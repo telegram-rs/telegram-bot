@@ -47,26 +47,41 @@ pub struct Update {
 #[derive(Debug)]
 pub struct Message {
     message_id: Integer,
-    // from: User,
-    // chat: Chat,
-    // date: Integer,
+    from: User,
+    chat: Chat,
+    date: Integer,
 
-    // // forward_from and forward_date in one
-    // forward: Option<(User, Integer)>,
-    // reply: Option<Box<Message>>,
+    // forward_from and forward_date in one
+    forward: Option<(User, Integer)>,
+    reply: Option<Box<Message>>,
 
-    // msg: MessageType,
+    msg: MessageType,
 }
 
 impl Decodable for Message {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        d.read_struct("root", 0, |d| {
-            Ok(Message { message_id: 0 })
-            // Ok(Message {
-            //     message_id: try!(d.read_struct_field("message_id", 0, |d| ))
-            // })
+        macro_rules! try_field {
+            ($d:ident, $name:expr) => {
+                try!($d.read_struct_field($name, 0, |d| Decodable::decode(d)))
+            }
+        }
+
+        let decode_msg = |d| {
+            MessageType::Text("not implemented".into())
+        };
+
+
+        d.read_struct("", 0, |d| {
+            Ok(Message {
+                message_id: try_field!(d, "message_id"),
+                from:       try_field!(d, "from"),
+                chat:       try_field!(d, "chat"),
+                date:       try_field!(d, "date"),
+                forward:    try_field!(d, "forward"),
+                reply:      try_field!(d, "reply"),
+                msg: decode_msg(d),
+            })
         })
-        // println!("{:?}", d);
     }
 }
 

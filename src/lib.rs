@@ -26,11 +26,11 @@ impl Bot {
         format!("https://api.telegram.org/bot{}/{}", self.token, method)
     }
 
-    pub fn get_me(&self) -> Result<User> {
+    fn send_request<T: Decodable>(&self, method: &str) -> Result<T> {
+        let url = self.request_url(method);
+
         let mut client = Client::new();
-        let url = self.request_url("getMe");
-        let req = client.get(&url)
-            .header(Connection::close());
+        let req = client.get(&url).header(Connection::close());
 
         let mut resp = match req.send() {
             Ok(resp) => resp,
@@ -54,36 +54,12 @@ impl Bot {
         }
     }
 
+    pub fn get_me(&self) -> Result<User> {
+        self.send_request("getMe")
+    }
+
     pub fn get_updates(&mut self) -> Result<Vec<Update>> {
-        let mut client = Client::new();
-        let url = self.request_url("getUpdates");
-        let req = client.get(&url)
-            .header(Connection::close());
-
-        let mut resp = match req.send() {
-            Ok(resp) => resp,
-            Err(e) => return Err(Error::Http(e)),
-        };
-
-        let mut body = String::new();
-        if let Err(e) = resp.read_to_string(&mut body) {
-            return Err(Error::Io(e));
-        }
-
-        // println!("-----------------");
-        // println!("{}", body);
-        // println!("-----------------");
-
-        match json::decode::<Response<Vec<Update>>>(&*body) {
-            Err(e) => Err(Error::Json(e)),
-            Ok(Response { ok: false, description: Some(desc), ..}) => {
-                Err(Error::Api(desc))
-            },
-            Ok(Response { ok: true, result: Some(res), ..}) => {
-                Ok(res)
-            },
-            _ => Err(Error::InvalidState("Invalid server response".into())),
-        }
+        self.send_request("getUpdates")
     }
 }
 
@@ -123,6 +99,7 @@ impl fmt::Display for Error {
         }
     }
 }
+
 
 #[test]
 fn it_works() {
