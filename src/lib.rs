@@ -53,6 +53,38 @@ impl Bot {
             _ => Err(Error::InvalidState("Invalid server response".into())),
         }
     }
+
+    pub fn get_updates(&mut self) -> Result<Vec<Update>> {
+        let mut client = Client::new();
+        let url = self.request_url("getUpdates");
+        let req = client.get(&url)
+            .header(Connection::close());
+
+        let mut resp = match req.send() {
+            Ok(resp) => resp,
+            Err(e) => return Err(Error::Http(e)),
+        };
+
+        let mut body = String::new();
+        if let Err(e) = resp.read_to_string(&mut body) {
+            return Err(Error::Io(e));
+        }
+
+        // println!("-----------------");
+        // println!("{}", body);
+        // println!("-----------------");
+
+        match json::decode::<Response<Vec<Update>>>(&*body) {
+            Err(e) => Err(Error::Json(e)),
+            Ok(Response { ok: false, description: Some(desc), ..}) => {
+                Err(Error::Api(desc))
+            },
+            Ok(Response { ok: true, result: Some(res), ..}) => {
+                Ok(res)
+            },
+            _ => Err(Error::InvalidState("Invalid server response".into())),
+        }
+    }
 }
 
 
