@@ -1,4 +1,5 @@
-use rustc_serialize::{json, Decodable, Decoder};
+use rustc_serialize::{Decodable, Decoder};
+// use std::collections::BTreeMap;
 
 type Integer = i32;
 
@@ -60,16 +61,13 @@ pub struct Message {
 
 impl Decodable for Message {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
+        // Decodes a field with a given name. If successful: Return decoded
+        // value. If not: Exist function with error value.
         macro_rules! try_field {
             ($d:ident, $name:expr) => {
                 try!($d.read_struct_field($name, 0, |d| Decodable::decode(d)))
             }
         }
-
-        let decode_msg = |d| {
-            MessageType::Text("not implemented".into())
-        };
-
 
         d.read_struct("", 0, |d| {
             Ok(Message {
@@ -79,7 +77,7 @@ impl Decodable for Message {
                 date:       try_field!(d, "date"),
                 forward:    try_field!(d, "forward"),
                 reply:      try_field!(d, "reply"),
-                msg: decode_msg(d),
+                msg: try!(MessageType::decode(d)),
             })
         })
     }
@@ -101,4 +99,30 @@ pub enum MessageType {
     GroupPhotoChange,
     GroupPhotoDelete,
     GroupCreate,
+}
+
+impl Decodable for MessageType {
+    fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
+        // Tries to decode a field with the given name. If the field does NOT
+        // exist: Does nothing. If the field does exist: Return the decoded
+        // value. If any other decoder error occured: Return the error.
+        macro_rules! maybe_field {
+            ($d:ident, $name:expr, $variant:ident) => {{
+                if let Some(val) = try!($d.read_struct_field(
+                    $name, 0, |d| Decodable::decode(d))) {
+                    return Ok(MessageType::$variant(val));
+                };
+            }}
+        }
+
+        // There is always just one of these fields used, so we can infer the
+        // enum variant from it.
+        maybe_field!(d, "text", Text);
+        maybe_field!(d, "new_chat_participant", GroupAdd);
+        maybe_field!(d, "left_chat_participant", GroupRemove);
+        maybe_field!(d, "new_chat_title", GroupTitleChange);
+
+        // TODO: Implement missing MessageType's. If no field is set: Error.
+        Ok(MessageType::Text("!!! Not implemented !!!".into()))
+    }
 }

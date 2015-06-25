@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 extern crate rustc_serialize;
 extern crate telegram_bot;
 
@@ -18,4 +19,33 @@ fn main() {
     // println!("{}", u.unwrap_err());
     // println!("{:?}", );
 
+    // let u : Result<Update, _> = json::decode(r#"
+    //     {
+    //   "update_id": 102520066,
+    //   "message": {
+    //     "message_id": 6,
+    //     "from": {
+    //       "id": 10742080,
+    //       "first_name": "Lukas",
+    //       "last_name": "Kalbertodt",
+    //       "username": "LukasKalbertodt"
+    //     },
+    //     "chat": {
+    //       "id": 10742080,
+    //       "first_name": "Lukas",
+    //       "last_name": "Kalbertodt",
+    //       "username": "LukasKalbertodt"
+    //     },
+    //     "date": 1435244203,
+    //     "forward_from": {
+    //       "id": 10742080,
+    //       "first_name": "Lukas",
+    //       "last_name": "Kalbertodt",
+    //       "username": "LukasKalbertodt"
+    //     },
+    //     "forward_date": 1435243061
+    //   }
+    // }
+    // "#);
+    // println!("{:?}", u);
 }
