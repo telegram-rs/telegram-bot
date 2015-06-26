@@ -2,20 +2,37 @@
 extern crate rustc_serialize;
 extern crate telegram_bot;
 
-use telegram_bot::{Bot, Update};
+use telegram_bot::*;
 use std::env;
 use rustc_serialize::json;
 
 fn main() {
     let token = match env::var("TELEGRAM_BOT_TOKEN") {
         Ok(tok) => tok,
-        Err(e) => panic!("Environment variable 'TELEGRAM_BOT_TOKEN' missing!"),
+        Err(e) =>
+            panic!("Environment variable 'TELEGRAM_BOT_TOKEN' missing! {}", e),
     };
 
     let mut bot = Bot::new(token);
     println!("{:?}", bot.get_me());
-    let u = bot.get_updates();
-    println!("{:?}", u);
+    // let u = bot.get_updates(None, Some(3), None);
+    // println!("{:?}", u);
+
+    let res = bot.long_poll(None, |bot, u| {
+        print!("Received Update[{}]: ", u.update_id);
+        if let Some(m) = u.message {
+            print!("<{}> ", m.from.first_name);
+            if let MessageType::Text(t) = m.msg {
+                print!("{}", t);
+            }
+        }
+        println!("");
+    });
+
+    if let Err(e) = res {
+        println!("An error occured: {}", e);
+    }
+
     // println!("{}", u.unwrap_err());
     // println!("{:?}", );
 

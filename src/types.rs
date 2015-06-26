@@ -1,7 +1,7 @@
 use rustc_serialize::{Decodable, Decoder};
 // use std::collections::BTreeMap;
 
-type Integer = i32;
+pub type Integer = i32;
 
 #[derive(RustcDecodable, Debug)]
 pub struct Response<T: Decodable> {
@@ -12,16 +12,16 @@ pub struct Response<T: Decodable> {
 
 #[derive(RustcDecodable, Debug)]
 pub struct User {
-    id: Integer,
-    first_name: String,
-    last_name: Option<String>,
-    username: Option<String>,
+    pub id: Integer,
+    pub first_name: String,
+    pub last_name: Option<String>,
+    pub username: Option<String>,
 }
 
 #[derive(RustcDecodable, Debug)]
 pub struct GroupChat {
-    id: Integer,
-    title: String,
+    pub id: Integer,
+    pub title: String,
 }
 
 #[derive(Debug)]
@@ -41,22 +41,22 @@ impl Decodable for Chat {
 
 #[derive(RustcDecodable, Debug)]
 pub struct Update {
-    update_id: Integer,
-    message: Option<Message>
+    pub update_id: Integer,
+    pub message: Option<Message>
 }
 
 #[derive(Debug)]
 pub struct Message {
-    message_id: Integer,
-    from: User,
-    chat: Chat,
-    date: Integer,
+    pub message_id: Integer,
+    pub from: User,
+    pub chat: Chat,
+    pub date: Integer,
 
     // forward_from and forward_date in one
-    forward: Option<(User, Integer)>,
-    reply: Option<Box<Message>>,
+    pub forward: Option<(User, Integer)>,
+    pub reply: Option<Box<Message>>,
 
-    msg: MessageType,
+    pub msg: MessageType,
 }
 
 impl Decodable for Message {

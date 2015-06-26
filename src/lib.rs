@@ -13,21 +13,24 @@ use hyper::header::Connection;
 
 pub struct Bot {
     token: String,
+    offset: Integer,
 }
 
 impl Bot {
     pub fn new(token: String) -> Bot {
         Bot {
             token: token,
+            offset: 0,
         }
     }
 
-    fn request_url(&self, method: &str) -> String {
-        format!("https://api.telegram.org/bot{}/{}", self.token, method)
+    fn request_url(&self, suffix: &str) -> String {
+        format!("https://api.telegram.org/bot{}/{}", self.token, suffix)
     }
 
-    fn send_request<T: Decodable>(&self, method: &str) -> Result<T> {
-        let url = self.request_url(method);
+    fn send_request<T: Decodable>(&self, suffix: String) -> Result<T> {
+        let url = self.request_url(&*suffix);
+        // println!("URL: {}", url);
 
         let mut client = Client::new();
         let req = client.get(&url).header(Connection::close());
@@ -55,11 +58,44 @@ impl Bot {
     }
 
     pub fn get_me(&self) -> Result<User> {
-        self.send_request("getMe")
+        self.send_request("getMe".into())
     }
 
-    pub fn get_updates(&mut self) -> Result<Vec<Update>> {
-        self.send_request("getUpdates")
+    pub fn get_updates(&self, offset: Option<Integer>,
+                       limit: Option<Integer>, timeout: Option<Integer>)
+                       -> Result<Vec<Update>> {
+        // Set method name and append possible parameters
+        let mut suffix : String = "getUpdates".into();
+
+        let mut params : String = "?".into();
+        if let Some(i) = offset { params.push_str(&*format!("offset={}&", i)); }
+        if let Some(i) = limit { params.push_str(&*format!("limit={}&", i)); }
+        if let Some(i) = timeout { params.push_str(&*format!("timeout={}&", i)); }
+        if params.len() > 0 {
+            params.pop();   // remove last '&'
+            suffix.push_str(&*params);
+        }
+
+        self.send_request(suffix)
+    }
+
+    pub fn long_poll<F>(&mut self, timeout: Option<Integer>, handler: F)
+                        -> Result<()>
+                        where F: Fn(&mut Bot, Update) {
+        let timeout = Some(if let Some(t) = timeout { t } else { 10 });
+        loop {
+            let updates = try!(self.get_updates(
+                Some(self.offset), None, timeout));
+            // println!("Getting Updates...");
+
+            for u in updates {
+                if u.update_id >= self.offset {
+                    self.offset = u.update_id + 1;
+                }
+
+                handler(self, u);
+            }
+        }
     }
 }
 
