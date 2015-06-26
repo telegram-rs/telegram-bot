@@ -136,7 +136,7 @@ impl Decodable for MessageType {
     }
 }
 
-#[derive(RustcDecodable, Debug)]
+#[derive(RustcDecodable, Debug, PartialEq, Eq)]
 pub struct ReplyKeyboardMarkup {
     pub keyboard: Vec<Vec<String>>,
     pub resize_keyboard: Option<bool>,
@@ -187,3 +187,6 @@ impl Encodable for ReplyKeyboardMarkup {
         })
     }
 }
+
+
+mod test;
