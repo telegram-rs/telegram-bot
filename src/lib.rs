@@ -3,13 +3,14 @@ extern crate rustc_serialize;
 
 mod types;
 mod util;
+mod error;
 
 pub use types::*;
+pub use error::*;
 use util::Params;
 
 use rustc_serialize::{json, Decodable};
 use std::io::Read;
-use std::fmt;
 use hyper::{Client, Url};
 use hyper::header::Connection;
 
@@ -55,31 +56,25 @@ impl Bot {
         url.set_query_from_pairs(it);
 
         // Prepare HTTP Request
+        // println!("Sending: {}", url);
         let req = self.client.get(url).header(Connection::close());
 
         // Send request and check if it failed
-        let mut resp = match req.send() {
-            Ok(resp) => resp,
-            Err(e) => return Err(Error::Http(e)),
-        };
+        let mut resp = try!(req.send());
 
         // Read response into String and return error if it failed
         let mut body = String::new();
-        if let Err(e) = resp.read_to_string(&mut body) {
-            return Err(Error::Io(e));
-        }
+        try!(resp.read_to_string(&mut body));
 
         // Try to decode response as JSON representing a Response
-        match json::decode(&*body) {
-            // If decoding JSON fails: Return JSON-Error
-            Err(e) => Err(Error::Json(e)),
-            // If JSON decoding was ok, but the response says that there was
-            // an error: Return API-Error with the given description
-            Ok(Response { ok: false, description: Some(desc), ..}) => {
+        match try!(json::decode(&*body)) {
+            // If the response says that there was an error: Return API-Error
+            // with the given description.
+            Response { ok: false, description: Some(desc), ..} => {
                 Err(Error::Api(desc))
             },
-            // If JSON decoding and response are "ok": Return the result.
-            Ok(Response { ok: true, result: Some(res), ..}) => {
+            // If response is "ok": Return the result.
+            Response { ok: true, result: Some(res), ..} => {
                 Ok(res)
             },
             // This should never occur: If "ok"==false, "description" should
@@ -112,6 +107,29 @@ impl Bot {
         // Execute request
         self.send_request("getUpdates", params)
     }
+
+    /// Corresponds to the "getUpdates" method of the API.
+    ///
+    /// **Note:**
+    /// The method will not set the offset parameter on its own. To receive
+    /// updates in a more high level way, see `long_poll`.
+    pub fn send_message(&mut self, chat_id: Integer, text: String,
+                        disable_web_page_preview: Option<bool>,
+                        reply_to_message_id: Option<Integer>,
+                        reply_markup: Option<ReplyKeyboardMarkup>)
+                        -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get("text", text);
+        params.add_get_opt("disable_web_page_preview", disable_web_page_preview);
+        params.add_get_opt("reply_to_message_id", reply_to_message_id);
+        try!(params.add_get_json_opt("reply_markup", reply_markup));
+
+        // Execute request
+        self.send_request("sendMessage", params)
+    }
+
 
     /// Receive and handle updates via "getUpdates".
     ///
@@ -149,42 +167,6 @@ impl Bot {
     }
 }
 
-/// Telegram-Bot Result
-pub type Result<T> = std::result::Result<T, Error>;
-
-/// Telegram-Bot Error.
-#[derive(Debug)]
-pub enum Error {
-    Http(hyper::error::Error),
-    Io(std::io::Error),
-    Json(json::DecoderError),
-    Api(String),
-    InvalidState(String),
-}
-
-impl std::error::Error for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::Http(ref e) => e.description(),
-            Error::Io(ref e) => e.description(),
-            Error::Json(ref e) => e.description(),
-            Error::Api(ref s) => &*s,
-            Error::InvalidState(ref s) => &*s,
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Error::Http(ref e) => e.fmt(f),
-            Error::Io(ref e) => e.fmt(f),
-            Error::Json(ref e) => e.fmt(f),
-            Error::Api(ref s) => s.fmt(f),
-            Error::InvalidState(ref s) => s.fmt(f),
-        }
-    }
-}
 
 
 #[test]

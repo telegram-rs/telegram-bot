@@ -15,18 +15,33 @@ fn main() {
 
     let mut bot = Bot::new(token);
     println!("{:?}", bot.get_me());
-    // let u = bot.get_updates(None, Some(3), None);
-    // println!("{:?}", u);
+
+    // let keyboard = ReplyKeyboardMarkup {
+    //     keyboard: vec![vec!["Hi".into()],
+    //                    vec!["A".into(), "B".into()]],
+    //     .. Default::default()
+    // };
+
+    // println!("{}", json::encode(&keyboard).unwrap());
 
     let res = bot.long_poll(None, |bot, u| {
-        print!("Received Update[{}]: ", u.update_id);
         if let Some(m) = u.message {
-            print!("<{}> ", m.from.first_name);
             if let MessageType::Text(t) = m.msg {
-                print!("{}", t);
+                println!("Received Update[{}]: <{}> {}",
+                    u.update_id, m.from.first_name, t);
+                let keyboard = ReplyKeyboardMarkup {
+                    keyboard: vec![vec![t],
+                                   vec!["A".into(), "B".into()]],
+                    .. Default::default()
+                };
+
+                println!("{:?}", bot.send_message(m.chat.id(),
+                    format!("Hi, {}", m.from.first_name),
+                    None, None, Some(keyboard)));
             }
+
+
         }
-        println!("");
     });
 
     if let Err(e) = res {

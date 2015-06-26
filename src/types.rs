@@ -1,4 +1,4 @@
-use rustc_serialize::{Decodable, Decoder};
+use rustc_serialize::{Decodable, Encodable, Decoder, Encoder};
 // use std::collections::BTreeMap;
 
 pub type Integer = i32;
@@ -28,6 +28,15 @@ pub struct GroupChat {
 pub enum Chat {
     User(User),
     Group(GroupChat),
+}
+
+impl Chat {
+    pub fn id(&self) -> Integer {
+        match self {
+            &Chat::User(ref u) => u.id,
+            &Chat::Group(ref g) => g.id,
+        }
+    }
 }
 
 impl Decodable for Chat {
@@ -124,5 +133,57 @@ impl Decodable for MessageType {
 
         // TODO: Implement missing MessageType's. If no field is set: Error.
         Ok(MessageType::Text("!!! Not implemented !!!".into()))
+    }
+}
+
+#[derive(RustcDecodable, Debug)]
+pub struct ReplyKeyboardMarkup {
+    pub keyboard: Vec<Vec<String>>,
+    pub resize_keyboard: Option<bool>,
+    pub one_time_keyboard: Option<bool>,
+    pub selective: Option<bool>,
+}
+
+impl Default for ReplyKeyboardMarkup {
+    fn default() -> Self {
+        ReplyKeyboardMarkup {
+            keyboard: Vec::new(),
+            resize_keyboard: None,
+            one_time_keyboard: None,
+            selective: None,
+        }
+    }
+}
+
+macro_rules! emit_field {
+    ($this:ident, $e:ident, $id:expr, $name:ident) => {{
+        try!($e.emit_struct_field(stringify!($name), $id, |e| {
+            $this.$name.encode(e)
+        }));
+    }}
+}
+
+macro_rules! emit_option {
+    ($this:ident, $e:ident, $id:expr, $name:ident) => {{
+        if let Some(v) = $this.$name {
+            try!($e.emit_struct_field(stringify!($name), $id, |e| {
+                v.encode(e)
+            }));
+        }
+    }}
+}
+
+impl Encodable for ReplyKeyboardMarkup {
+    fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
+        println!("IN A");
+        e.emit_struct("ReplyKeyboardMarkup", 4, |e| {
+            println!("IN B");
+            emit_field!(self, e, 0, keyboard);
+            emit_option!(self, e, 1, resize_keyboard);
+            emit_option!(self, e, 2, one_time_keyboard);
+            emit_option!(self, e, 3, selective);
+
+            Ok(())
+        })
     }
 }

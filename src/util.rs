@@ -1,3 +1,6 @@
+use super::Result;
+use rustc_serialize::{json, Encodable};
+
 // Type for managing GET and POST parameter
 pub struct Params<'a> {
     gets: Vec<(&'a str, String)>,
@@ -14,6 +17,17 @@ impl<'a> Params<'a> {
         if let Some(d) = value {
             self.gets.push((key, d.to_string()));
         }
+    }
+    pub fn add_get<T: ToString>(&mut self, key: &'a str, value: T) {
+        self.gets.push((key, value.to_string()));
+    }
+
+    pub fn add_get_json_opt<T: Encodable>(&mut self,
+                            key: &'a str, value: Option<T>) -> Result<()> {
+        if let Some(d) = value {
+            self.gets.push((key, try!(json::encode(&d))));
+        }
+        Ok(())
     }
 
     pub fn get_params(&self) -> &Vec<(&str, String)> {
