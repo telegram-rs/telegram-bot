@@ -143,6 +143,19 @@ impl Bot {
         self.send_request("sendLocation", params)
     }
 
+    /// Corresponds to the "forwardMessage" method of the API.
+    pub fn forward_message(&mut self, chat_id: Integer, from_chat_id: Integer,
+                           message_id: Integer) -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get("from_chat_id", from_chat_id);
+        params.add_get("message_id", message_id);
+
+        // Execute request
+        self.send_request("forwardMessage", params)
+    }
+
 
     /// Receive and handle updates via "getUpdates".
     ///
@@ -159,7 +172,7 @@ impl Bot {
     /// updates.
     pub fn long_poll<F>(&mut self, timeout: Option<Integer>, handler: F)
                         -> Result<()>
-                        where F: Fn(&mut Bot, Update) {
+                        where F: Fn(&mut Bot, Update) -> Result<()> {
         // Calculate final timeout: Given or default.
         let timeout = Some(if let Some(t) = timeout { t } else { 30 });
 
@@ -174,7 +187,7 @@ impl Bot {
                     self.offset = u.update_id + 1;
                 }
 
-                handler(self, u);
+                try!(handler(self, u));
             }
         }
     }

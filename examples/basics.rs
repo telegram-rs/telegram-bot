@@ -28,11 +28,11 @@ fn main() {
         if let Some(m) = u.message {
             let name = m.from.first_name + &*m.from.last_name
                 .map_or("".to_string(), |mut n| { n.insert(0, ' '); n });
+            let chat_id = m.chat.id();
 
             match m.msg {
                 MessageType::Text(t) => {
-                    println!("Received Update[{}]: <{}> {}",
-                    u.update_id, name, t);
+                    println!("<{}> {}", name, t);
                     let keyboard = ReplyKeyboardMarkup {
                         keyboard: vec![vec![t],
                                        vec!["A".into(), "B".into()]],
@@ -40,15 +40,15 @@ fn main() {
                         .. Default::default()
                     };
 
-                    let res = bot.send_message(
-                        m.chat.id(),
+                    try!(bot.send_message(
+                        chat_id,
                         format!("Hi, {}", name),
                         None,
                         None,
-                        Some(keyboard));
+                        Some(keyboard)));
                 },
                 MessageType::Location(loc) => {
-                    // Log
+                    // Print event
                     println!("{} is here: (lng: {}, lat: {})",
                              name, loc.longitude, loc.latitude);
 
@@ -61,11 +61,21 @@ fn main() {
                         loc.longitude + 180.0
                     };
 
-                    bot.send_location(m.chat.id(), lat, lng, None, None);
+                    try!(bot.send_location(chat_id, lat, lng, None, None));
                 },
+                MessageType::Contact(c) => {
+                    // Print event
+                    println!("<{}> send a contact: {}", name,
+                        json::encode(&c).unwrap());
+
+                    // Just forward the contact back to the sender...
+                    try!(bot.forward_message(chat_id, chat_id, m.message_id));
+                }
                 _ => {}
             }
+
         }
+        Ok(())
     });
 
     if let Err(e) = res {

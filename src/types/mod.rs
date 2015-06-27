@@ -208,7 +208,7 @@ pub struct PhotoSize {
     pub file_size: Option<Integer>,
 }
 
-#[derive(Debug, RustcDecodable)]
+#[derive(Debug, RustcDecodable, RustcEncodable)]
 pub struct Contact {
     pub phone_number: String,
     pub first_name: String,
