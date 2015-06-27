@@ -1,7 +1,59 @@
-use rustc_serialize::{Decodable, Encodable, Decoder, Encoder};
-// use std::collections::BTreeMap;
+//! Types of the Telegram API.
+//!
+//! This module contains definitions of the types defined
+//! [here](https://core.telegram.org/bots/api/#available-types). Many Telegram
+//! types, like "Location", map directly to Rust-structs. Other Telegram types,
+//! like "Message", was made more rusty by using enums.
+//!
+//! All types implement `Decodable` and `Encodable`, so they can be serialized
+//! as JSON. Non existing JSON-fields will result in `None` values for `Option`
+//! types. `None` values don't result in JSON fields.
+//!
 
+use rustc_serialize::{Decodable, Encodable, Decoder, Encoder};
+
+// ===========================================================================
+// Helpers
+// ===========================================================================
+// Macro to implement "Encodable" quickly. "None" fields won't be encoded.
+macro_rules! impl_encode {
+    (
+        $ty:ident, $count:expr,
+        [$($id:expr => $field:ident),*],
+        [$($o_id:expr => $o_field:ident),*]
+    ) => {
+        impl Encodable for $ty {
+            fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
+                e.emit_struct(stringify!($ty), $count, |e| {
+                    $(
+                        try!(e.emit_struct_field(stringify!($field), $id, |e| {
+                            self.$field.encode(e)
+                        }));
+                    )*
+                    $
+(                        if let Some(ref v) = self.$o_field {
+                            try!(e.emit_struct_field(
+                                stringify!($o_field), $o_id, |e| {
+                                v.encode(e)
+                            }));
+                        }
+                    )*
+
+                    Ok(())
+                })
+            }
+        }
+    }
+}
+
+
+
+// ===========================================================================
+// Telegram primitive types
+// ===========================================================================
+/// The Telegram "Integer": Currently i32.
 pub type Integer = i32;
+/// The Telegram "Float": Currently f32.
 pub type Float = f32;
 
 #[derive(RustcDecodable, Debug)]
@@ -9,14 +61,6 @@ pub struct Response<T: Decodable> {
     pub ok: bool,
     pub description: Option<String>,
     pub result: Option<T>,
-}
-
-#[derive(RustcDecodable, Debug)]
-pub struct User {
-    pub id: Integer,
-    pub first_name: String,
-    pub last_name: Option<String>,
-    pub username: Option<String>,
 }
 
 #[derive(RustcDecodable, Debug)]
@@ -150,6 +194,11 @@ impl Decodable for MessageType {
     }
 }
 
+// ===========================================================================
+// Telegram types directly mapped to Rust types
+// ===========================================================================
+
+/// Telegram type "ReplyKeyboardMarkup" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Eq)]
 pub struct ReplyKeyboardMarkup {
     pub keyboard: Vec<Vec<String>>,
@@ -169,38 +218,14 @@ impl Default for ReplyKeyboardMarkup {
     }
 }
 
-macro_rules! emit_field {
-    ($this:ident, $e:ident, $id:expr, $name:ident) => {{
-        try!($e.emit_struct_field(stringify!($name), $id, |e| {
-            $this.$name.encode(e)
-        }));
-    }}
-}
+impl_encode!(ReplyKeyboardMarkup, 4,
+    [0 => keyboard],
+    [1 => resize_keyboard, 2 => one_time_keyboard, 3 => selective]);
 
-macro_rules! emit_option {
-    ($this:ident, $e:ident, $id:expr, $name:ident) => {{
-        if let Some(v) = $this.$name {
-            try!($e.emit_struct_field(stringify!($name), $id, |e| {
-                v.encode(e)
-            }));
-        }
-    }}
-}
 
-impl Encodable for ReplyKeyboardMarkup {
-    fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
-        e.emit_struct("ReplyKeyboardMarkup", 4, |e| {
-            emit_field!(self, e, 0, keyboard);
-            emit_option!(self, e, 1, resize_keyboard);
-            emit_option!(self, e, 2, one_time_keyboard);
-            emit_option!(self, e, 3, selective);
-
-            Ok(())
-        })
-    }
-}
-
-#[derive(Debug, RustcDecodable)]
+// ---------------------------------------------------------------------------
+/// Telegram type "PhotoSize" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Eq)]
 pub struct PhotoSize {
     pub file_id: String,
     pub width: Integer,
@@ -208,7 +233,14 @@ pub struct PhotoSize {
     pub file_size: Option<Integer>,
 }
 
-#[derive(Debug, RustcDecodable, RustcEncodable)]
+impl_encode!(PhotoSize, 4,
+    [0 => file_id, 1 => width, 2 => height],
+    [3 => file_size]);
+
+
+// ---------------------------------------------------------------------------
+/// Telegram type "Contact" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Eq)]
 pub struct Contact {
     pub phone_number: String,
     pub first_name: String,
@@ -216,11 +248,34 @@ pub struct Contact {
     pub user_id: Option<String>,
 }
 
-#[derive(Debug, RustcDecodable)]
+impl_encode!(Contact, 4,
+    [0 => phone_number, 1 => first_name],
+    [2 => last_name, 3 => user_id]);
+
+// ---------------------------------------------------------------------------
+/// Telegram type "Location" (directly mapped)
+#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq)]
 pub struct Location {
     pub longitude: Float,
     pub latitude: Float,
 }
 
+// ---------------------------------------------------------------------------
+/// Telegram type "User" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+pub struct User {
+    pub id: Integer,
+    pub first_name: String,
+    pub last_name: Option<String>,
+    pub username: Option<String>,
+}
 
+impl_encode!(User, 4,
+    [0 => id, 1 => first_name],
+    [2 => last_name, 3 => username]);
+
+
+// ===========================================================================
+// Unit tests (mainly encode & decode)
+// ===========================================================================
 mod test;

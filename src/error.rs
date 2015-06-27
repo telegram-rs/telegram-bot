@@ -3,12 +3,16 @@ use rustc_serialize::json;
 /// Telegram-Bot Result
 pub type Result<T> = ::std::result::Result<T, Error>;
 
-/// Telegram-Bot Error.
+/// Telegram-Bot Error: Anything that may fail (HTTP, JSON, ...)
 #[derive(Debug)]
 pub enum Error {
+    /// HTTP related error
     Http(::hyper::error::Error),
+    /// IO related error (mainly reading the http result)
     Io(::std::io::Error),
+    /// Error while decoding JSON data
     JsonDecode(json::DecoderError),
+    /// Error while encoding JSON data
     JsonEncode(json::EncoderError),
     Api(String),
     InvalidState(String),

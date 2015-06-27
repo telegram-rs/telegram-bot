@@ -49,8 +49,8 @@ fn main() {
                 },
                 MessageType::Location(loc) => {
                     // Print event
-                    println!("{} is here: (lng: {}, lat: {})",
-                             name, loc.longitude, loc.latitude);
+                    println!("<{}> is here: {}", name,
+                        json::encode(&loc).unwrap());
 
                     // Calculate and send the location on the other side of the
                     // earth.
