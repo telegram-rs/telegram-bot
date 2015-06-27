@@ -1,5 +1,5 @@
-Rust Telegram Bot
-=================
+Rust Telegram Bot Library
+=========================
 [![Build Status](https://img.shields.io/travis/LukasKalbertodt/telegram-bot.svg)](https://travis-ci.org/LukasKalbertodt/telegram-bot)
 | [**Documentation**](https://lukaskalbertodt.github.io/telegram-bot/telegram_bot/)
 

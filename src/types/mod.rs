@@ -56,36 +56,51 @@ pub type Integer = i32;
 /// The Telegram "Float": Currently f32.
 pub type Float = f32;
 
-#[derive(RustcDecodable, Debug)]
+
+// ===========================================================================
+// Types not explicitly mentioned or somehow different from Telegram types
+// ===========================================================================
+/// All API responses are from this type. Mostly used internal.
+#[derive(RustcDecodable, Debug, PartialEq)]
 pub struct Response<T: Decodable> {
     pub ok: bool,
     pub description: Option<String>,
     pub result: Option<T>,
 }
 
-#[derive(RustcDecodable, Debug)]
-pub struct GroupChat {
-    pub id: Integer,
-    pub title: String,
-}
-
-#[derive(Debug)]
+// ---------------------------------------------------------------------------
+/// Either a User or a GroupChat. Used in "chat" field of Message. Has some
+/// useful methods for less typing.
+#[derive(Debug, PartialEq)]
 pub enum Chat {
     User(User),
     Group(GroupChat),
 }
 
 impl Chat {
+    /// Returns the chat id, which is needed to send messages.
     pub fn id(&self) -> Integer {
         match self {
             &Chat::User(ref u) => u.id,
             &Chat::Group(ref g) => g.id,
         }
     }
+
+    /// Returns if the Chat is a User
+    pub fn is_user(&self) -> bool {
+        if let &Chat::User(_) = self { true } else { false }
+    }
+
+    /// Returns if the Chat is a Group
+    pub fn is_group(&self) -> bool {
+        !self.is_user()
+    }
 }
 
 impl Decodable for Chat {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
+        // If the object can be decoded as User: Return the user. Otherwise
+        // try to decode the object as Group.
         match User::decode(d) {
             Ok(user) => Ok(Chat::User(user)),
             Err(_) => Ok(Chat::Group(try!(Decodable::decode(d)))),
@@ -93,13 +108,17 @@ impl Decodable for Chat {
     }
 }
 
-#[derive(RustcDecodable, Debug)]
-pub struct Update {
-    pub update_id: Integer,
-    pub message: Option<Message>
+impl Encodable for Chat {
+    fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
+        match self {
+            &Chat::User(ref u) => u.encode(e),
+            &Chat::Group(ref g) => g.encode(e),
+        }
+    }
 }
 
-#[derive(Debug)]
+// ---------------------------------------------------------------------------
+#[derive(Debug, PartialEq)]
 pub struct Message {
     pub message_id: Integer,
     pub from: User,
@@ -113,6 +132,8 @@ pub struct Message {
     pub msg: MessageType,
 }
 
+// We need to implement this on our own, because the field "msg" is not a real
+// JSON field.
 impl Decodable for Message {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
         // Decodes a field with a given name. If successful: Return decoded
@@ -126,31 +147,31 @@ impl Decodable for Message {
         d.read_struct("", 0, |d| {
             Ok(Message {
                 message_id: try_field!(d, "message_id"),
-                from:       try_field!(d, "from"),
-                chat:       try_field!(d, "chat"),
-                date:       try_field!(d, "date"),
-                forward:    try_field!(d, "forward"),
-                reply:      try_field!(d, "reply"),
+                from: try_field!(d, "from"),
+                chat: try_field!(d, "chat"),
+                date: try_field!(d, "date"),
+                forward: try_field!(d, "forward"),
+                reply: try_field!(d, "reply"),
                 msg: try!(MessageType::decode(d)),
             })
         })
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MessageType {
     Text(String),
-    Audio,
-    File,
-    Photo,
-    Sticker,
-    Video,
+    Audio(Audio),
+    File(Document),
+    Photo(PhotoSize),
+    Sticker(Sticker),
+    Video(Video),
     Contact(Contact),
     Location(Location),
     NewChatParticipant(User),
     LeftChatParticipant(User),
     NewChatTitle(String),
-    NewChatPhoto,
+    NewChatPhoto(Vec<PhotoSize>),
     DeleteChatPhoto,
     GroupChatCreated,
 }
@@ -171,26 +192,32 @@ impl Decodable for MessageType {
 
         // There is always just one of these fields used, so we can infer the
         // enum variant from it.
+        // These are the message types that carry additional data
         maybe_field!(d, "text", Text);
+        maybe_field!(d, "audio", Audio);
+        maybe_field!(d, "file", File);
+        maybe_field!(d, "photo", Photo);
+        maybe_field!(d, "sticker", Sticker);
+        maybe_field!(d, "video", Video);
         maybe_field!(d, "contact", Contact);
         maybe_field!(d, "location", Location);
         maybe_field!(d, "new_chat_participant", NewChatParticipant);
         maybe_field!(d, "left_chat_participant", LeftChatParticipant);
         maybe_field!(d, "new_chat_title", NewChatTitle);
+        maybe_field!(d, "new_chat_photo", NewChatPhoto);
 
-        // delete_chat_photo
+        // Message types without additional data
         if let Some(true) = try!(d.read_struct_field(
             "delete_chat_photo", 0, |d| Decodable::decode(d))) {
             return Ok(MessageType::DeleteChatPhoto);
         };
-        // group_chat_created
         if let Some(true) = try!(d.read_struct_field(
             "group_chat_created", 0, |d| Decodable::decode(d))) {
             return Ok(MessageType::GroupChatCreated);
         };
 
-        // TODO: Implement missing MessageType's. If no field is set: Error.
-        Ok(MessageType::Text("!!! Not implemented !!!".into()))
+        // None of the tested fields is present: This is an error
+        Err(d.error("No field for inferring message type is set"))
     }
 }
 
@@ -198,7 +225,7 @@ impl Decodable for MessageType {
 // Telegram types directly mapped to Rust types
 // ===========================================================================
 /// Telegram type "User" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+#[derive(RustcDecodable, Debug, PartialEq)]
 pub struct User {
     pub id: Integer,
     pub first_name: String,
@@ -210,9 +237,18 @@ impl_encode!(User, 4,
     [0 => id, 1 => first_name],
     [2 => last_name, 3 => username]);
 
+
+// ---------------------------------------------------------------------------
+/// Telegram type "GroupChat" (directly mapped)
+#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq)]
+pub struct GroupChat {
+    pub id: Integer,
+    pub title: String,
+}
+
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+#[derive(RustcDecodable, Debug, PartialEq)]
 pub struct PhotoSize {
     pub file_id: String,
     pub width: Integer,
@@ -226,7 +262,7 @@ impl_encode!(PhotoSize, 4,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+#[derive(RustcDecodable, Debug, PartialEq)]
 pub struct Audio {
     pub file_id: String,
     pub duration: Integer,
@@ -240,7 +276,7 @@ impl_encode!(Audio, 4,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+#[derive(RustcDecodable, Debug, PartialEq)]
 pub struct Document {
     pub file_id: String,
     pub thumb: PhotoSize,
@@ -255,7 +291,7 @@ impl_encode!(Document, 5,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+#[derive(RustcDecodable, Debug, PartialEq)]
 pub struct Sticker {
     pub file_id: String,
     pub width: Integer,
@@ -270,7 +306,7 @@ impl_encode!(Sticker, 5,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+#[derive(RustcDecodable, Debug, PartialEq)]
 pub struct Video {
     pub file_id: String,
     pub width: Integer,
@@ -288,7 +324,7 @@ impl_encode!(Video, 8,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Contact" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+#[derive(RustcDecodable, Debug, PartialEq)]
 pub struct Contact {
     pub phone_number: String,
     pub first_name: String,
@@ -309,6 +345,18 @@ pub struct Location {
 }
 
 // ---------------------------------------------------------------------------
+/// Telegram type "Update" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq)]
+pub struct Update {
+    pub update_id: Integer,
+    pub message: Option<Message>
+}
+
+// impl_encode!(Update, 2,
+//     [0 => update_id],
+//     [1 => message]);
+
+// ---------------------------------------------------------------------------
 /// Telegram type "Location" (directly mapped)
 #[derive(RustcDecodable, RustcEncodable, Debug, PartialEq)]
 pub struct UserProfilePhotos {
@@ -318,7 +366,7 @@ pub struct UserProfilePhotos {
 
 // ---------------------------------------------------------------------------
 /// Telegram type "ReplyKeyboardMarkup" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+#[derive(RustcDecodable, Debug, PartialEq)]
 pub struct ReplyKeyboardMarkup {
     pub keyboard: Vec<Vec<String>>,
     pub resize_keyboard: Option<bool>,
