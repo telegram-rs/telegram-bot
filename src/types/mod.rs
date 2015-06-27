@@ -30,8 +30,8 @@ macro_rules! impl_encode {
                             self.$field.encode(e)
                         }));
                     )*
-                    $
-(                        if let Some(ref v) = self.$o_field {
+                    $(
+                        if let Some(ref v) = self.$o_field {
                             try!(e.emit_struct_field(
                                 stringify!($o_field), $o_id, |e| {
                                 v.encode(e)
@@ -197,31 +197,18 @@ impl Decodable for MessageType {
 // ===========================================================================
 // Telegram types directly mapped to Rust types
 // ===========================================================================
-
-/// Telegram type "ReplyKeyboardMarkup" (directly mapped)
+/// Telegram type "User" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Eq)]
-pub struct ReplyKeyboardMarkup {
-    pub keyboard: Vec<Vec<String>>,
-    pub resize_keyboard: Option<bool>,
-    pub one_time_keyboard: Option<bool>,
-    pub selective: Option<bool>,
+pub struct User {
+    pub id: Integer,
+    pub first_name: String,
+    pub last_name: Option<String>,
+    pub username: Option<String>,
 }
 
-impl Default for ReplyKeyboardMarkup {
-    fn default() -> Self {
-        ReplyKeyboardMarkup {
-            keyboard: Vec::new(),
-            resize_keyboard: None,
-            one_time_keyboard: None,
-            selective: None,
-        }
-    }
-}
-
-impl_encode!(ReplyKeyboardMarkup, 4,
-    [0 => keyboard],
-    [1 => resize_keyboard, 2 => one_time_keyboard, 3 => selective]);
-
+impl_encode!(User, 4,
+    [0 => id, 1 => first_name],
+    [2 => last_name, 3 => username]);
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
@@ -237,6 +224,67 @@ impl_encode!(PhotoSize, 4,
     [0 => file_id, 1 => width, 2 => height],
     [3 => file_size]);
 
+// ---------------------------------------------------------------------------
+/// Telegram type "PhotoSize" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+pub struct Audio {
+    pub file_id: String,
+    pub duration: Integer,
+    pub mime_type: Option<String>,
+    pub file_size: Option<Integer>,
+}
+
+impl_encode!(Audio, 4,
+    [0 => file_id, 1 => duration],
+    [2 => mime_type, 3 => file_size]);
+
+// ---------------------------------------------------------------------------
+/// Telegram type "PhotoSize" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+pub struct Document {
+    pub file_id: String,
+    pub thumb: PhotoSize,
+    pub file_name: Option<String>,
+    pub mime_type: Option<String>,
+    pub file_size: Option<Integer>,
+}
+
+impl_encode!(Document, 5,
+    [0 => file_id, 1 => thumb],
+    [2 => file_name, 3 => mime_type, 4 => file_size]);
+
+// ---------------------------------------------------------------------------
+/// Telegram type "PhotoSize" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+pub struct Sticker {
+    pub file_id: String,
+    pub width: Integer,
+    pub height: Integer,
+    pub thumb: PhotoSize,
+    pub file_size: Option<Integer>,
+}
+
+impl_encode!(Sticker, 5,
+    [0 => file_id, 1 => width, 2 => height, 3 => thumb],
+    [4 => file_size]);
+
+// ---------------------------------------------------------------------------
+/// Telegram type "PhotoSize" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+pub struct Video {
+    pub file_id: String,
+    pub width: Integer,
+    pub height: Integer,
+    pub duration: Integer,
+    pub thumb: PhotoSize,
+    pub mime_type: Option<String>,
+    pub file_size: Option<Integer>,
+    pub caption: Option<String>,
+}
+
+impl_encode!(Video, 8,
+    [0 => file_id, 1 => width, 2 => height, 3 => duration, 4 => thumb],
+    [5 => mime_type, 6 => file_size, 7 => caption]);
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Contact" (directly mapped)
@@ -261,18 +309,37 @@ pub struct Location {
 }
 
 // ---------------------------------------------------------------------------
-/// Telegram type "User" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq, Eq)]
-pub struct User {
-    pub id: Integer,
-    pub first_name: String,
-    pub last_name: Option<String>,
-    pub username: Option<String>,
+/// Telegram type "Location" (directly mapped)
+#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq)]
+pub struct UserProfilePhotos {
+    pub total_count: Integer,
+    pub photos: Vec<Vec<PhotoSize>>,
 }
 
-impl_encode!(User, 4,
-    [0 => id, 1 => first_name],
-    [2 => last_name, 3 => username]);
+// ---------------------------------------------------------------------------
+/// Telegram type "ReplyKeyboardMarkup" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Eq)]
+pub struct ReplyKeyboardMarkup {
+    pub keyboard: Vec<Vec<String>>,
+    pub resize_keyboard: Option<bool>,
+    pub one_time_keyboard: Option<bool>,
+    pub selective: Option<bool>,
+}
+
+impl Default for ReplyKeyboardMarkup {
+    fn default() -> Self {
+        ReplyKeyboardMarkup {
+            keyboard: Vec::new(),
+            resize_keyboard: None,
+            one_time_keyboard: None,
+            selective: None,
+        }
+    }
+}
+
+impl_encode!(ReplyKeyboardMarkup, 4,
+    [0 => keyboard],
+    [1 => resize_keyboard, 2 => one_time_keyboard, 3 => selective]);
 
 
 // ===========================================================================
