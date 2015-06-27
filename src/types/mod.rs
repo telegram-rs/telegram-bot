@@ -2,6 +2,7 @@ use rustc_serialize::{Decodable, Encodable, Decoder, Encoder};
 // use std::collections::BTreeMap;
 
 pub type Integer = i32;
+pub type Float = f32;
 
 #[derive(RustcDecodable, Debug)]
 pub struct Response<T: Decodable> {
@@ -100,14 +101,14 @@ pub enum MessageType {
     Photo,
     Sticker,
     Video,
-    Contact,
-    Location,
-    GroupAdd(User),
-    GroupRemove(User),
-    GroupTitleChange(String),
-    GroupPhotoChange,
-    GroupPhotoDelete,
-    GroupCreate,
+    Contact(Contact),
+    Location(Location),
+    NewChatParticipant(User),
+    LeftChatParticipant(User),
+    NewChatTitle(String),
+    NewChatPhoto,
+    DeleteChatPhoto,
+    GroupChatCreated,
 }
 
 impl Decodable for MessageType {
@@ -127,9 +128,22 @@ impl Decodable for MessageType {
         // There is always just one of these fields used, so we can infer the
         // enum variant from it.
         maybe_field!(d, "text", Text);
-        maybe_field!(d, "new_chat_participant", GroupAdd);
-        maybe_field!(d, "left_chat_participant", GroupRemove);
-        maybe_field!(d, "new_chat_title", GroupTitleChange);
+        maybe_field!(d, "contact", Contact);
+        maybe_field!(d, "location", Location);
+        maybe_field!(d, "new_chat_participant", NewChatParticipant);
+        maybe_field!(d, "left_chat_participant", LeftChatParticipant);
+        maybe_field!(d, "new_chat_title", NewChatTitle);
+
+        // delete_chat_photo
+        if let Some(true) = try!(d.read_struct_field(
+            "delete_chat_photo", 0, |d| Decodable::decode(d))) {
+            return Ok(MessageType::DeleteChatPhoto);
+        };
+        // group_chat_created
+        if let Some(true) = try!(d.read_struct_field(
+            "group_chat_created", 0, |d| Decodable::decode(d))) {
+            return Ok(MessageType::GroupChatCreated);
+        };
 
         // TODO: Implement missing MessageType's. If no field is set: Error.
         Ok(MessageType::Text("!!! Not implemented !!!".into()))
@@ -175,9 +189,7 @@ macro_rules! emit_option {
 
 impl Encodable for ReplyKeyboardMarkup {
     fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
-        println!("IN A");
         e.emit_struct("ReplyKeyboardMarkup", 4, |e| {
-            println!("IN B");
             emit_field!(self, e, 0, keyboard);
             emit_option!(self, e, 1, resize_keyboard);
             emit_option!(self, e, 2, one_time_keyboard);
@@ -186,6 +198,28 @@ impl Encodable for ReplyKeyboardMarkup {
             Ok(())
         })
     }
+}
+
+#[derive(Debug, RustcDecodable)]
+pub struct PhotoSize {
+    pub file_id: String,
+    pub width: Integer,
+    pub height: Integer,
+    pub file_size: Option<Integer>,
+}
+
+#[derive(Debug, RustcDecodable)]
+pub struct Contact {
+    pub phone_number: String,
+    pub first_name: String,
+    pub last_name: Option<String>,
+    pub user_id: Option<String>,
+}
+
+#[derive(Debug, RustcDecodable)]
+pub struct Location {
+    pub longitude: Float,
+    pub latitude: Float,
 }
 
 

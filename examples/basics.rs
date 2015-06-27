@@ -26,21 +26,45 @@ fn main() {
 
     let res = bot.long_poll(None, |bot, u| {
         if let Some(m) = u.message {
-            if let MessageType::Text(t) = m.msg {
-                println!("Received Update[{}]: <{}> {}",
-                    u.update_id, m.from.first_name, t);
-                let keyboard = ReplyKeyboardMarkup {
-                    keyboard: vec![vec![t],
-                                   vec!["A".into(), "B".into()]],
-                    .. Default::default()
-                };
+            let name = m.from.first_name + &*m.from.last_name
+                .map_or("".to_string(), |mut n| { n.insert(0, ' '); n });
 
-                println!("{:?}", bot.send_message(m.chat.id(),
-                    format!("Hi, {}", m.from.first_name),
-                    None, None, Some(keyboard)));
+            match m.msg {
+                MessageType::Text(t) => {
+                    println!("Received Update[{}]: <{}> {}",
+                    u.update_id, name, t);
+                    let keyboard = ReplyKeyboardMarkup {
+                        keyboard: vec![vec![t],
+                                       vec!["A".into(), "B".into()]],
+                       one_time_keyboard: Some(true),
+                        .. Default::default()
+                    };
+
+                    let res = bot.send_message(
+                        m.chat.id(),
+                        format!("Hi, {}", name),
+                        None,
+                        None,
+                        Some(keyboard));
+                },
+                MessageType::Location(loc) => {
+                    // Log
+                    println!("{} is here: (lng: {}, lat: {})",
+                             name, loc.longitude, loc.latitude);
+
+                    // Calculate and send the location on the other side of the
+                    // earth.
+                    let lat = -loc.latitude;
+                    let lng = if loc.longitude > 0.0 {
+                        loc.longitude - 180.0
+                    } else {
+                        loc.longitude + 180.0
+                    };
+
+                    bot.send_location(m.chat.id(), lat, lng, None, None);
+                },
+                _ => {}
             }
-
-
         }
     });
 

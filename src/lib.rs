@@ -108,11 +108,7 @@ impl Bot {
         self.send_request("getUpdates", params)
     }
 
-    /// Corresponds to the "getUpdates" method of the API.
-    ///
-    /// **Note:**
-    /// The method will not set the offset parameter on its own. To receive
-    /// updates in a more high level way, see `long_poll`.
+    /// Corresponds to the "sendMessage" method of the API.
     pub fn send_message(&mut self, chat_id: Integer, text: String,
                         disable_web_page_preview: Option<bool>,
                         reply_to_message_id: Option<Integer>,
@@ -128,6 +124,23 @@ impl Bot {
 
         // Execute request
         self.send_request("sendMessage", params)
+    }
+
+    /// Corresponds to the "sendLocation" method of the API.
+    pub fn send_location(&mut self, chat_id: Integer, latitude: Float,
+                         longitude: Float, reply_to_message_id: Option<Integer>,
+                         reply_markup: Option<ReplyKeyboardMarkup>)
+                         -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get("latitude", latitude);
+        params.add_get("longitude", longitude);
+        params.add_get_opt("reply_to_message_id", reply_to_message_id);
+        try!(params.add_get_json_opt("reply_markup", reply_markup));
+
+        // Execute request
+        self.send_request("sendLocation", params)
     }
 
 
