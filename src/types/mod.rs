@@ -62,7 +62,7 @@ pub type Float = f32;
 // Types not explicitly mentioned or somehow different from Telegram types
 // ===========================================================================
 /// All API responses are from this type. Mostly used internal.
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Response<T: Decodable> {
     pub ok: bool,
     pub description: Option<String>,
@@ -130,7 +130,7 @@ impl Encodable for ChatAction {
 // ---------------------------------------------------------------------------
 /// Either a User or a GroupChat. Used in "chat" field of Message. Has some
 /// useful methods for less typing.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Chat {
     User(User),
     Group(GroupChat),
@@ -177,7 +177,7 @@ impl Encodable for Chat {
 }
 
 // ---------------------------------------------------------------------------
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Message {
     pub message_id: Integer,
     pub from: User,
@@ -217,7 +217,7 @@ impl Decodable for Message {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum MessageType {
     Text(String),
     Audio(Audio),
@@ -284,7 +284,7 @@ impl Decodable for MessageType {
 // Telegram types directly mapped to Rust types
 // ===========================================================================
 /// Telegram type "User" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct User {
     pub id: Integer,
     pub first_name: String,
@@ -299,7 +299,7 @@ impl_encode!(User, 4,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "GroupChat" (directly mapped)
-#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq)]
+#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq, Clone)]
 pub struct GroupChat {
     pub id: Integer,
     pub title: String,
@@ -307,7 +307,7 @@ pub struct GroupChat {
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct PhotoSize {
     pub file_id: String,
     pub width: Integer,
@@ -321,7 +321,7 @@ impl_encode!(PhotoSize, 4,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Audio {
     pub file_id: String,
     pub duration: Integer,
@@ -335,7 +335,7 @@ impl_encode!(Audio, 4,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Document {
     pub file_id: String,
     pub thumb: PhotoSize,
@@ -350,7 +350,7 @@ impl_encode!(Document, 5,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Sticker {
     pub file_id: String,
     pub width: Integer,
@@ -365,7 +365,7 @@ impl_encode!(Sticker, 5,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Video {
     pub file_id: String,
     pub width: Integer,
@@ -383,7 +383,7 @@ impl_encode!(Video, 8,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Contact" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Contact {
     pub phone_number: String,
     pub first_name: String,
@@ -397,7 +397,7 @@ impl_encode!(Contact, 4,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Location" (directly mapped)
-#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq)]
+#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq, Clone, Copy)]
 pub struct Location {
     pub longitude: Float,
     pub latitude: Float,
@@ -405,7 +405,7 @@ pub struct Location {
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Update" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Update {
     pub update_id: Integer,
     pub message: Option<Message>
@@ -417,7 +417,7 @@ pub struct Update {
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Location" (directly mapped)
-#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq)]
+#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq, Clone)]
 pub struct UserProfilePhotos {
     pub total_count: Integer,
     pub photos: Vec<Vec<PhotoSize>>,
@@ -425,7 +425,7 @@ pub struct UserProfilePhotos {
 
 // ---------------------------------------------------------------------------
 /// Telegram type "ReplyKeyboardMarkup" (directly mapped)
-#[derive(RustcDecodable, Debug, PartialEq)]
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct ReplyKeyboardMarkup {
     pub keyboard: Vec<Vec<String>>,
     pub resize_keyboard: Option<bool>,

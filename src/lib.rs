@@ -102,6 +102,7 @@ impl Bot {
         self.send_request("sendLocation", params)
     }
 
+    /// Corresponds to the "sendChatAction" method of the API.
     pub fn send_chat_action(&mut self, chat_id: Integer, action: ChatAction)
                             -> Result<bool> {
         let mut params = Params::new();
@@ -110,6 +111,20 @@ impl Bot {
 
         // Execute request
         self.send_request("sendChatAction", params)
+    }
+
+    /// Corresponds to the "getUserProfilePhotos" method of the API.
+    pub fn get_user_profile_photos(&mut self, user_id: Integer,
+                                   offset: Option<Integer>,
+                                   limit: Option<Integer>)
+                                   -> Result<UserProfilePhotos> {
+        let mut params = Params::new();
+        params.add_get("user_id", user_id);
+        params.add_get_opt("offset", offset);
+        params.add_get_opt("limit", limit);
+
+        // Execute request
+        self.send_request("getUserProfilePhotos", params)
     }
 
     /// Corresponds to the "getUpdates" method of the API.
