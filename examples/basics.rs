@@ -40,12 +40,13 @@ fn main() {
                         .. Default::default()
                     };
 
-                    try!(bot.send_message(
-                        chat_id,
-                        format!("Hi, {}", name),
-                        None,
-                        None,
-                        Some(keyboard)));
+                    try!(bot.send_chat_action(chat_id, ChatAction::Typing));
+                    // try!(bot.send_message(
+                    //     chat_id,
+                    //     format!("Hi, {}", name),
+                    //     None,
+                    //     None,
+                    //     Some(keyboard)));
                 },
                 MessageType::Location(loc) => {
                     // Print event

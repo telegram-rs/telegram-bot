@@ -102,6 +102,16 @@ impl Bot {
         self.send_request("sendLocation", params)
     }
 
+    pub fn send_chat_action(&mut self, chat_id: Integer, action: ChatAction)
+                            -> Result<bool> {
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get("action", action);
+
+        // Execute request
+        self.send_request("sendChatAction", params)
+    }
+
     /// Corresponds to the "getUpdates" method of the API.
     ///
     /// **Note:**
@@ -187,6 +197,8 @@ impl Bot {
         // Read response into String and return error if it failed
         let mut body = String::new();
         try!(resp.read_to_string(&mut body));
+
+        println!("BODY: {}", body);
 
         // Try to decode response as JSON representing a Response
         match try!(json::decode(&*body)) {

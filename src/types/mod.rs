@@ -11,6 +11,7 @@
 //!
 
 use rustc_serialize::{Decodable, Encodable, Decoder, Encoder};
+use std::convert::Into;
 
 // ===========================================================================
 // Helpers
@@ -66,6 +67,64 @@ pub struct Response<T: Decodable> {
     pub ok: bool,
     pub description: Option<String>,
     pub result: Option<T>,
+}
+
+// ---------------------------------------------------------------------------
+/// Strongly typed ChatAction. Instead of passing a String to the
+/// `send_chat_action` method, this is used.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum ChatAction {
+    Typing,
+    UploadPhoto,
+    RecordVideo,
+    UploadVideo,
+    RecordAudio,
+    UploadAudio,
+    UploadDocument,
+    FindLocation,
+}
+
+impl Decodable for ChatAction {
+    fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
+        Ok(match &*try!(d.read_str()) {
+            "typing" => ChatAction::Typing,
+            "upload_photo" => ChatAction::UploadPhoto,
+            "record_video" => ChatAction::RecordVideo,
+            "upload_video" => ChatAction::UploadVideo,
+            "record_audio" => ChatAction::RecordAudio,
+            "upload_audio" => ChatAction::UploadAudio,
+            "upload_document" => ChatAction::UploadDocument,
+            "find_location" => ChatAction::FindLocation,
+            _ => return Err(d.error("Not a valid chat action")),
+        })
+    }
+}
+
+impl Into<&'static str> for ChatAction {
+    fn into(self) -> &'static str {
+        match self {
+             ChatAction::Typing => "typing",
+             ChatAction::UploadPhoto => "upload_photo",
+             ChatAction::RecordVideo => "record_video",
+             ChatAction::UploadVideo => "upload_video",
+             ChatAction::RecordAudio => "record_audio",
+             ChatAction::UploadAudio => "upload_audio",
+             ChatAction::UploadDocument => "upload_document",
+             ChatAction::FindLocation => "find_location",
+        }
+    }
+}
+
+impl ToString for ChatAction {
+    fn to_string(&self) -> String {
+        Into::<&str>::into(*self).into()
+    }
+}
+
+impl Encodable for ChatAction {
+    fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
+        e.emit_str((*self).into())
+    }
 }
 
 // ---------------------------------------------------------------------------
