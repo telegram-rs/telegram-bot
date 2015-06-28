@@ -29,3 +29,21 @@ fn reply_keyboard_markup() {
     assert_eq!(json::encode(&x).unwrap(),
         "{\"keyboard\":[[\"ABC\"],[\"X\",\"Y\"]],\"resize_keyboard\":false}".to_string());
 }
+
+#[test]
+fn keyboard_markup() {
+    use ReplyKeyboardMarkup as RKM;
+    use ReplyMarkup as RM;
+
+    // Test encoding
+    let x = RM::Keyboard(RKM::default());
+    assert_eq!(json::encode(&x).unwrap(), "{\"keyboard\":[]}".to_string());
+
+    let x = RM::KeyboardHide(false);
+    assert_eq!(json::encode(&x).unwrap(),
+        "{\"hide_keyboard\":true,\"selective\":false}".to_string());
+
+    let x = RM::ForceReply(true);
+    assert_eq!(json::encode(&x).unwrap(),
+        "{\"force_reply\":true,\"selective\":true}".to_string());
+}

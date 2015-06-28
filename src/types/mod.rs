@@ -70,6 +70,42 @@ pub struct Response<T: Decodable> {
 }
 
 // ---------------------------------------------------------------------------
+/// Represents one of "ReplyKeyboardMarkup", "ReplyKeyboardHide" or
+/// "ForceReply". Used for the "reply_markup" field.
+#[derive(Debug, PartialEq, Clone)]
+pub enum ReplyMarkup {
+    Keyboard(ReplyKeyboardMarkup),
+    /// The boolean corresponds to the "selective" field of "ReplyKeyboardHide"
+    KeyboardHide(bool),
+    /// The boolean corresponds to the "selective" field of "ForceReply"
+    ForceReply(bool),
+}
+
+impl Encodable for ReplyMarkup {
+    fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
+        match *self {
+            ReplyMarkup::Keyboard(ref k) => k.encode(e),
+            ReplyMarkup::KeyboardHide(b) => {
+                e.emit_struct("ReplyKeyboardHide", 2, |e| {
+                    try!(e.emit_struct_field("hide_keyboard", 0, |e| {
+                        true.encode(e)
+                    }));
+                    e.emit_struct_field("selective", 1, |e| b.encode(e))
+                })
+            },
+            ReplyMarkup::ForceReply(b) => {
+                e.emit_struct("ForceReply", 2, |e| {
+                    try!(e.emit_struct_field("force_reply", 0, |e| {
+                        true.encode(e)
+                    }));
+                    e.emit_struct_field("selective", 1, |e| b.encode(e))
+                })
+            },
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 /// Strongly typed ChatAction. Instead of passing a String to the
 /// `send_chat_action` method, this is used.
 #[derive(Debug, PartialEq, Clone, Copy)]

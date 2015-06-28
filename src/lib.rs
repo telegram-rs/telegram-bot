@@ -58,7 +58,7 @@ impl Bot {
     pub fn send_message(&mut self, chat_id: Integer, text: String,
                         disable_web_page_preview: Option<bool>,
                         reply_to_message_id: Option<Integer>,
-                        reply_markup: Option<ReplyKeyboardMarkup>)
+                        reply_markup: Option<ReplyMarkup>)
                         -> Result<Message> {
         // Prepare parameters
         let mut params = Params::new();
@@ -88,7 +88,7 @@ impl Bot {
     /// Corresponds to the "sendLocation" method of the API.
     pub fn send_location(&mut self, chat_id: Integer, latitude: Float,
                          longitude: Float, reply_to_message_id: Option<Integer>,
-                         reply_markup: Option<ReplyKeyboardMarkup>)
+                         reply_markup: Option<ReplyMarkup>)
                          -> Result<Message> {
         // Prepare parameters
         let mut params = Params::new();
