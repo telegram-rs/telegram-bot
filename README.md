@@ -64,6 +64,7 @@ fn main() {
     }
 }
 ```
+You can find a bigger example in the `examples` folder.
 
 ## Usage
 Will be uploaded to crates.io soon...

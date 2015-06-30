@@ -81,6 +81,12 @@ pub enum ReplyMarkup {
     ForceReply(bool),
 }
 
+impl From<ReplyKeyboardMarkup> for ReplyMarkup {
+    fn from(keyboard: ReplyKeyboardMarkup) -> ReplyMarkup {
+        ReplyMarkup::Keyboard(keyboard)
+    }
+}
+
 impl Encodable for ReplyMarkup {
     fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
         match *self {
