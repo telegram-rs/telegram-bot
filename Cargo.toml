@@ -3,6 +3,17 @@ name = "telegram-bot"
 version = "0.1.0"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"]
 
+description = "A library for creating Telegram bots."
+
+documentation = "https://lukaskalbertodt.github.io/telegram-bot/telegram_bot/"
+repository = "https://github.com/LukasKalbertodt/telegram-bot"
+readme = "README.md"
+
+keywords = ["telegram", "bot", "chat", "api"]
+license = "MIT"
+
+exclude = ["deploy.sh"]
+
 [dependencies]
 hyper = "*"
 rustc-serialize = "*"

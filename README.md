@@ -2,6 +2,7 @@ Rust Telegram Bot Library
 =========================
 [![Build Status](https://img.shields.io/travis/LukasKalbertodt/telegram-bot.svg)](https://travis-ci.org/LukasKalbertodt/telegram-bot)
 [![License](https://img.shields.io/github/license/LukasKalbertodt/telegram-bot.svg)]()
+[![Crates.io](https://img.shields.io/crates/v/telegram-bot.svg)](https://crates.io/crates/telegram-bot)
 
 [**Documentation**](https://lukaskalbertodt.github.io/telegram-bot/telegram_bot/)
 
@@ -67,7 +68,11 @@ fn main() {
 You can find a bigger example in the `examples` folder.
 
 ## Usage
-Will be uploaded to crates.io soon...
+This library is available via `crates.io`. In order to use it, just add this to your `Cargo.toml`:
+
+```
+telegram-bot = "*"
+```
 
 ## Collaboration
 Yes please! Every type of colaboration is welcome: Create issues, hack some code or make suggestions. If you don't know where to start, just contact me (my email is on my github profile).
