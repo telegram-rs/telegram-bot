@@ -16,6 +16,7 @@ pub enum Error {
     JsonEncode(json::EncoderError),
     Api(String),
     InvalidState(String),
+    UserInterrupt,
 }
 
 impl ::std::error::Error for Error {
@@ -27,6 +28,7 @@ impl ::std::error::Error for Error {
             Error::JsonEncode(ref e) => e.description(),
             Error::Api(ref s) => &*s,
             Error::InvalidState(ref s) => &*s,
+            Error::UserInterrupt => "user interrupt",
         }
     }
 }
@@ -40,6 +42,7 @@ impl fmt::Display for Error {
             Error::JsonEncode(ref e) => e.fmt(f),
             Error::Api(ref s) => s.fmt(f),
             Error::InvalidState(ref s) => s.fmt(f),
+            Error::UserInterrupt => "user interrupt".fmt(f),
         }
     }
 }

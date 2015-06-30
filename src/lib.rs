@@ -165,8 +165,8 @@ impl Bot {
     pub fn long_poll<F>(&mut self, timeout: Option<Integer>, handler: F)
                         -> Result<()>
                         where F: Fn(&mut Bot, Update) -> Result<()> {
-        // Calculate final timeout: Given or default.
-        let timeout = Some(if let Some(t) = timeout { t } else { 30 });
+        // Calculate final timeout: Given or default (30s)
+        let timeout = timeout.or(Some(30));
 
         loop {
             // Receive updates with correct offset
@@ -203,7 +203,6 @@ impl Bot {
         url.set_query_from_pairs(it);
 
         // Prepare HTTP Request
-        // println!("Sending: {}", url);
         let req = self.client.get(url).header(Connection::close());
 
         // Send request and check if it failed
@@ -212,8 +211,6 @@ impl Bot {
         // Read response into String and return error if it failed
         let mut body = String::new();
         try!(resp.read_to_string(&mut body));
-
-        println!("BODY: {}", body);
 
         // Try to decode response as JSON representing a Response
         match try!(json::decode(&*body)) {
