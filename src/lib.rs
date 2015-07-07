@@ -11,8 +11,12 @@ use util::Params;
 
 use rustc_serialize::{json, Decodable};
 use std::io::Read;
-use hyper::{Client, Url};
+use std::net::ToSocketAddrs;
+use hyper::{Client, Url, Server};
+use hyper::client::IntoUrl;
 use hyper::header::Connection;
+use hyper::server;
+use hyper::net::Fresh;
 
 /// API-URL prefix
 pub const API_URL : &'static str = "https://api.telegram.org/bot";
@@ -145,6 +149,17 @@ impl Bot {
         self.send_request("getUpdates", params)
     }
 
+    pub fn set_webhook<U: IntoUrl>(&mut self, url: Option<U>) -> Result<bool> {
+        let u = url.map_or("".into(), |u| u.into_url().unwrap().to_string());
+
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("url", u);
+
+        // Execute request
+        self.send_request("setWebhook", params)
+    }
+
 
     // =======================================================================
     // Methods for receiving updates
@@ -162,9 +177,9 @@ impl Bot {
     /// If the bot is restarted, but the last received updates are not yet
     /// confirmed (the last poll was not empty), there will be some duplicate
     /// updates.
-    pub fn long_poll<F>(&mut self, timeout: Option<Integer>, handler: F)
+    pub fn long_poll<H>(&mut self, timeout: Option<Integer>, handler: H)
                         -> Result<()>
-                        where F: Fn(&mut Bot, Update) -> Result<()> {
+                        where H: Fn(&mut Bot, Update) -> Result<()> {
         // Calculate final timeout: Given or default (30s)
         let timeout = timeout.or(Some(30));
 
@@ -184,6 +199,34 @@ impl Bot {
         }
     }
 
+    pub fn listen<U, H>(&mut self, url: U, handler: H) -> Result<()>
+                     where H: Fn(&mut Bot, Update) -> Result<()>,
+                           U: IntoUrl {
+        // blabla
+        println!("Hello Listen!");
+
+        fn handle_update(mut req: server::Request, mut res: server::Response<Fresh>) {
+            use hyper::header;
+            println!("Hello Handle!");
+
+            let mut body = String::new();
+            req.read_to_string(&mut body);
+
+            println!("DING: {}", body);
+
+            res.headers_mut().set(header::Connection::close());
+        }
+
+        // TODO: Port 80 not hardcoded!
+        let listener = try!(Server::http("0.0.0.0:8443")).handle(handle_update);
+
+        println!("AFTER");
+        // Tell Telegram that we're listening
+        self.set_webhook(Some(url));
+
+        Ok(())
+    }
+
     // =======================================================================
     // Private methods
     // =======================================================================
@@ -198,7 +241,7 @@ impl Bot {
             })
         });
 
-        // For alle (str, String) pairs: Map to (str, str) and append it to URL
+        // For all (str, String) pairs: Map to (str, str) and append it to URL
         let it = p.get_params().iter().map(|&(k, ref v)| (k, &**v));
         url.set_query_from_pairs(it);
 

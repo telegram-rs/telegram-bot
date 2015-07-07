@@ -17,6 +17,11 @@ fn main() {
     let mut bot = Bot::new(token);
     println!("getMe: {:?}", bot.get_me());
 
+    // Just to demonstrate this method. Sadly, a server listening for updates
+    // is not (yet!) integrated in this library.
+    println!("Webhook: {:?}", bot.set_webhook(Some("https://example.com")));
+    println!("Webhook: {:?}", bot.set_webhook::<&str>(None));
+
     // Fetch new updates via long poll method
     let res = bot.long_poll(None, |bot, u| {
         // If the received update contains a message...
