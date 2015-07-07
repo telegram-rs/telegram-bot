@@ -11,12 +11,9 @@ use util::Params;
 
 use rustc_serialize::{json, Decodable};
 use std::io::Read;
-use std::net::ToSocketAddrs;
-use hyper::{Client, Url, Server};
+use hyper::{Client, Url};
 use hyper::client::IntoUrl;
 use hyper::header::Connection;
-use hyper::server;
-use hyper::net::Fresh;
 
 /// API-URL prefix
 pub const API_URL : &'static str = "https://api.telegram.org/bot";
@@ -197,34 +194,6 @@ impl Bot {
                 try!(handler(self, u));
             }
         }
-    }
-
-    pub fn listen<U, H>(&mut self, url: U, handler: H) -> Result<()>
-                     where H: Fn(&mut Bot, Update) -> Result<()>,
-                           U: IntoUrl {
-        // blabla
-        println!("Hello Listen!");
-
-        fn handle_update(mut req: server::Request, mut res: server::Response<Fresh>) {
-            use hyper::header;
-            println!("Hello Handle!");
-
-            let mut body = String::new();
-            req.read_to_string(&mut body);
-
-            println!("DING: {}", body);
-
-            res.headers_mut().set(header::Connection::close());
-        }
-
-        // TODO: Port 80 not hardcoded!
-        let listener = try!(Server::http("0.0.0.0:8443")).handle(handle_update);
-
-        println!("AFTER");
-        // Tell Telegram that we're listening
-        self.set_webhook(Some(url));
-
-        Ok(())
     }
 
     // =======================================================================
