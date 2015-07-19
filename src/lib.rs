@@ -198,7 +198,7 @@ impl Bot {
             })
         });
 
-        // For alle (str, String) pairs: Map to (str, str) and append it to URL
+        // For all (str, String) pairs: Map to (str, str) and append it to URL
         let it = p.get_params().iter().map(|&(k, ref v)| (k, &**v));
         url.set_query_from_pairs(it);
 
