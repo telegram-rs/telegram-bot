@@ -75,7 +75,9 @@ telegram-bot = "*"
 ```
 
 ## Collaboration
-Yes please! Every type of colaboration is welcome: Create issues, hack some code or make suggestions. If you don't know where to start, just contact me (my email is on my github profile).
+Yes please! Every type of contribution is welcome: Create issues, hack some code or make suggestions. If you don't know where to start, just contact me (my email is on my github profile).
+
+Please submit pull request against the `dev` branch, unless all changes are just documentation fixes.
 
 ## Todo
 
