@@ -73,3 +73,76 @@ fn decode_user_chat() {
     assert!(chat.is_user());
     assert_eq!(Chat::User(user), chat);
 }
+
+#[test]
+fn decode_update() {
+    use Update;
+    let blob = r#"{
+        "message" : {
+            "text" : "The quick brown fox jumps over the lazy dog",
+            "from" : {
+                "first_name" : "test",
+                "id" : 123456789,
+                "username" : "test"
+            },
+            "date" : 1437821492,
+            "message_id" : 74,
+            "chat" : {
+                "title" : "This is a group chat",
+                "id" : -12345678
+            }
+        },
+        "update_id" : 123456789
+    }"#;
+    let _: Update = json::decode(&blob).unwrap();
+}
+
+#[test]
+fn decode_get_updates_response() {
+    use Response;
+    use Update;
+
+    let blob = r#"{
+        "result" : [
+            {
+                "message" : {
+                    "text" : "This is the first message",
+                    "from" : {
+                        "username" : "test",
+                        "id" : 123456789,
+                        "first_name" : "Test"
+                    },
+                    "date" : 1437821579,
+                    "message_id" : 78,
+                    "chat" : {
+                        "username" : "test",
+                        "id" : 123456789,
+                        "first_name" : "Test"
+                    }
+                },
+                "update_id" : 123456789
+            },
+            {
+                "message" : {
+                    "text" : "This is the second message",
+                    "from" : {
+                        "username" : "test",
+                        "id" : 123456789,
+                        "first_name" : "Test"
+                    },
+                    "date" : 1437821579,
+                    "message_id" : 79,
+                    "chat" : {
+                        "username" : "test",
+                        "id" : 123456789,
+                        "first_name" : "Test"
+                    }
+                },
+                "update_id" : 123456790
+            }
+        ],
+        "ok" : true
+    }"#;
+
+    let _: Response<Vec<Update>> = json::decode(&blob).unwrap();
+}
