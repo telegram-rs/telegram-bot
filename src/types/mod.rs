@@ -207,23 +207,25 @@ impl Chat {
 
 impl Decodable for Chat {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        // Both User and GroupChat have an 'id' field
-        let id : Integer = try_field!(d, "id");
+        d.read_struct("", 0, |d| {
+            // Both User and GroupChat have an 'id' field
+            let id : Integer = try_field!(d, "id");
 
-        // If there is a 'title' field, it's a GroupChat. A User otherwise.
-        if let Some(title) = try_field!(d, "title") {
-            Ok(Chat::Group(GroupChat {
-                id: id,
-                title: title,
-            }))
-        } else {
-            Ok(Chat::User(User {
-                id: id,
-                first_name: try_field!(d, "first_name"),
-                last_name: try_field!(d, "last_name"),
-                username: try_field!(d, "username"),
-            }))
-        }
+            // If there is a 'title' field, it's a GroupChat. A User otherwise.
+            if let Some(title) = try_field!(d, "title") {
+                Ok(Chat::Group(GroupChat {
+                    id: id,
+                    title: title,
+                }))
+            } else {
+                Ok(Chat::User(User {
+                    id: id,
+                    first_name: try_field!(d, "first_name"),
+                    last_name: try_field!(d, "last_name"),
+                    username: try_field!(d, "username"),
+                }))
+            }
+        })
     }
 }
 
