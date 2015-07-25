@@ -238,7 +238,7 @@ pub struct Message {
 impl Decodable for Message {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
         // Decodes a field with a given name. If successful: Return decoded
-        // value. If not: Exist function with error value.
+        // value. If not: Exit function with error value.
         macro_rules! try_field {
             ($d:ident, $name:expr) => {
                 try!($d.read_struct_field($name, 0, |d| Decodable::decode(d)))
@@ -362,7 +362,7 @@ impl_encode!(PhotoSize, 4,
     [3 => file_size]);
 
 // ---------------------------------------------------------------------------
-/// Telegram type "PhotoSize" (directly mapped)
+/// Telegram type "Audio" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Audio {
     pub file_id: String,
@@ -376,7 +376,7 @@ impl_encode!(Audio, 4,
     [2 => mime_type, 3 => file_size]);
 
 // ---------------------------------------------------------------------------
-/// Telegram type "PhotoSize" (directly mapped)
+/// Telegram type "Document" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Document {
     pub file_id: String,
@@ -391,7 +391,7 @@ impl_encode!(Document, 5,
     [2 => file_name, 3 => mime_type, 4 => file_size]);
 
 // ---------------------------------------------------------------------------
-/// Telegram type "PhotoSize" (directly mapped)
+/// Telegram type "Sticker" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Sticker {
     pub file_id: String,
@@ -406,7 +406,7 @@ impl_encode!(Sticker, 5,
     [4 => file_size]);
 
 // ---------------------------------------------------------------------------
-/// Telegram type "PhotoSize" (directly mapped)
+/// Telegram type "Video" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Video {
     pub file_id: String,
@@ -458,7 +458,7 @@ pub struct Update {
 //     [1 => message]);
 
 // ---------------------------------------------------------------------------
-/// Telegram type "Location" (directly mapped)
+/// Telegram type "UserProfilePhotos" (directly mapped)
 #[derive(RustcDecodable, RustcEncodable, Debug, PartialEq, Clone)]
 pub struct UserProfilePhotos {
     pub total_count: Integer,

@@ -6,7 +6,7 @@ Rust Telegram Bot Library
 
 [**Documentation**](https://lukaskalbertodt.github.io/telegram-bot/telegram_bot/)
 
-A library for writing your own [Telegram](https://telegram.org/) bots. More information [here](https://core.telegram.org/bots). **Note:** Work in progress!
+A library for writing your own [Telegram](https://telegram.org/) bots. More information [here](https://core.telegram.org/bots). Official API [here](https://core.telegram.org/bots/api). **Note:** Work in progress!
 
 ## Example
 Here is a simple example (see [`example/simple.rs`](https://github.com/LukasKalbertodt/telegram-bot/blob/master/examples/simple.rs)):
@@ -75,7 +75,9 @@ telegram-bot = "*"
 ```
 
 ## Collaboration
-Yes please! Every type of colaboration is welcome: Create issues, hack some code or make suggestions. If you don't know where to start, just contact me (my email is on my github profile).
+Yes please! Every type of contribution is welcome: Create issues, hack some code or make suggestions. If you don't know where to start, just contact me (my email is on my github profile).
+
+Please submit pull request against the `dev` branch, unless all changes are just documentation fixes.
 
 ## Todo
 
