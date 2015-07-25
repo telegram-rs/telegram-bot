@@ -47,6 +47,13 @@ macro_rules! impl_encode {
     }
 }
 
+// Decodes a field with a given name. If successful: Return decoded
+// value. If not: Exit function with error value.
+macro_rules! try_field {
+    ($d:ident, $name:expr) => {
+        try!($d.read_struct_field($name, 0, |d| Decodable::decode(d)))
+    }
+}
 
 
 // ===========================================================================
@@ -200,11 +207,22 @@ impl Chat {
 
 impl Decodable for Chat {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        // If the object can be decoded as User: Return the user. Otherwise
-        // try to decode the object as Group.
-        match User::decode(d) {
-            Ok(user) => Ok(Chat::User(user)),
-            Err(_) => Ok(Chat::Group(try!(Decodable::decode(d)))),
+        // Both User and GroupChat have an 'id' field
+        let id : Integer = try_field!(d, "id");
+
+        // If there is a 'title' field, it's a GroupChat. A User otherwise.
+        if let Some(title) = try_field!(d, "title") {
+            Ok(Chat::Group(GroupChat {
+                id: id,
+                title: title,
+            }))
+        } else {
+            Ok(Chat::User(User {
+                id: id,
+                first_name: try_field!(d, "first_name"),
+                last_name: try_field!(d, "last_name"),
+                username: try_field!(d, "username"),
+            }))
         }
     }
 }
@@ -237,14 +255,6 @@ pub struct Message {
 // JSON field.
 impl Decodable for Message {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        // Decodes a field with a given name. If successful: Return decoded
-        // value. If not: Exit function with error value.
-        macro_rules! try_field {
-            ($d:ident, $name:expr) => {
-                try!($d.read_struct_field($name, 0, |d| Decodable::decode(d)))
-            }
-        }
-
         d.read_struct("", 0, |d| {
             Ok(Message {
                 message_id: try_field!(d, "message_id"),
