@@ -15,11 +15,11 @@ fn reply_keyboard_markup() {
 
     // Test encoding
     let x = RKM::default();
-    assert_eq!(json::encode(&x).unwrap(), "{\"keyboard\":[]}".to_string());
+    assert_eq!(json::encode(&x).unwrap(), r#"{"keyboard":[]}"#.to_string());
 
     let x = RKM { resize_keyboard: Some(true), ..Default::default() };
     assert_eq!(json::encode(&x).unwrap(),
-        "{\"keyboard\":[],\"resize_keyboard\":true}".to_string());
+        r#"{"keyboard":[],"resize_keyboard":true}"#.to_string());
 
     let x = RKM {
         keyboard: vec![vec!["ABC".into()], vec!["X".into(), "Y".into()]],
@@ -27,7 +27,7 @@ fn reply_keyboard_markup() {
         ..Default::default()
     };
     assert_eq!(json::encode(&x).unwrap(),
-        "{\"keyboard\":[[\"ABC\"],[\"X\",\"Y\"]],\"resize_keyboard\":false}".to_string());
+        r#"{"keyboard":[["ABC"],["X","Y"]],"resize_keyboard":false}"#.to_string());
 }
 
 #[test]
@@ -37,15 +37,15 @@ fn keyboard_markup() {
 
     // Test encoding
     let x = RM::Keyboard(RKM::default());
-    assert_eq!(json::encode(&x).unwrap(), "{\"keyboard\":[]}".to_string());
+    assert_eq!(json::encode(&x).unwrap(), r#"{"keyboard":[]}"#.to_string());
 
     let x = RM::KeyboardHide(false);
     assert_eq!(json::encode(&x).unwrap(),
-        "{\"hide_keyboard\":true,\"selective\":false}".to_string());
+        r#"{"hide_keyboard":true,"selective":false}"#.to_string());
 
     let x = RM::ForceReply(true);
     assert_eq!(json::encode(&x).unwrap(),
-        "{\"force_reply\":true,\"selective\":true}".to_string());
+        r#"{"force_reply":true,"selective":true}"#.to_string());
 }
 
 #[test]
