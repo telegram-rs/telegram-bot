@@ -1,6 +1,6 @@
 [package]
 name = "telegram-bot"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"]
 
 description = "A library for creating Telegram bots."
