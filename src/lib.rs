@@ -169,14 +169,19 @@ impl Bot {
     /// the same update twice.
     /// The `timeout` parameter influences how long (in seconds) each poll may
     /// last. Defaults to 30.
+    /// The handler gets a mutable reference to the bot since borrowing it
+    /// from the outer scope won't work. When the handler returns an `Err`
+    /// value the bot will stop listening for updates and `long_poll` will
+    /// return the Error. If you want to stop listening you can just return
+    /// `Error::UserInterrupt`.
     ///
     /// **Note:**
     /// If the bot is restarted, but the last received updates are not yet
     /// confirmed (the last poll was not empty), there will be some duplicate
     /// updates.
-    pub fn long_poll<H>(&mut self, timeout: Option<Integer>, handler: H)
+    pub fn long_poll<H>(&mut self, timeout: Option<Integer>, mut handler: H)
                         -> Result<()>
-                        where H: Fn(&mut Bot, Update) -> Result<()> {
+                        where H: FnMut(&mut Bot, Update) -> Result<()> {
         // Calculate final timeout: Given or default (30s)
         let timeout = timeout.or(Some(30));
 
