@@ -18,14 +18,14 @@ use hyper::header::Connection;
 /// API-URL prefix
 pub const API_URL : &'static str = "https://api.telegram.org/bot";
 
-/// The Bot. Main type for doing nearly everything.
-pub struct Bot {
+/// Main type for sending requests to the Telegram bot API.
+pub struct Api {
     offset: Integer,
     url: Url,
     client: Client,
 }
 
-impl Bot {
+impl Api {
     // =======================================================================
     // Constructors
     // =======================================================================
@@ -33,12 +33,12 @@ impl Bot {
     /// invalid (resulting in an invalid API-URL), the function will panic.
     /// However, the function will not check if the given token is a valid
     /// Telegram token. You can call `get_me` to execute a test request.
-    pub fn new(token: String) -> Bot {
+    pub fn new(token: String) -> Api {
         let url = match Url::parse(&*format!("{}{}/dummy", API_URL, token)) {
             Ok(url) => url,
             Err(e) => panic!("Invalid token! ({})", e),
         };
-        Bot {
+        Api {
             offset: 0,
             url: url,
             client: Client::new(),
@@ -181,7 +181,7 @@ impl Bot {
     /// updates.
     pub fn long_poll<H>(&mut self, timeout: Option<Integer>, mut handler: H)
                         -> Result<()>
-                        where H: FnMut(&mut Bot, Update) -> Result<()> {
+                        where H: FnMut(&mut Api, Update) -> Result<()> {
         // Calculate final timeout: Given or default (30s)
         let timeout = timeout.or(Some(30));
 
