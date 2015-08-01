@@ -20,7 +20,6 @@ pub const API_URL : &'static str = "https://api.telegram.org/bot";
 
 /// Main type for sending requests to the Telegram bot API.
 pub struct Api {
-    offset: Integer,
     url: Url,
     client: Client,
 }
@@ -39,7 +38,6 @@ impl Api {
             Err(e) => panic!("Invalid token! ({})", e),
         };
         Api {
-            offset: 0,
             url: url,
             client: Client::new(),
         }
@@ -179,25 +177,34 @@ impl Api {
     /// If the bot is restarted, but the last received updates are not yet
     /// confirmed (the last poll was not empty), there will be some duplicate
     /// updates.
-    pub fn long_poll<H>(&mut self, timeout: Option<Integer>, mut handler: H)
-                        -> Result<()>
-                        where H: FnMut(&mut Api, Update) -> Result<()> {
-        // Calculate final timeout: Given or default (30s)
-        let timeout = timeout.or(Some(30));
+    // pub fn long_poll<H>(&mut self, timeout: Option<Integer>, mut handler: H)
+    //                     -> Result<()>
+    //                     where H: FnMut(&mut Api, Update) -> Result<()> {
+    //     // Calculate final timeout: Given or default (30s)
+    //     let timeout = timeout.or(Some(30));
 
-        loop {
-            // Receive updates with correct offset
-            let offset = Some(self.offset);
-            let updates = try!(self.get_updates(offset, None, timeout));
+    //     loop {
+    //         // Receive updates with correct offset
+    //         let offset = Some(self.offset);
+    //         let updates = try!(self.get_updates(offset, None, timeout));
 
-            // For every update: Increase the offset and call the handler.
-            for u in updates {
-                if u.update_id >= self.offset {
-                    self.offset = u.update_id + 1;
-                }
+    //         // For every update: Increase the offset and call the handler.
+    //         for u in updates {
+    //             if u.update_id >= self.offset {
+    //                 self.offset = u.update_id + 1;
+    //             }
 
-                try!(handler(self, u));
-            }
+    //             try!(handler(self, u));
+    //         }
+    //     }
+    // }
+
+    pub fn listener(&self, method: ListeningMethod) -> Listener {
+        Listener {
+            method: method,
+            offset: 0,
+            url: self.url.clone(),
+            client: Client::new(),
         }
     }
 
@@ -205,10 +212,16 @@ impl Api {
     // Private methods
     // =======================================================================
     fn send_request<T: Decodable>(&mut self, method: &str, p: Params)
-                   -> Result<T> {
+        -> Result<T>
+    {
+        Self::request(&self.client, &self.url, method, p)
+    }
+
+    fn request<T: Decodable>(client: &Client, url: &Url,
+                             method: &str, params: Params) -> Result<T> {
         // Prepare URL for request: Clone and change the last path fragment
         // to the method name and append GET parameters.
-        let mut url = self.url.clone();
+        let mut url = url.clone();
         url.path_mut().map(|path| {         // if theres a path: Change it
             path.last_mut().map(|last| {    // if its not empty: Change last...
                 *last = method.into()       // ... into method name
@@ -216,11 +229,11 @@ impl Api {
         });
 
         // For all (str, String) pairs: Map to (str, str) and append it to URL
-        let it = p.get_params().iter().map(|&(k, ref v)| (k, &**v));
+        let it = params.get_params().iter().map(|&(k, ref v)| (k, &**v));
         url.set_query_from_pairs(it);
 
         // Prepare HTTP Request
-        let req = self.client.get(url).header(Connection::close());
+        let req = client.get(url).header(Connection::close());
 
         // Send request and check if it failed
         let mut resp = try!(req.send());
@@ -244,6 +257,66 @@ impl Api {
             // always be Some. If "ok"==true, then "result" should always be
             // Some. We could also panic in this case.
             _ => Err(Error::InvalidState("Invalid server response".into())),
+        }
+    }
+}
+
+/// Different method how to listen for new updates. Currently `LongPoll` is
+/// the only method supported by this library. The Telegram API offers a
+/// webhook method which is not yet implemented here.
+pub enum ListeningMethod {
+    LongPoll(Option<Integer>),
+}
+
+/// Offers methods to easily receive new updates via the specified method. This
+/// should be used instead of calling methods like `get_updates` yourself.
+///
+/// To create a listener, you first have to create a `Api` object and call
+/// `listener` on it. In order to make listening easier in a concurrent
+/// environment, the `Listener` object and the `Api` object don't share any
+/// internal state. This makes creating a `Listener` a bit more expensive, but
+/// it's usually sufficient to create only one `Listener` once.
+pub struct Listener {
+    method: ListeningMethod,
+    offset: Integer,
+    url: Url,
+    client: Client,
+}
+
+
+impl Listener {
+    pub fn listen<H>(&mut self, mut handler: H) -> Result<()>
+        where H: FnMut(Update) -> Result<()>
+    {
+        match self.method {
+            ListeningMethod::LongPoll(timeout) => {
+                // Calculate final timeout: Given or default (30s)
+                let timeout = timeout.or(Some(30));
+
+                loop {
+                    // Receive updates with correct offset. We don't specify a
+                    // limit (Telegram limits to 100 automatically).
+                    let offset = Some(self.offset);
+
+                    // Prepare parameters
+                    let mut params = Params::new();
+                    params.add_get_opt("offset", offset);
+                    params.add_get_opt("timeout", timeout);
+
+                    // Execute request
+                    let updates : Vec<Update> = try!(Api::request(&self.client, &self.url,
+                                                    "getUpdates", params));
+
+                    // For every update: Increase the offset & call the handler.
+                    for u in updates {
+                        if u.update_id >= self.offset {
+                            self.offset = u.update_id + 1;
+                        }
+
+                        try!(handler(u));
+                    }
+                }
+            }
         }
     }
 }

@@ -12,11 +12,12 @@ fn main() {
     };
 
     // Create bot, test simple API call and print bot information
-    let mut bot = Bot::new(token);
-    println!("getMe: {:?}", bot.get_me());
+    let mut api = Api::new(token);
+    println!("getMe: {:?}", api.get_me());
+    let mut listener = api.listener(ListeningMethod::LongPoll(None));
 
     // Fetch new updates via long poll method
-    let res = bot.long_poll(None, |bot, u| {
+    let res = listener.listen(|u| {
         // If the received update contains a message...
         if let Some(m) = u.message {
             let name = m.from.first_name;
@@ -32,7 +33,7 @@ fn main() {
                     }
 
                     // Answer message with "Hi"
-                    try!(bot.send_message(
+                    try!(api.send_message(
                         m.chat.id(),
                         format!("Hi, {}! You just wrote '{}'", name, t),
                         None, None, None));
