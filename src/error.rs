@@ -26,8 +26,8 @@ impl ::std::error::Error for Error {
             Error::Io(ref e) => e.description(),
             Error::JsonDecode(ref e) => e.description(),
             Error::JsonEncode(ref e) => e.description(),
-            Error::Api(ref s) => &*s,
-            Error::InvalidState(ref s) => &*s,
+            Error::Api(ref s) => &s,
+            Error::InvalidState(ref s) => &s,
             Error::UserInterrupt => "user interrupt",
         }
     }

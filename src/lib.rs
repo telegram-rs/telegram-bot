@@ -33,7 +33,7 @@ impl Api {
     /// However, the function will not check if the given token is a valid
     /// Telegram token. You can call `get_me` to execute a test request.
     pub fn new(token: String) -> Api {
-        let url = match Url::parse(&*format!("{}{}/dummy", API_URL, token)) {
+        let url = match Url::parse(&format!("{}{}/dummy", API_URL, token)) {
             Ok(url) => url,
             Err(e) => panic!("Invalid token! ({})", e),
         };
@@ -229,7 +229,7 @@ impl Api {
         });
 
         // For all (str, String) pairs: Map to (str, str) and append it to URL
-        let it = params.get_params().iter().map(|&(k, ref v)| (k, &**v));
+        let it = params.get_params().into_iter().map(|&(k, ref v)| (k, &**v));
         url.set_query_from_pairs(it);
 
         // Prepare HTTP Request
@@ -243,7 +243,7 @@ impl Api {
         try!(resp.read_to_string(&mut body));
 
         // Try to decode response as JSON representing a Response
-        match try!(json::decode(&*body)) {
+        match try!(json::decode(&body)) {
             // If the response says that there was an error: Return API-Error
             // with the given description.
             Response { ok: false, description: Some(desc), ..} => {
