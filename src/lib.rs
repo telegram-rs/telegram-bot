@@ -202,7 +202,7 @@ impl Api {
     pub fn listener(&self, method: ListeningMethod) -> Listener {
         Listener {
             method: method,
-            offset: 0,
+            confirmed: 0,
             url: self.url.clone(),
             client: Client::new(),
         }
@@ -268,6 +268,14 @@ pub enum ListeningMethod {
     LongPoll(Option<Integer>),
 }
 
+/// A listening handler returns this type to signal the listening method either
+/// to stop or to continue. If a handler returns `Stop`, the update it was
+/// passed counts as "handled" and won't be handled again.
+pub enum HandlerResult {
+    Continue,
+    Stop
+}
+
 /// Offers methods to easily receive new updates via the specified method. This
 /// should be used instead of calling methods like `get_updates` yourself.
 ///
@@ -278,42 +286,102 @@ pub enum ListeningMethod {
 /// it's usually sufficient to create only one `Listener` once.
 pub struct Listener {
     method: ListeningMethod,
-    offset: Integer,
+    confirmed: Integer,
     url: Url,
     client: Client,
 }
 
 
 impl Listener {
+    /// Receive and handle updates with the given closure.
+    ///
+    /// This method will use the specified listening method to receive new
+    /// updates and will then call the given handler for every update. Normally
+    /// the handler won't ever be called for the same update twice (see Note
+    /// below).
+    /// When the handler returns an `Err` value, this function will stop
+    /// listening and return the same `Err`. If you want to stop listening you
+    /// can return `Ok(HandlerResult::Stop)` instead of an `Err` value.
+    ///
+    /// When returning an `Ok` value, the update that was passed to the handler
+    /// is considered handled and won't be passed to a handler again. On the
+    /// other hand if an `Err` is returned, the update is not considered handled
+    /// so it will be passed to a handler the next time again.
+    ///
+    /// **Note:**
+    /// If you are listening via `LongPoll` method and your handler panics or
+    /// the program is aborted in a not natural way (ctrl + c), the  handler
+    /// might receive some already handled updates a second time.
     pub fn listen<H>(&mut self, mut handler: H) -> Result<()>
-        where H: FnMut(Update) -> Result<()>
+        where H: FnMut(Update) -> Result<HandlerResult>
     {
         match self.method {
             ListeningMethod::LongPoll(timeout) => {
+                // `handled_until` will hold the id of the last handled update
+                let mut handled_until = self.confirmed;
+
                 // Calculate final timeout: Given or default (30s)
                 let timeout = timeout.or(Some(30));
 
                 loop {
                     // Receive updates with correct offset. We don't specify a
                     // limit (Telegram limits to 100 automatically).
-                    let offset = Some(self.offset);
-
-                    // Prepare parameters
                     let mut params = Params::new();
-                    params.add_get_opt("offset", offset);
+                    params.add_get_opt("offset", Some(handled_until));
                     params.add_get_opt("timeout", timeout);
 
-                    // Execute request
-                    let updates : Vec<Update> = try!(Api::request(&self.client, &self.url,
-                                                    "getUpdates", params));
+                    // Execute request and increas
+                    let updates : Vec<Update> = try!(Api::request(
+                        &self.client, &self.url, "getUpdates", params
+                    ));
+                    self.confirmed = handled_until;
 
                     // For every update: Increase the offset & call the handler.
                     for u in updates {
-                        if u.update_id >= self.offset {
-                            self.offset = u.update_id + 1;
+                        let update_id = u.update_id;
+
+                        // Execute the handler and save it's result.
+                        let res = handler(u);
+
+                        // If an error was returned: Confirm the update before
+                        // (if necessary) and return the given error.
+                        if let Err(e) = res {
+                            // Send a last request to confirm already handled updates.
+                            let mut params = Params::new();
+                            params.add_get("offset", handled_until);
+                            params.add_get("timeout", 0);
+                            params.add_get("limit", 0);
+
+                            let _ : Result<Vec<Update>> = Api::request(
+                                &self.client, &self.url, "getUpdates", params
+                            );
+                            self.confirmed = handled_until;
+
+                            return Err(e);
                         }
 
-                        try!(handler(u));
+                        // The update is now considered "handled". The
+                        // if-condition should always be true.
+                        if update_id >= handled_until {
+                            handled_until = update_id + 1;
+                        }
+
+                        // If an Ok(Stop) was returned, stop listening now with
+                        // confirmed update.
+                        if let Ok(HandlerResult::Stop) = res {
+                            // Send a last request to confirm already handled updates.
+                            let mut params = Params::new();
+                            params.add_get("offset", handled_until);
+                            params.add_get("timeout", 0);
+                            params.add_get("limit", 0);
+
+                            let _ : Result<Vec<Update>> = Api::request(
+                                &self.client, &self.url, "getUpdates", params
+                            );
+                            self.confirmed = handled_until;
+
+                            return Ok(());
+                        }
                     }
                 }
             }

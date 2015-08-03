@@ -29,7 +29,7 @@ fn main() {
                     println!("<{}> {}", name, t);
 
                     if t == "/exit" {
-                        return Err(Error::UserInterrupt);
+                        return Ok(HandlerResult::Stop);
                     }
 
                     // Answer message with "Hi"
@@ -43,7 +43,7 @@ fn main() {
         }
 
         // If none of the "try!" statements returned an error: It's Ok!
-        Ok(())
+        Ok(HandlerResult::Continue)
     });
 
     // When the method `long_poll` returns, its due to an error. Check it here.

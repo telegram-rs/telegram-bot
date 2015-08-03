@@ -84,7 +84,7 @@ fn main() {
             }
 
         }
-        Ok(())
+        Ok(HandlerResult::Continue)
     });
 
     if let Err(e) = res {
