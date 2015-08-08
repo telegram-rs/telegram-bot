@@ -1,18 +1,10 @@
 extern crate telegram_bot;
 
 use telegram_bot::*;
-use std::env;
 
 fn main() {
-    // Fetch environment variable with bot token
-    let token = match env::var("TELEGRAM_BOT_TOKEN") {
-        Ok(tok) => tok,
-        Err(e) =>
-            panic!("Environment variable 'TELEGRAM_BOT_TOKEN' missing! {}", e),
-    };
-
     // Create bot, test simple API call and print bot information
-    let mut api = Api::new(token);
+    let mut api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
     println!("getMe: {:?}", api.get_me());
     let mut listener = api.listener(ListeningMethod::LongPoll(None));
 

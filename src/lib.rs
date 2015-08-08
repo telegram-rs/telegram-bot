@@ -1,5 +1,6 @@
 extern crate hyper;
 extern crate rustc_serialize;
+extern crate url;
 
 mod error;
 mod util;
@@ -10,6 +11,7 @@ pub use error::*;
 use util::Params;
 
 use rustc_serialize::{json, Decodable};
+use std::env;
 use std::io::Read;
 use std::sync::mpsc;
 use std::thread;
@@ -26,23 +28,43 @@ pub struct Api {
     client: Client,
 }
 
+/// Errors that may occur while creating an Api object.
+#[derive(Debug)]
+pub enum CreateError {
+    InvalidTokenFormat(url::ParseError),
+    InvalidEnvironmentVar(env::VarError),
+}
+
 impl Api {
     // =======================================================================
     // Constructors
     // =======================================================================
     /// Creates a new bot with the given token. If the token is completely
-    /// invalid (resulting in an invalid API-URL), the function will panic.
-    /// However, the function will not check if the given token is a valid
-    /// Telegram token. You can call `get_me` to execute a test request.
-    pub fn new(token: String) -> Api {
+    /// invalid (resulting in an invalid API-URL), the function will return
+    /// an `Err` value. However, the function will not check if the given token
+    /// is a valid Telegram token. You can call `get_me` to execute a test
+    /// request.
+    pub fn from_token(token: &str) -> std::result::Result<Api, CreateError> {
         let url = match Url::parse(&format!("{}{}/dummy", API_URL, token)) {
             Ok(url) => url,
-            Err(e) => panic!("Invalid token! ({})", e),
+            Err(e) => return Err(CreateError::InvalidTokenFormat(e)),
         };
-        Api {
+        Ok(Api {
             url: url,
             client: Client::new(),
-        }
+        })
+    }
+
+    /// Will receive the bot token from the environment variable `var` and call
+    /// `from_token` with it. Will return an `Err` value, if the environment
+    /// var could not be read or the token has an invalid format.
+    pub fn from_env(var: &str) -> std::result::Result<Api, CreateError> {
+        let token = match env::var(var) {
+            Ok(tok) => tok,
+            Err(e) => return Err(CreateError::InvalidEnvironmentVar(e)),
+        };
+
+        Self::from_token(&token)
     }
 
 
