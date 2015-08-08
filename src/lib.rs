@@ -11,6 +11,8 @@ use util::Params;
 
 use rustc_serialize::{json, Decodable};
 use std::io::Read;
+use std::sync::mpsc;
+use std::thread;
 use hyper::{Client, Url};
 use hyper::client::IntoUrl;
 use hyper::header::Connection;
@@ -330,7 +332,7 @@ impl Listener {
                     params.add_get_opt("offset", Some(handled_until));
                     params.add_get_opt("timeout", timeout);
 
-                    // Execute request and increas
+                    // Execute request
                     let updates : Vec<Update> = try!(Api::request(
                         &self.client, &self.url, "getUpdates", params
                     ));
@@ -346,7 +348,8 @@ impl Listener {
                         // If an error was returned: Confirm the update before
                         // (if necessary) and return the given error.
                         if let Err(e) = res {
-                            // Send a last request to confirm already handled updates.
+                            // Send a last request to confirm already handled
+                            // updates.
                             let mut params = Params::new();
                             params.add_get("offset", handled_until);
                             params.add_get("timeout", 0);
@@ -369,7 +372,8 @@ impl Listener {
                         // If an Ok(Stop) was returned, stop listening now with
                         // confirmed update.
                         if let Ok(HandlerResult::Stop) = res {
-                            // Send a last request to confirm already handled updates.
+                            // Send a last request to confirm already handled
+                            // updates.
                             let mut params = Params::new();
                             params.add_get("offset", handled_until);
                             params.add_get("timeout", 0);
@@ -386,5 +390,38 @@ impl Listener {
                 }
             }
         }
+    }
+
+    /// Consumes `self` and returns a sender-receiver pair. You can receive
+    /// new updates through the Receiver. Each update needs to be confirmed
+    /// with a `Result<HandlerResult>` before the next update can be handled.
+    ///
+    /// This means that handling updates isn't done in parallel. The only
+    /// advantage of this function over the `listen` function is that you can
+    /// ask the receiver, if a new update has arrived. This is useful if you
+    /// want to handle different events in one thread. E.g. a remainder bot
+    /// gets active on every received message AND on timed events.
+    pub fn channel(mut self)
+        -> (mpsc::Sender<Result<HandlerResult>>, mpsc::Receiver<Update>)
+    {
+        // Create channels for sending updates and handle result
+        let (update_tx, update_rx) = mpsc::channel();
+        let (res_tx, res_rx) = mpsc::channel();
+
+        // Listen for new updates in a new thread. Sadly we cannot easily
+        // return the result of `listen`, so we just discard it.
+        thread::spawn(move || {
+            let _ = self.listen(|u| {
+                // Send received update and return if the receiver hung up.
+                if let Err(_) = update_tx.send(u) {
+                    return Ok(HandlerResult::Stop);
+                }
+
+                // Receive handle result. If the channel hung up: Stop.
+                res_rx.recv().unwrap_or(Ok(HandlerResult::Stop))
+            });
+        });
+
+        (res_tx, update_rx)
     }
 }
