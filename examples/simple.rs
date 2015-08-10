@@ -21,7 +21,7 @@ fn main() {
                     println!("<{}> {}", name, t);
 
                     if t == "/exit" {
-                        return Ok(HandlerResult::Stop);
+                        return Ok(ListeningAction::Stop);
                     }
 
                     // Answer message with "Hi"
@@ -35,7 +35,7 @@ fn main() {
         }
 
         // If none of the "try!" statements returned an error: It's Ok!
-        Ok(HandlerResult::Continue)
+        Ok(ListeningAction::Continue)
     });
 
     // When the method `long_poll` returns, its due to an error. Check it here.

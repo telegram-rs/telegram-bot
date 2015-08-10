@@ -1,7 +1,9 @@
 //! This crate helps writing bots for the messenger Telegram. Here is a
 //! minimalistic example:
 //!
-//! ```
+//! ```no_run
+//! use telegram_bot::*;
+//!
 //! // Create the Api from a bot token saved in a environment variable and
 //! // test an Api-call
 //! let mut api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
@@ -13,8 +15,6 @@
 //! listener.listen(|u| {
 //!     // If the received update contains a message...
 //!     if let Some(m) = u.message {
-//!         let name = m.from.first_name;
-//!
 //!         // ... and it was a text message:
 //!         if let MessageType::Text(_) = m.msg {
 //!             // Answer message with "Hi"
@@ -27,7 +27,7 @@
 //!     }
 //!
 //!     // If none of the "try!" statements returned an error: It's Ok!
-//!     Ok(HandlerResult::Continue)
+//!     Ok(ListeningAction::Continue)
 //! });
 //! ```
 //!

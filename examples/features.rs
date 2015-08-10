@@ -76,7 +76,7 @@ fn main() {
             }
 
         }
-        Ok(HandlerResult::Continue)
+        Ok(ListeningAction::Continue)
     });
 
     if let Err(e) = res {
