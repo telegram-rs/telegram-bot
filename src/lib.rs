@@ -28,13 +28,6 @@ pub struct Api {
     client: Client,
 }
 
-/// Errors that may occur while creating an Api object.
-#[derive(Debug)]
-pub enum CreateError {
-    InvalidTokenFormat(url::ParseError),
-    InvalidEnvironmentVar(env::VarError),
-}
-
 impl Api {
     // =======================================================================
     // Constructors
@@ -44,10 +37,10 @@ impl Api {
     /// an `Err` value. However, the function will not check if the given token
     /// is a valid Telegram token. You can call `get_me` to execute a test
     /// request.
-    pub fn from_token(token: &str) -> std::result::Result<Api, CreateError> {
+    pub fn from_token(token: &str) -> Result<Api> {
         let url = match Url::parse(&format!("{}{}/dummy", API_URL, token)) {
             Ok(url) => url,
-            Err(e) => return Err(CreateError::InvalidTokenFormat(e)),
+            Err(e) => return Err(Error::InvalidTokenFormat(e)),
         };
         Ok(Api {
             url: url,
@@ -58,10 +51,10 @@ impl Api {
     /// Will receive the bot token from the environment variable `var` and call
     /// `from_token` with it. Will return an `Err` value, if the environment
     /// var could not be read or the token has an invalid format.
-    pub fn from_env(var: &str) -> std::result::Result<Api, CreateError> {
+    pub fn from_env(var: &str) -> Result<Api> {
         let token = match env::var(var) {
             Ok(tok) => tok,
-            Err(e) => return Err(CreateError::InvalidEnvironmentVar(e)),
+            Err(e) => return Err(Error::InvalidEnvironmentVar(e)),
         };
 
         Self::from_token(&token)

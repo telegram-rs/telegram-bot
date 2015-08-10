@@ -1,5 +1,7 @@
 use std::fmt;
 use rustc_serialize::json;
+use std::env;
+
 /// Telegram-Bot Result
 pub type Result<T> = ::std::result::Result<T, Error>;
 
@@ -17,6 +19,8 @@ pub enum Error {
     Api(String),
     InvalidState(String),
     UserInterrupt,
+    InvalidTokenFormat(::url::ParseError),
+    InvalidEnvironmentVar(env::VarError),
 }
 
 impl ::std::error::Error for Error {
@@ -29,6 +33,8 @@ impl ::std::error::Error for Error {
             Error::Api(ref s) => &s,
             Error::InvalidState(ref s) => &s,
             Error::UserInterrupt => "user interrupt",
+            Error::InvalidTokenFormat(ref e) => e.description(),
+            Error::InvalidEnvironmentVar(ref e) => e.description(),
         }
     }
 }
@@ -43,6 +49,8 @@ impl fmt::Display for Error {
             Error::Api(ref s) => s.fmt(f),
             Error::InvalidState(ref s) => s.fmt(f),
             Error::UserInterrupt => "user interrupt".fmt(f),
+            Error::InvalidTokenFormat(ref e) => e.fmt(f),
+            Error::InvalidEnvironmentVar(ref e) => e.fmt(f),
         }
     }
 }
@@ -61,3 +69,5 @@ from_impl!(::hyper::error::Error, Http);
 from_impl!(::std::io::Error, Io);
 from_impl!(json::DecoderError, JsonDecode);
 from_impl!(json::EncoderError, JsonEncode);
+from_impl!(::url::ParseError, InvalidTokenFormat);
+from_impl!(env::VarError, InvalidEnvironmentVar);
