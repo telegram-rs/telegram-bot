@@ -16,10 +16,14 @@ pub enum Error {
     JsonDecode(json::DecoderError),
     /// Error while encoding JSON data
     JsonEncode(json::EncoderError),
+    /// Telegram server reponsded with an error + description
     Api(String),
+    /// This should never happen (it possibly could if the telegram servers
+    /// would respond with garbage)
     InvalidState(String),
-    UserInterrupt,
+    /// Occurs, if the given bot token would not result in a valid request URL.
     InvalidTokenFormat(::url::ParseError),
+    /// The given environment variable could not be fetched.
     InvalidEnvironmentVar(env::VarError),
 }
 
@@ -32,7 +36,6 @@ impl ::std::error::Error for Error {
             Error::JsonEncode(ref e) => e.description(),
             Error::Api(ref s) => &s,
             Error::InvalidState(ref s) => &s,
-            Error::UserInterrupt => "user interrupt",
             Error::InvalidTokenFormat(ref e) => e.description(),
             Error::InvalidEnvironmentVar(ref e) => e.description(),
         }
@@ -48,7 +51,6 @@ impl fmt::Display for Error {
             Error::JsonEncode(ref e) => e.fmt(f),
             Error::Api(ref s) => s.fmt(f),
             Error::InvalidState(ref s) => s.fmt(f),
-            Error::UserInterrupt => "user interrupt".fmt(f),
             Error::InvalidTokenFormat(ref e) => e.fmt(f),
             Error::InvalidEnvironmentVar(ref e) => e.fmt(f),
         }
