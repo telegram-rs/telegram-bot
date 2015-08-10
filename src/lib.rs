@@ -1,3 +1,60 @@
+//! This crate helps writing bots for the messenger Telegram. Here is a
+//! minimalistic example:
+//!
+//! ```
+//! // Create the Api from a bot token saved in a environment variable and
+//! // test an Api-call
+//! let mut api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
+//! println!("getMe: {:?}", api.get_me());
+//! // We want to listen for new updates via LongPoll
+//! let mut listener = api.listener(ListeningMethod::LongPoll(None));
+//!
+//! // Fetch new updates
+//! listener.listen(|u| {
+//!     // If the received update contains a message...
+//!     if let Some(m) = u.message {
+//!         let name = m.from.first_name;
+//!
+//!         // ... and it was a text message:
+//!         if let MessageType::Text(_) = m.msg {
+//!             // Answer message with "Hi"
+//!             try!(api.send_message(
+//!                 m.chat.id(),
+//!                 format!("Hi, {}!", m.from.first_name),
+//!                 None, None, None)
+//!             );
+//!         }
+//!     }
+//!
+//!     // If none of the "try!" statements returned an error: It's Ok!
+//!     Ok(HandlerResult::Continue)
+//! });
+//! ```
+//!
+//! How to use it
+//! -------------
+//!
+//! *Note*: You should be familiar with the
+//! [official HTTP Api](https://core.telegram.org/bots/api) to use this library
+//! effectivly.
+//!
+//! The first step is always to create an `Api` object. You need one `Api` for
+//! every bot (token) you want to control. You can either create it directly
+//! from a token with `from_token` or, since you shouldn't hardcode your token,
+//! a bit easier: From an environment variable with `from_env`.
+//!
+//! The `Api` object has all methods of the Telegram HTTP API, like
+//! `send_message`. For more information see the `Api` struct documentation.
+//!
+//! Next you want to listen for new updates. This is best done via the `listen`
+//! method on the `Listener` type. To obtain a listener, call `listener` on the
+//! `Api` object.
+//!
+//! Examples
+//! --------
+//!
+//! There are two examples in the `examples/` directory in the project's
+//! repository.
 extern crate hyper;
 extern crate rustc_serialize;
 extern crate url;
