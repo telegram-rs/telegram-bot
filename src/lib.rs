@@ -1,5 +1,63 @@
+//! This crate helps writing bots for the messenger Telegram. Here is a
+//! minimalistic example:
+//!
+//! ```no_run
+//! use telegram_bot::*;
+//!
+//! // Create the Api from a bot token saved in a environment variable and
+//! // test an Api-call
+//! let mut api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
+//! println!("getMe: {:?}", api.get_me());
+//! // We want to listen for new updates via LongPoll
+//! let mut listener = api.listener(ListeningMethod::LongPoll(None));
+//!
+//! // Fetch new updates
+//! listener.listen(|u| {
+//!     // If the received update contains a message...
+//!     if let Some(m) = u.message {
+//!         // ... and it was a text message:
+//!         if let MessageType::Text(_) = m.msg {
+//!             // Answer message with "Hi"
+//!             try!(api.send_message(
+//!                 m.chat.id(),
+//!                 format!("Hi, {}!", m.from.first_name),
+//!                 None, None, None)
+//!             );
+//!         }
+//!     }
+//!
+//!     // If none of the "try!" statements returned an error: It's Ok!
+//!     Ok(ListeningAction::Continue)
+//! });
+//! ```
+//!
+//! How to use it
+//! -------------
+//!
+//! *Note*: You should be familiar with the
+//! [official HTTP Api](https://core.telegram.org/bots/api) to use this library
+//! effectivly.
+//!
+//! The first step is always to create an `Api` object. You need one `Api` for
+//! every bot (token) you want to control. You can either create it directly
+//! from a token with `from_token` or, since you shouldn't hardcode your token,
+//! a bit easier: From an environment variable with `from_env`.
+//!
+//! The `Api` object has all methods of the Telegram HTTP API, like
+//! `send_message`. For more information see the `Api` struct documentation.
+//!
+//! Next you want to listen for new updates. This is best done via the `listen`
+//! method on the `Listener` type. To obtain a listener, call `listener` on the
+//! `Api` object.
+//!
+//! Examples
+//! --------
+//!
+//! There are two examples in the `examples/` directory in the project's
+//! repository.
 extern crate hyper;
 extern crate rustc_serialize;
+extern crate url;
 
 mod error;
 mod util;
@@ -10,7 +68,10 @@ pub use error::*;
 use util::Params;
 
 use rustc_serialize::{json, Decodable};
+use std::env;
 use std::io::Read;
+use std::sync::mpsc;
+use std::thread;
 use hyper::{Client, Url};
 use hyper::client::IntoUrl;
 use hyper::header::Connection;
@@ -18,31 +79,47 @@ use hyper::header::Connection;
 /// API-URL prefix
 pub const API_URL : &'static str = "https://api.telegram.org/bot";
 
-/// The Bot. Main type for doing nearly everything.
-pub struct Bot {
-    offset: Integer,
+/// Main type for sending requests to the Telegram bot API.
+///
+/// You can create an `API` object via `from_token` or `from_env`. A `Listener`
+/// object is obtained via `listener`. All remaining methods correspond
+/// directly to a telegram API call and are named like the API method, but in
+/// `camel_case`.
+pub struct Api {
     url: Url,
     client: Client,
 }
 
-impl Bot {
+impl Api {
     // =======================================================================
     // Constructors
     // =======================================================================
     /// Creates a new bot with the given token. If the token is completely
-    /// invalid (resulting in an invalid API-URL), the function will panic.
-    /// However, the function will not check if the given token is a valid
-    /// Telegram token. You can call `get_me` to execute a test request.
-    pub fn new(token: String) -> Bot {
-        let url = match Url::parse(&*format!("{}{}/dummy", API_URL, token)) {
+    /// invalid (resulting in an invalid API-URL), the function will return
+    /// an `Err` value. However, the function will not check if the given token
+    /// is a valid Telegram token. You can call `get_me` to execute a test
+    /// request.
+    pub fn from_token(token: &str) -> Result<Api> {
+        let url = match Url::parse(&format!("{}{}/dummy", API_URL, token)) {
             Ok(url) => url,
-            Err(e) => panic!("Invalid token! ({})", e),
+            Err(e) => return Err(Error::InvalidTokenFormat(e)),
         };
-        Bot {
-            offset: 0,
+        Ok(Api {
             url: url,
             client: Client::new(),
-        }
+        })
+    }
+
+    /// Will receive the bot token from the environment variable `var` and call
+    /// `from_token` with it. Will return an `Err` value, if the environment
+    /// var could not be read or the token has an invalid format.
+    pub fn from_env(var: &str) -> Result<Api> {
+        let token = match env::var(var) {
+            Ok(tok) => tok,
+            Err(e) => return Err(Error::InvalidEnvironmentVar(e)),
+        };
+
+        Self::from_token(&token)
     }
 
 
@@ -132,7 +209,7 @@ impl Bot {
     ///
     /// **Note:**
     /// The method will not set the offset parameter on its own. To receive
-    /// updates in a more high level way, see `long_poll`.
+    /// updates in a more high level way, see `listener`.
     pub fn get_updates(&mut self, offset: Option<Integer>,
                        limit: Option<Integer>, timeout: Option<Integer>)
                        -> Result<Vec<Update>> {
@@ -146,6 +223,12 @@ impl Bot {
         self.send_request("getUpdates", params)
     }
 
+    /// Corresponds to the `setWebhook` method of the API.
+    ///
+    /// **Note:**
+    /// This library does not yet offer the feature to listen via webhook. This
+    /// is just the raw telegram API request and will do nothing more. Use only
+    /// if you know what you're doing.
     pub fn set_webhook<U: IntoUrl>(&mut self, url: Option<U>) -> Result<bool> {
         let u = url.map_or("".into(), |u| u.into_url().unwrap().to_string());
 
@@ -179,25 +262,34 @@ impl Bot {
     /// If the bot is restarted, but the last received updates are not yet
     /// confirmed (the last poll was not empty), there will be some duplicate
     /// updates.
-    pub fn long_poll<H>(&mut self, timeout: Option<Integer>, mut handler: H)
-                        -> Result<()>
-                        where H: FnMut(&mut Bot, Update) -> Result<()> {
-        // Calculate final timeout: Given or default (30s)
-        let timeout = timeout.or(Some(30));
+    // pub fn long_poll<H>(&mut self, timeout: Option<Integer>, mut handler: H)
+    //                     -> Result<()>
+    //                     where H: FnMut(&mut Api, Update) -> Result<()> {
+    //     // Calculate final timeout: Given or default (30s)
+    //     let timeout = timeout.or(Some(30));
 
-        loop {
-            // Receive updates with correct offset
-            let offset = Some(self.offset);
-            let updates = try!(self.get_updates(offset, None, timeout));
+    //     loop {
+    //         // Receive updates with correct offset
+    //         let offset = Some(self.offset);
+    //         let updates = try!(self.get_updates(offset, None, timeout));
 
-            // For every update: Increase the offset and call the handler.
-            for u in updates {
-                if u.update_id >= self.offset {
-                    self.offset = u.update_id + 1;
-                }
+    //         // For every update: Increase the offset and call the handler.
+    //         for u in updates {
+    //             if u.update_id >= self.offset {
+    //                 self.offset = u.update_id + 1;
+    //             }
 
-                try!(handler(self, u));
-            }
+    //             try!(handler(self, u));
+    //         }
+    //     }
+    // }
+
+    pub fn listener(&self, method: ListeningMethod) -> Listener {
+        Listener {
+            method: method,
+            confirmed: 0,
+            url: self.url.clone(),
+            client: Client::new(),
         }
     }
 
@@ -205,10 +297,16 @@ impl Bot {
     // Private methods
     // =======================================================================
     fn send_request<T: Decodable>(&mut self, method: &str, p: Params)
-                   -> Result<T> {
+        -> Result<T>
+    {
+        Self::request(&self.client, &self.url, method, p)
+    }
+
+    fn request<T: Decodable>(client: &Client, url: &Url,
+                             method: &str, params: Params) -> Result<T> {
         // Prepare URL for request: Clone and change the last path fragment
         // to the method name and append GET parameters.
-        let mut url = self.url.clone();
+        let mut url = url.clone();
         url.path_mut().map(|path| {         // if theres a path: Change it
             path.last_mut().map(|last| {    // if its not empty: Change last...
                 *last = method.into()       // ... into method name
@@ -216,11 +314,11 @@ impl Bot {
         });
 
         // For all (str, String) pairs: Map to (str, str) and append it to URL
-        let it = p.get_params().iter().map(|&(k, ref v)| (k, &**v));
+        let it = params.get_params().into_iter().map(|&(k, ref v)| (k, &**v));
         url.set_query_from_pairs(it);
 
         // Prepare HTTP Request
-        let req = self.client.get(url).header(Connection::close());
+        let req = client.get(url).header(Connection::close());
 
         // Send request and check if it failed
         let mut resp = try!(req.send());
@@ -230,7 +328,7 @@ impl Bot {
         try!(resp.read_to_string(&mut body));
 
         // Try to decode response as JSON representing a Response
-        match try!(json::decode(&*body)) {
+        match try!(json::decode(&body)) {
             // If the response says that there was an error: Return API-Error
             // with the given description.
             Response { ok: false, description: Some(desc), ..} => {
@@ -245,5 +343,171 @@ impl Bot {
             // Some. We could also panic in this case.
             _ => Err(Error::InvalidState("Invalid server response".into())),
         }
+    }
+}
+
+/// Different method how to listen for new updates. Currently `LongPoll` is
+/// the only method supported by this library. The Telegram API offers a
+/// webhook method which is not yet implemented here.
+pub enum ListeningMethod {
+    LongPoll(Option<Integer>),
+}
+
+/// A listening handler returns this type to signal the listening-method either
+/// to stop or to continue. If a handler returns `Stop`, the update it was
+/// passed counts as "handled" and won't be handled again.
+pub enum ListeningAction {
+    Continue,
+    Stop
+}
+
+/// Offers methods to easily receive new updates via the specified method. This
+/// should be used instead of calling methods like `get_updates` yourself.
+///
+/// To create a listener, you first have to create an `Api` object and call
+/// `listener` on it. In order to make listening easier in a concurrent
+/// environment, the `Listener` object and the `Api` object don't share any
+/// internal state. This makes creating a `Listener` a bit more expensive, but
+/// it's usually sufficient for any purpose to create a `Listener` only once.
+pub struct Listener {
+    method: ListeningMethod,
+    confirmed: Integer,
+    url: Url,
+    client: Client,
+}
+
+
+impl Listener {
+    /// Receive and handle updates with the given closure.
+    ///
+    /// This method will use the specified listening method to receive new
+    /// updates and will then call the given handler for every update. Normally
+    /// the handler won't ever be called for the same update twice (see Note
+    /// below).
+    /// When the handler returns an `Err` value, this function will stop
+    /// listening and return the same `Err`. If you want to stop listening you
+    /// can return `Ok(ListeningAction::Stop)` instead of an `Err` value.
+    ///
+    /// When returning an `Ok` value, the update that was passed to the handler
+    /// is considered handled and won't be passed to a handler again. On the
+    /// other hand if an `Err` is returned, the update is not considered handled
+    /// so it will be passed to a handler the next time again.
+    ///
+    /// **Note:**
+    /// If you are listening via `LongPoll` method and your handler panics or
+    /// the program is aborted in an abnormal way (e.g. `SIGKILL`), the handler
+    /// might receive some already handled updates a second time.
+    pub fn listen<H>(&mut self, mut handler: H) -> Result<()>
+        where H: FnMut(Update) -> Result<ListeningAction>
+    {
+        match self.method {
+            ListeningMethod::LongPoll(timeout) => {
+                // `handled_until` will hold the id of the last handled update
+                let mut handled_until = self.confirmed;
+
+                // Calculate final timeout: Given or default (30s)
+                let timeout = timeout.or(Some(30));
+
+                loop {
+                    // Receive updates with correct offset. We don't specify a
+                    // limit (Telegram limits to 100 automatically).
+                    let mut params = Params::new();
+                    params.add_get_opt("offset", Some(handled_until));
+                    params.add_get_opt("timeout", timeout);
+
+                    // Execute request
+                    let updates : Vec<Update> = try!(Api::request(
+                        &self.client, &self.url, "getUpdates", params
+                    ));
+                    self.confirmed = handled_until;
+
+                    // For every update: Increase the offset & call the handler.
+                    for u in updates {
+                        let update_id = u.update_id;
+
+                        // Execute the handler and save it's result.
+                        let res = handler(u);
+
+                        // If an error was returned: Confirm the update before
+                        // (if necessary) and return the given error.
+                        if let Err(e) = res {
+                            // Send a last request to confirm already handled
+                            // updates.
+                            let mut params = Params::new();
+                            params.add_get("offset", handled_until);
+                            params.add_get("timeout", 0);
+                            params.add_get("limit", 0);
+
+                            let _ : Result<Vec<Update>> = Api::request(
+                                &self.client, &self.url, "getUpdates", params
+                            );
+                            self.confirmed = handled_until;
+
+                            return Err(e);
+                        }
+
+                        // The update is now considered "handled". The
+                        // if-condition should always be true.
+                        if update_id >= handled_until {
+                            handled_until = update_id + 1;
+                        }
+
+                        // If an Ok(Stop) was returned, stop listening now with
+                        // confirmed update.
+                        if let Ok(ListeningAction::Stop) = res {
+                            // Send a last request to confirm already handled
+                            // updates.
+                            let mut params = Params::new();
+                            params.add_get("offset", handled_until);
+                            params.add_get("timeout", 0);
+                            params.add_get("limit", 0);
+
+                            let _ : Result<Vec<Update>> = Api::request(
+                                &self.client, &self.url, "getUpdates", params
+                            );
+                            self.confirmed = handled_until;
+
+                            return Ok(());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// Consumes `self` and returns a sender-receiver pair. You can receive
+    /// new updates through the Receiver. Each update needs to be confirmed
+    /// with a `Result<ListeningAction>` before the next update can be handled.
+    ///
+    /// This means that handling updates isn't done in parallel. The only
+    /// advantage of this function over the `listen` function is that you can
+    /// ask the receiver, if a new update has arrived. This is useful if you
+    /// want to handle different events in one thread. E.g. a remainder bot
+    /// gets active on every received message AND on timed events.
+    ///
+    /// **Note:** Remember to send a result through the `Sender` after each
+    /// update!
+    pub fn channel(mut self)
+        -> (mpsc::Sender<Result<ListeningAction>>, mpsc::Receiver<Update>)
+    {
+        // Create channels for sending updates and handle result
+        let (update_tx, update_rx) = mpsc::channel();
+        let (res_tx, res_rx) = mpsc::channel();
+
+        // Listen for new updates in a new thread. Sadly we cannot easily
+        // return the result of `listen`, so we just discard it.
+        thread::spawn(move || {
+            let _ = self.listen(|u| {
+                // Send received update and return if the receiver hung up.
+                if let Err(_) = update_tx.send(u) {
+                    return Ok(ListeningAction::Stop);
+                }
+
+                // Receive handle result. If the channel hung up: Stop.
+                res_rx.recv().unwrap_or(Ok(ListeningAction::Stop))
+            });
+        });
+
+        (res_tx, update_rx)
     }
 }

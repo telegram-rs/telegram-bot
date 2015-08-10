@@ -2,28 +2,21 @@ extern crate rustc_serialize;
 extern crate telegram_bot;
 
 use telegram_bot::*;
-use std::env;
 use rustc_serialize::json;
 
 fn main() {
-    // Fetch environment variable with bot token
-    let token = match env::var("TELEGRAM_BOT_TOKEN") {
-        Ok(tok) => tok,
-        Err(e) =>
-            panic!("Environment variable 'TELEGRAM_BOT_TOKEN' missing! {}", e),
-    };
-
     // Create bot, test simple API call and print bot information
-    let mut bot = Bot::new(token);
-    println!("getMe: {:?}", bot.get_me());
+    let mut api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
+    println!("getMe: {:?}", api.get_me());
+    let mut listener = api.listener(ListeningMethod::LongPoll(None));
 
     // Just to demonstrate this method. Sadly, a server listening for updates
     // is not (yet!) integrated in this library.
-    println!("Webhook: {:?}", bot.set_webhook(Some("https://example.com")));
-    println!("Webhook: {:?}", bot.set_webhook::<&str>(None));
+    println!("Webhook: {:?}", api.set_webhook(Some("https://example.com")));
+    println!("Webhook: {:?}", api.set_webhook::<&str>(None));
 
     // Fetch new updates via long poll method
-    let res = bot.long_poll(None, |bot, u| {
+    let res = listener.listen(|u| {
         // If the received update contains a message...
         if let Some(m) = u.message {
             let name = m.from.first_name + &*m.from.last_name
@@ -45,7 +38,7 @@ fn main() {
                     };
 
                     // Reply with custom Keyboard
-                    try!(bot.send_message(
+                    try!(api.send_message(
                         chat_id,
                         format!("Hi, {}!", name),
                         None, None, Some(keyboard.into())));
@@ -58,7 +51,7 @@ fn main() {
 
                     // Send chat action (this is useless here, it's just for
                     // demonstration purposes)
-                    try!(bot.send_chat_action(chat_id, ChatAction::Typing));
+                    try!(api.send_chat_action(chat_id, ChatAction::Typing));
 
                     // Calculate and send the location on the other side of the
                     // earth.
@@ -69,7 +62,7 @@ fn main() {
                         loc.longitude + 180.0
                     };
 
-                    try!(bot.send_location(chat_id, lat, lng, None, None));
+                    try!(api.send_location(chat_id, lat, lng, None, None));
                 },
                 MessageType::Contact(c) => {
                     // Print event
@@ -77,13 +70,13 @@ fn main() {
                         json::encode(&c).unwrap());
 
                     // Just forward the contact back to the sender...
-                    try!(bot.forward_message(chat_id, chat_id, m.message_id));
+                    try!(api.forward_message(chat_id, chat_id, m.message_id));
                 }
                 _ => {}
             }
 
         }
-        Ok(())
+        Ok(ListeningAction::Continue)
     });
 
     if let Err(e) = res {
