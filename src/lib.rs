@@ -296,10 +296,10 @@ pub enum ListeningMethod {
     LongPoll(Option<Integer>),
 }
 
-/// A listening handler returns this type to signal the listening method either
+/// A listening handler returns this type to signal the listening-method either
 /// to stop or to continue. If a handler returns `Stop`, the update it was
 /// passed counts as "handled" and won't be handled again.
-pub enum HandlerResult {
+pub enum ListeningAction {
     Continue,
     Stop
 }
@@ -329,7 +329,7 @@ impl Listener {
     /// below).
     /// When the handler returns an `Err` value, this function will stop
     /// listening and return the same `Err`. If you want to stop listening you
-    /// can return `Ok(HandlerResult::Stop)` instead of an `Err` value.
+    /// can return `Ok(ListeningAction::Stop)` instead of an `Err` value.
     ///
     /// When returning an `Ok` value, the update that was passed to the handler
     /// is considered handled and won't be passed to a handler again. On the
@@ -341,7 +341,7 @@ impl Listener {
     /// the program is aborted in an abnormal way (e.g. `SIGKILL`), the handler
     /// might receive some already handled updates a second time.
     pub fn listen<H>(&mut self, mut handler: H) -> Result<()>
-        where H: FnMut(Update) -> Result<HandlerResult>
+        where H: FnMut(Update) -> Result<ListeningAction>
     {
         match self.method {
             ListeningMethod::LongPoll(timeout) => {
@@ -397,7 +397,7 @@ impl Listener {
 
                         // If an Ok(Stop) was returned, stop listening now with
                         // confirmed update.
-                        if let Ok(HandlerResult::Stop) = res {
+                        if let Ok(ListeningAction::Stop) = res {
                             // Send a last request to confirm already handled
                             // updates.
                             let mut params = Params::new();
@@ -420,7 +420,7 @@ impl Listener {
 
     /// Consumes `self` and returns a sender-receiver pair. You can receive
     /// new updates through the Receiver. Each update needs to be confirmed
-    /// with a `Result<HandlerResult>` before the next update can be handled.
+    /// with a `Result<ListeningAction>` before the next update can be handled.
     ///
     /// This means that handling updates isn't done in parallel. The only
     /// advantage of this function over the `listen` function is that you can
@@ -431,7 +431,7 @@ impl Listener {
     /// **Note:** Remember to send a result through the `Sender` after each
     /// update!
     pub fn channel(mut self)
-        -> (mpsc::Sender<Result<HandlerResult>>, mpsc::Receiver<Update>)
+        -> (mpsc::Sender<Result<ListeningAction>>, mpsc::Receiver<Update>)
     {
         // Create channels for sending updates and handle result
         let (update_tx, update_rx) = mpsc::channel();
@@ -443,11 +443,11 @@ impl Listener {
             let _ = self.listen(|u| {
                 // Send received update and return if the receiver hung up.
                 if let Err(_) = update_tx.send(u) {
-                    return Ok(HandlerResult::Stop);
+                    return Ok(ListeningAction::Stop);
                 }
 
                 // Receive handle result. If the channel hung up: Stop.
-                res_rx.recv().unwrap_or(Ok(HandlerResult::Stop))
+                res_rx.recv().unwrap_or(Ok(ListeningAction::Stop))
             });
         });
 
