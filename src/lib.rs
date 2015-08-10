@@ -23,6 +23,11 @@ use hyper::header::Connection;
 pub const API_URL : &'static str = "https://api.telegram.org/bot";
 
 /// Main type for sending requests to the Telegram bot API.
+///
+/// You can create an `API` object via `from_token` or `from_env`. A `Listener`
+/// object is obtained via `listener`. All remaining methods correspond
+/// directly to a telegram API call and are named like the API method, but in
+/// `camel_case`.
 pub struct Api {
     url: Url,
     client: Client,
@@ -147,7 +152,7 @@ impl Api {
     ///
     /// **Note:**
     /// The method will not set the offset parameter on its own. To receive
-    /// updates in a more high level way, see `long_poll`.
+    /// updates in a more high level way, see `listener`.
     pub fn get_updates(&mut self, offset: Option<Integer>,
                        limit: Option<Integer>, timeout: Option<Integer>)
                        -> Result<Vec<Update>> {
@@ -161,6 +166,12 @@ impl Api {
         self.send_request("getUpdates", params)
     }
 
+    /// Corresponds to the `setWebhook` method of the API.
+    ///
+    /// **Note:**
+    /// This library does not yet offer the feature to listen via webhook. This
+    /// is just the raw telegram API request and will do nothing more. Use only
+    /// if you know what you're doing.
     pub fn set_webhook<U: IntoUrl>(&mut self, url: Option<U>) -> Result<bool> {
         let u = url.map_or("".into(), |u| u.into_url().unwrap().to_string());
 
@@ -296,11 +307,11 @@ pub enum HandlerResult {
 /// Offers methods to easily receive new updates via the specified method. This
 /// should be used instead of calling methods like `get_updates` yourself.
 ///
-/// To create a listener, you first have to create a `Api` object and call
+/// To create a listener, you first have to create an `Api` object and call
 /// `listener` on it. In order to make listening easier in a concurrent
 /// environment, the `Listener` object and the `Api` object don't share any
 /// internal state. This makes creating a `Listener` a bit more expensive, but
-/// it's usually sufficient to create only one `Listener` once.
+/// it's usually sufficient for any purpose to create a `Listener` only once.
 pub struct Listener {
     method: ListeningMethod,
     confirmed: Integer,
@@ -327,7 +338,7 @@ impl Listener {
     ///
     /// **Note:**
     /// If you are listening via `LongPoll` method and your handler panics or
-    /// the program is aborted in a not natural way (ctrl + c), the  handler
+    /// the program is aborted in an abnormal way (e.g. `SIGKILL`), the handler
     /// might receive some already handled updates a second time.
     pub fn listen<H>(&mut self, mut handler: H) -> Result<()>
         where H: FnMut(Update) -> Result<HandlerResult>
@@ -416,6 +427,9 @@ impl Listener {
     /// ask the receiver, if a new update has arrived. This is useful if you
     /// want to handle different events in one thread. E.g. a remainder bot
     /// gets active on every received message AND on timed events.
+    ///
+    /// **Note:** Remember to send a result through the `Sender` after each
+    /// update!
     pub fn channel(mut self)
         -> (mpsc::Sender<Result<HandlerResult>>, mpsc::Receiver<Update>)
     {
