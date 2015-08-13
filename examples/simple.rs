@@ -38,7 +38,6 @@ fn main() {
         Ok(ListeningAction::Continue)
     });
 
-    // When the method `long_poll` returns, its due to an error. Check it here.
     if let Err(e) = res {
         println!("An error occured: {}", e);
     }
