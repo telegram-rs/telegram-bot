@@ -13,17 +13,14 @@
 //!
 //! // Fetch new updates
 //! listener.listen(|u| {
-//!     // If the received update contains a message...
-//!     if let Some(m) = u.message {
-//!         // ... and it was a text message:
-//!         if let MessageType::Text(_) = m.msg {
-//!             // Answer message with "Hi"
-//!             try!(api.send_message(
-//!                 m.chat.id(),
-//!                 format!("Hi, {}!", m.from.first_name),
-//!                 None, None, None)
-//!             );
-//!         }
+//!     // if the message was a text message:
+//!     if let MessageType::Text(_) = u.message.msg {
+//!         // Answer message with "Hi"
+//!         try!(api.send_message(
+//!             u.message.chat.id(),
+//!             format!("Hi, {}!", u.message.from.first_name),
+//!             None, None, None)
+//!         );
 //!     }
 //!
 //!     // If none of the "try!" statements returned an error: It's Ok!
@@ -58,6 +55,7 @@
 extern crate hyper;
 extern crate rustc_serialize;
 extern crate url;
+extern crate multipart;
 
 mod error;
 mod util;
@@ -69,15 +67,32 @@ use util::Params;
 
 use rustc_serialize::{json, Decodable};
 use std::env;
+use std::fs;
 use std::io::Read;
+use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 use std::thread;
 use hyper::{Client, Url};
 use hyper::client::IntoUrl;
-use hyper::header::Connection;
+use hyper::client::request::Request;
+use hyper::method::Method;
+use hyper::header::{Connection, ContentType, ContentLength};
+use multipart::client::Multipart;
 
 /// API-URL prefix
 pub const API_URL : &'static str = "https://api.telegram.org/bot";
+
+// RequestType let you choose between a post request or a multipart request
+enum RequestType {
+    Post,
+    Multipart(SendPath),
+}
+
+// SendPath is used in multipart request to send a local file or an id string
+enum SendPath {
+    File(String, PathBuf),
+    Id(String, String),
+}
 
 /// Main type for sending requests to the Telegram bot API.
 ///
@@ -88,6 +103,15 @@ pub const API_URL : &'static str = "https://api.telegram.org/bot";
 pub struct Api {
     url: Url,
     client: Client,
+}
+
+impl Clone for Api {
+    fn clone(&self) -> Api {
+        Api {
+            url: self.url.clone(),
+            client: Client::new(),
+        }
+    }
 }
 
 impl Api {
@@ -127,13 +151,13 @@ impl Api {
     // Methods corresponding directly to a API method
     // =======================================================================
     /// Corresponds to the "getMe" method of the API.
-    pub fn get_me(&mut self) -> Result<User> {
+    pub fn get_me(&self) -> Result<User> {
         // Execute request with empty parameter list
-        self.send_request("getMe", Params::new())
+        self.send_request("getMe", Params::new(), RequestType::Post)
     }
 
     /// Corresponds to the "sendMessage" method of the API.
-    pub fn send_message(&mut self, chat_id: Integer, text: String,
+    pub fn send_message(&self, chat_id: Integer, text: String,
                         disable_web_page_preview: Option<bool>,
                         reply_to_message_id: Option<Integer>,
                         reply_markup: Option<ReplyMarkup>)
@@ -147,11 +171,11 @@ impl Api {
         try!(params.add_get_json_opt("reply_markup", reply_markup));
 
         // Execute request
-        self.send_request("sendMessage", params)
+        self.send_request("sendMessage", params, RequestType::Post)
     }
 
     /// Corresponds to the "forwardMessage" method of the API.
-    pub fn forward_message(&mut self, chat_id: Integer, from_chat_id: Integer,
+    pub fn forward_message(&self, chat_id: Integer, from_chat_id: Integer,
                            message_id: Integer) -> Result<Message> {
         // Prepare parameters
         let mut params = Params::new();
@@ -160,11 +184,11 @@ impl Api {
         params.add_get("message_id", message_id);
 
         // Execute request
-        self.send_request("forwardMessage", params)
+        self.send_request("forwardMessage", params, RequestType::Post)
     }
 
     /// Corresponds to the "sendLocation" method of the API.
-    pub fn send_location(&mut self, chat_id: Integer, latitude: Float,
+    pub fn send_location(&self, chat_id: Integer, latitude: Float,
                          longitude: Float, reply_to_message_id: Option<Integer>,
                          reply_markup: Option<ReplyMarkup>)
                          -> Result<Message> {
@@ -177,22 +201,22 @@ impl Api {
         try!(params.add_get_json_opt("reply_markup", reply_markup));
 
         // Execute request
-        self.send_request("sendLocation", params)
+        self.send_request("sendLocation", params, RequestType::Post)
     }
 
     /// Corresponds to the "sendChatAction" method of the API.
-    pub fn send_chat_action(&mut self, chat_id: Integer, action: ChatAction)
+    pub fn send_chat_action(&self, chat_id: Integer, action: ChatAction)
                             -> Result<bool> {
         let mut params = Params::new();
         params.add_get("chat_id", chat_id);
         params.add_get("action", action);
 
         // Execute request
-        self.send_request("sendChatAction", params)
+        self.send_request("sendChatAction", params, RequestType::Post)
     }
 
     /// Corresponds to the "getUserProfilePhotos" method of the API.
-    pub fn get_user_profile_photos(&mut self, user_id: Integer,
+    pub fn get_user_profile_photos(&self, user_id: Integer,
                                    offset: Option<Integer>,
                                    limit: Option<Integer>)
                                    -> Result<UserProfilePhotos> {
@@ -202,7 +226,7 @@ impl Api {
         params.add_get_opt("limit", limit);
 
         // Execute request
-        self.send_request("getUserProfilePhotos", params)
+        self.send_request("getUserProfilePhotos", params, RequestType::Post)
     }
 
     /// Corresponds to the "getUpdates" method of the API.
@@ -210,7 +234,7 @@ impl Api {
     /// **Note:**
     /// The method will not set the offset parameter on its own. To receive
     /// updates in a more high level way, see `listener`.
-    pub fn get_updates(&mut self, offset: Option<Integer>,
+    pub fn get_updates(&self, offset: Option<Integer>,
                        limit: Option<Integer>, timeout: Option<Integer>)
                        -> Result<Vec<Update>> {
         // Prepare parameters
@@ -220,7 +244,99 @@ impl Api {
         params.add_get_opt("timeout", timeout);
 
         // Execute request
-        self.send_request("getUpdates", params)
+        self.send_request("getUpdates", params, RequestType::Post)
+    }
+
+    /// Corresponds to the `sendPhoto` method of the API.
+    pub fn send_photo(&self, chat_id: Integer, path: String, caption: Option<String>, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get_opt("caption", caption);
+        params.add_get_opt("reply_to_message_id", reply_to_message_id);
+        try!(params.add_get_json_opt("reply_markup", reply_markup));
+
+        // Convert path string to SendPath
+        let path_file = Api::detect_file_or_id("photo", path);
+        // Execute request
+        self.send_request("sendPhoto", params, RequestType::Multipart(path_file))
+    }
+
+    /// Corresponds to the `sendAudio` method of the API.
+    pub fn send_audio(&self, chat_id: Integer, path: String, duration: Option<Integer>, performer: Option<String>, title: Option<String>, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get_opt("duration", duration);
+        params.add_get_opt("performer", performer);
+        params.add_get_opt("title", title);
+        params.add_get_opt("reply_to_message_id", reply_to_message_id);
+        try!(params.add_get_json_opt("reply_markup", reply_markup));
+
+        // Convert path string to SendPath
+        let path_file = Api::detect_file_or_id("audio", path);
+        // Execute request
+        self.send_request("sendAudio", params, RequestType::Multipart(path_file))
+    }
+
+    /// Corresponds to the `sendVoice` method of the API.
+    pub fn send_voice(&self, chat_id: Integer, path: String, duration: Option<Integer>, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get_opt("duration", duration);
+        params.add_get_opt("reply_to_message_id", reply_to_message_id);
+        try!(params.add_get_json_opt("reply_markup", reply_markup));
+
+        // Convert path string to SendPath
+        let path_file = Api::detect_file_or_id("voice", path);
+        // Execute request
+        self.send_request("sendVoice", params, RequestType::Multipart(path_file))
+    }
+
+
+    /// Corresponds to the `sendDocument` method of the API.
+    pub fn send_document(&self, chat_id: Integer, path: String, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get_opt("reply_to_message_id", reply_to_message_id);
+        try!(params.add_get_json_opt("reply_markup", reply_markup));
+
+        // Convert path string to SendPath
+        let path_file = Api::detect_file_or_id("document", path);
+        // Execute request
+        self.send_request("sendDocument", params, RequestType::Multipart(path_file))
+    }
+
+    /// Corresponds to the `sendSticker` method of the API.
+    pub fn send_sticker(&self, chat_id: Integer, path: String, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get_opt("reply_to_message_id", reply_to_message_id);
+        try!(params.add_get_json_opt("reply_markup", reply_markup));
+
+        // Convert path string to SendPath
+        let path_file = Api::detect_file_or_id("sticker", path);
+        // Execute request
+        self.send_request("sendSticker", params, RequestType::Multipart(path_file))
+    }
+
+    /// Corresponds to the `sendVideo` method of the API.
+    pub fn send_video(&self, chat_id: Integer, path: String, caption: Option<String>, duration: Option<Integer>, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("chat_id", chat_id);
+        params.add_get_opt("caption", caption);
+        params.add_get_opt("duration", duration);
+        params.add_get_opt("reply_to_message_id", reply_to_message_id);
+        try!(params.add_get_json_opt("reply_markup", reply_markup));
+
+        // Convert path string to SendPath
+        let path_file = Api::detect_file_or_id("video", path);
+        // Execute request
+        self.send_request("sendVideo", params, RequestType::Multipart(path_file))
     }
 
     /// Corresponds to the `setWebhook` method of the API.
@@ -229,7 +345,7 @@ impl Api {
     /// This library does not yet offer the feature to listen via webhook. This
     /// is just the raw telegram API request and will do nothing more. Use only
     /// if you know what you're doing.
-    pub fn set_webhook<U: IntoUrl>(&mut self, url: Option<U>) -> Result<bool> {
+    pub fn set_webhook<U: IntoUrl>(&self, url: Option<U>) -> Result<bool> {
         let u = url.map_or("".into(), |u| u.into_url().unwrap().to_string());
 
         // Prepare parameters
@@ -237,9 +353,8 @@ impl Api {
         params.add_get("url", u);
 
         // Execute request
-        self.send_request("setWebhook", params)
+        self.send_request("setWebhook", params, RequestType::Post)
     }
-
 
     // =======================================================================
     // Methods for receiving updates
@@ -296,14 +411,32 @@ impl Api {
     // =======================================================================
     // Private methods
     // =======================================================================
-    fn send_request<T: Decodable>(&mut self, method: &str, p: Params)
-        -> Result<T>
-    {
-        Self::request(&self.client, &self.url, method, p)
+
+    fn detect_file_or_id(name: &str, path: String) -> SendPath {
+        // When PathExt becomes stable, use Path::new(&path).exists() instead of this!
+        let check = fs::metadata(&path);
+        if path.contains(".") && check.is_ok() && check.unwrap().is_file() {
+            SendPath::File(name.to_owned(), Path::new(&path).to_path_buf())
+        } else {
+            SendPath::Id(name.to_owned(), path)
+        }
+    }
+
+    fn send_request<T: Decodable>(&self, method: &str,
+                                  p: Params, typ: RequestType) -> Result<T> {
+        Self::request(&self.client, &self.url, method, p, typ)
     }
 
     fn request<T: Decodable>(client: &Client, url: &Url,
-                             method: &str, params: Params) -> Result<T> {
+                             method: &str, p: Params, typ: RequestType) -> Result<T> {
+        match typ {
+            RequestType::Post => Self::post_request(client, url, method, p),
+            RequestType::Multipart(sendpath) => Self::multipart_request(url, method, p, sendpath),
+        }
+    }
+
+    fn multipart_request<T: Decodable>(url: &Url, method: &str,
+                                       p: Params, file: SendPath) -> Result<T> {
         // Prepare URL for request: Clone and change the last path fragment
         // to the method name and append GET parameters.
         let mut url = url.clone();
@@ -313,12 +446,72 @@ impl Api {
             })
         });
 
-        // For all (str, String) pairs: Map to (str, str) and append it to URL
-        let it = params.get_params().into_iter().map(|&(k, ref v)| (k, &**v));
-        url.set_query_from_pairs(it);
+        let r = try!(Request::new(Method::Post, url));
+        let mut req = try!(Multipart::from_request(r));
 
-        // Prepare HTTP Request
-        let req = client.get(url).header(Connection::close());
+        for &(k, ref v) in p.get_params().into_iter() {
+            req.write_text(k, v);
+        }
+
+        match file {
+            SendPath::File(name, path) => {
+                match path.to_str() {
+                    Some(p) => req.write_file(&name, p),
+                    None => return Err(Error::InvalidPath("Invalid path given.".into())),
+                }
+            },
+            SendPath::Id(name, id) => req.write_text(&name, id),
+        };
+
+        // Send request and check if it failed
+        let mut resp = try!(req.send());
+
+        // Read response into String and return error if it failed
+        let mut body = String::new();
+        try!(resp.read_to_string(&mut body));
+
+        // Try to decode response as JSON representing a Response
+        match try!(json::decode(&body)) {
+            // If the response says that there was an error: Return API-Error
+            // with the given description.
+            Response { ok: false, description: Some(desc), ..} => {
+                Err(Error::Api(desc))
+            },
+            // If response is "ok": Return the result.
+            Response { ok: true, result: Some(res), ..} => {
+                Ok(res)
+            },
+            // This should never occur: If "ok"==false, "description" should
+            // always be Some. If "ok"==true, then "result" should always be
+            // Some. We could also panic in this case.
+            _ => Err(Error::InvalidState("Invalid server response".into())),
+        }
+    }
+
+    fn post_request<T: Decodable>(client: &Client, url: &Url,
+                                  method: &str, p: Params) -> Result<T> {
+        // Prepare URL for request: Clone and change the last path fragment
+        // to the method name and append GET parameters.
+        let mut url = url.clone();
+        url.path_mut().map(|path| {         // if theres a path: Change it
+            path.last_mut().map(|last| {    // if its not empty: Change last...
+                *last = method.into()       // ... into method name
+            })
+        });
+
+        // Change the parameters to a well formed url-encoded string.
+        // Change connect("&") to join("&") when rust 1.3 becomes stable
+        let bodyparams = p.get_params().into_iter().map(|&(k, ref  v)| {
+            format!("{}={}", k, &**v)
+        }).collect::<Vec<_>>().connect("&");
+
+        // Create the request with the body and headers
+        let req = client
+            .post(url)
+            .body(&*bodyparams)
+            .header(Connection::close())
+            .header(ContentType::form_url_encoded())
+            .header(ContentLength(bodyparams.len() as u64));
 
         // Send request and check if it failed
         let mut resp = try!(req.send());
@@ -378,6 +571,16 @@ pub struct Listener {
 
 
 impl Listener {
+
+    fn send_get_updates(&self, offset: Integer, timeout: Option<Integer>, limit: Option<Integer>)
+                        -> Result<Vec<Update>> {
+        let mut params = Params::new();
+        params.add_get("offset", offset);
+        params.add_get_opt("timeout", timeout);
+        params.add_get_opt("limit", limit);
+        Api::request(&self.client, &self.url, "getUpdates", params, RequestType::Post)
+    }
+
     /// Receive and handle updates with the given closure.
     ///
     /// This method will use the specified listening method to receive new
@@ -411,14 +614,8 @@ impl Listener {
                 loop {
                     // Receive updates with correct offset. We don't specify a
                     // limit (Telegram limits to 100 automatically).
-                    let mut params = Params::new();
-                    params.add_get_opt("offset", Some(handled_until));
-                    params.add_get_opt("timeout", timeout);
+                    let updates = try!(self.send_get_updates(handled_until, timeout, None));
 
-                    // Execute request
-                    let updates : Vec<Update> = try!(Api::request(
-                        &self.client, &self.url, "getUpdates", params
-                    ));
                     self.confirmed = handled_until;
 
                     // For every update: Increase the offset & call the handler.
@@ -433,14 +630,9 @@ impl Listener {
                         if let Err(e) = res {
                             // Send a last request to confirm already handled
                             // updates.
-                            let mut params = Params::new();
-                            params.add_get("offset", handled_until);
-                            params.add_get("timeout", 0);
-                            params.add_get("limit", 0);
+                            // We don't specify a timeout (Telegram timeout 0 seconds by default)
+                            let _ = try!(self.send_get_updates(handled_until, None, Some(0)));
 
-                            let _ : Result<Vec<Update>> = Api::request(
-                                &self.client, &self.url, "getUpdates", params
-                            );
                             self.confirmed = handled_until;
 
                             return Err(e);
@@ -457,14 +649,9 @@ impl Listener {
                         if let Ok(ListeningAction::Stop) = res {
                             // Send a last request to confirm already handled
                             // updates.
-                            let mut params = Params::new();
-                            params.add_get("offset", handled_until);
-                            params.add_get("timeout", 0);
-                            params.add_get("limit", 0);
+                            // We don't specify a timeout (Telegram timeout 0 seconds by default)
+                            let _ = try!(self.send_get_updates(handled_until, None, Some(0)));
 
-                            let _ : Result<Vec<Update>> = Api::request(
-                                &self.client, &self.url, "getUpdates", params
-                            );
                             self.confirmed = handled_until;
 
                             return Ok(());

@@ -18,34 +18,31 @@ use telegram_bot::*;
 
 fn main() {
     // Create bot, test simple API call and print bot information
-    let mut api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
+    let api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
     println!("getMe: {:?}", api.get_me());
     let mut listener = api.listener(ListeningMethod::LongPoll(None));
 
     // Fetch new updates via long poll method
     let res = listener.listen(|u| {
-        // If the received update contains a message...
-        if let Some(m) = u.message {
-            let name = m.from.first_name;
+        let name = u.message.from.first_name;
 
-            // Match message type
-            match m.msg {
-                MessageType::Text(t) => {
-                    // Print received text message to stdout
-                    println!("<{}> {}", name, t);
+        // Match message type
+        match u.message.msg {
+            MessageType::Text(t) => {
+                // Print received text message to stdout
+                println!("<{}> {}", name, t);
 
-                    if t == "/exit" {
-                        return Ok(ListeningAction::Stop);
-                    }
+                if t == "/exit" {
+                    return Ok(ListeningAction::Stop);
+                }
 
-                    // Answer message with "Hi"
-                    try!(api.send_message(
-                        m.chat.id(),
-                        format!("Hi, {}! You just wrote '{}'", name, t),
-                        None, None, None));
-                },
-                _ => {}
-            }
+                // Answer message with "Hi"
+                try!(api.send_message(
+                    u.message.chat.id(),
+                    format!("Hi, {}! You just wrote '{}'", name, t),
+                    None, None, None));
+            },
+            _ => {}
         }
 
         // If none of the "try!" statements returned an error: It's Ok!
@@ -83,6 +80,6 @@ Please submit pull request against the `dev` branch, unless all changes are just
   - [x] "getUserProfilePhotos"
 - [x] "getUpdates" and `long_poll`
 - [ ] "setWebhook" and `listen`
-- [ ] sending files ("sendAudio", "sendDocument", ...)
+- [x] sending files ("sendAudio", "sendDocument", ...)
 - [x] More good documentation and examples
 - [x] Maybe think about multithreading stuff

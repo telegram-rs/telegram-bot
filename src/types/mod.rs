@@ -51,7 +51,7 @@ macro_rules! impl_encode {
 // value. If not: Exit function with error value.
 macro_rules! try_field {
     ($d:ident, $name:expr) => {
-        try!($d.read_struct_field($name, 0, |d| Decodable::decode(d)))
+        try!($d.read_struct_field($name, 0, Decodable::decode))
     }
 }
 
@@ -72,6 +72,7 @@ pub type Float = f32;
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Response<T: Decodable> {
     pub ok: bool,
+    pub error_code: Option<Integer>,
     pub description: Option<String>,
     pub result: Option<T>,
 }
@@ -251,6 +252,8 @@ pub struct Message {
     pub reply: Option<Box<Message>>,
 
     pub msg: MessageType,
+
+    pub caption: Option<String>,
 }
 
 // We need to implement this on our own, because the field "msg" is not a real
@@ -266,6 +269,7 @@ impl Decodable for Message {
                 forward: try_field!(d, "forward"),
                 reply: try_field!(d, "reply"),
                 msg: try!(MessageType::decode(d)),
+                caption: try_field!(d, "caption"),
             })
         })
     }
@@ -275,8 +279,9 @@ impl Decodable for Message {
 pub enum MessageType {
     Text(String),
     Audio(Audio),
+    Voice(Voice),
     File(Document),
-    Photo(PhotoSize),
+    Photo(Vec<PhotoSize>),
     Sticker(Sticker),
     Video(Video),
     Contact(Contact),
@@ -297,7 +302,7 @@ impl Decodable for MessageType {
         macro_rules! maybe_field {
             ($d:ident, $name:expr, $variant:ident) => {{
                 if let Some(val) = try!($d.read_struct_field(
-                    $name, 0, |d| Decodable::decode(d))) {
+                    $name, 0, Decodable::decode)) {
                     return Ok(MessageType::$variant(val));
                 };
             }}
@@ -308,8 +313,10 @@ impl Decodable for MessageType {
         // These are the message types that carry additional data
         maybe_field!(d, "text", Text);
         maybe_field!(d, "audio", Audio);
+        maybe_field!(d, "voice", Voice);
         maybe_field!(d, "file", File);
         maybe_field!(d, "photo", Photo);
+        maybe_field!(d, "document", File);
         maybe_field!(d, "sticker", Sticker);
         maybe_field!(d, "video", Video);
         maybe_field!(d, "contact", Contact);
@@ -321,11 +328,11 @@ impl Decodable for MessageType {
 
         // Message types without additional data
         if let Some(true) = try!(d.read_struct_field(
-            "delete_chat_photo", 0, |d| Decodable::decode(d))) {
+            "delete_chat_photo", 0, Decodable::decode)) {
             return Ok(MessageType::DeleteChatPhoto);
         };
         if let Some(true) = try!(d.read_struct_field(
-            "group_chat_created", 0, |d| Decodable::decode(d))) {
+            "group_chat_created", 0, Decodable::decode)) {
             return Ok(MessageType::GroupChatCreated);
         };
 
@@ -379,20 +386,38 @@ impl_encode!(PhotoSize, 4,
 pub struct Audio {
     pub file_id: String,
     pub duration: Integer,
+    pub performer: Option<String>,
+    pub title: Option<String>,
     pub mime_type: Option<String>,
     pub file_size: Option<Integer>,
 }
 
-impl_encode!(Audio, 4,
-    [0 => file_id, 1 => duration],
-    [2 => mime_type, 3 => file_size]);
+impl_encode!(Audio, 6,
+             [0 => file_id, 1 => duration],
+             [2 => performer, 3 => title,
+              4 => mime_type, 5 => file_size]);
+
+// ---------------------------------------------------------------------------
+/// Telegram type "Voice" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
+pub struct Voice {
+    pub file_id: String,
+    pub duration: Integer,
+    pub mime_type: Option<String>,
+    pub file_size: Option<Integer>,
+}
+
+impl_encode!(Voice, 4,
+             [0 => file_id, 1 => duration],
+             [2 => mime_type, 3 => file_size]);
+
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Document" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Document {
     pub file_id: String,
-    pub thumb: PhotoSize,
+    pub thumb: Option<PhotoSize>,
     pub file_name: Option<String>,
     pub mime_type: Option<String>,
     pub file_size: Option<Integer>,
@@ -409,7 +434,7 @@ pub struct Sticker {
     pub file_id: String,
     pub width: Integer,
     pub height: Integer,
-    pub thumb: PhotoSize,
+    pub thumb: Option<PhotoSize>,
     pub file_size: Option<Integer>,
 }
 
@@ -425,15 +450,14 @@ pub struct Video {
     pub width: Integer,
     pub height: Integer,
     pub duration: Integer,
-    pub thumb: PhotoSize,
+    pub thumb: Option<PhotoSize>,
     pub mime_type: Option<String>,
     pub file_size: Option<Integer>,
-    pub caption: Option<String>,
 }
 
-impl_encode!(Video, 8,
+impl_encode!(Video, 7,
     [0 => file_id, 1 => width, 2 => height, 3 => duration, 4 => thumb],
-    [5 => mime_type, 6 => file_size, 7 => caption]);
+    [5 => mime_type, 6 => file_size]);
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Contact" (directly mapped)
@@ -462,7 +486,7 @@ pub struct Location {
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Update {
     pub update_id: Integer,
-    pub message: Option<Message>
+    pub message: Message
 }
 
 // impl_encode!(Update, 2,
