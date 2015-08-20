@@ -486,7 +486,7 @@ pub struct Location {
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct Update {
     pub update_id: Integer,
-    pub message: Message
+    pub message: Option<Message>
 }
 
 // impl_encode!(Update, 2,

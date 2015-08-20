@@ -17,59 +17,64 @@ fn main() {
 
     // Fetch new updates via long poll method
     let res = listener.listen(|u| {
-        let name = u.message.from.first_name + &*u.message.from.last_name
-            .map_or("".to_string(), |mut n| { n.insert(0, ' '); n });
-        let chat_id = u.message.chat.id();
+        // If the received update contains a message...
+        if let Some(m) = u.message {
+            let name = m.from.first_name + &*m.from.last_name
+                .map_or("".to_string(), |mut n| { n.insert(0, ' '); n });
+            let chat_id = m.chat.id();
 
-        // Match message type
-        match u.message.msg {
-            MessageType::Text(t) => {
-                // Print received text message to stdout
-                println!("<{}> {}", name, t);
+            // Match message type
+            match m.msg {
+                MessageType::Text(t) => {
+                    // Print received text message to stdout
+                    println!("<{}> {}", name, t);
 
-                // Define one time response keyboard
-                let keyboard = ReplyKeyboardMarkup {
-                    keyboard: vec![vec![t],
-                                   vec!["Yes".into(), "No".into()]],
-                    one_time_keyboard: Some(true),
-                    .. Default::default()
-                };
-                // Reply with custom Keyboard
-                try!(api.send_message(
-                    chat_id,
-                    format!("Hi, {}!", name),
-                    None, None, Some(keyboard.into())));
+                    // Define one time response keyboard
+                    let keyboard = ReplyKeyboardMarkup {
+                        keyboard: vec![vec![t],
+                                       vec!["Yes".into(), "No".into()]],
+                       one_time_keyboard: Some(true),
+                        .. Default::default()
+                    };
 
-            },
-            MessageType::Location(loc) => {
-                // Print event
-                println!("<{}> is here: {}", name,
-                         json::encode(&loc).unwrap());
+                    // Reply with custom Keyboard
+                    try!(api.send_message(
+                        chat_id,
+                        format!("Hi, {}!", name),
+                        None, None, Some(keyboard.into())));
 
-                // Send chat action (this is useless here, it's just for
-                // demonstration purposes)
-                try!(api.send_chat_action(chat_id, ChatAction::Typing));
+                },
+                MessageType::Location(loc) => {
+                    // Print event
+                    println!("<{}> is here: {}", name,
+                        json::encode(&loc).unwrap());
 
-                // Calculate and send the location on the other side of the
-                // earth.
-                let lat = -loc.latitude;
-                let lng = if loc.longitude > 0.0 {
-                    loc.longitude - 180.0
-                } else {
-                    loc.longitude + 180.0
-                };
+                    // Send chat action (this is useless here, it's just for
+                    // demonstration purposes)
+                    try!(api.send_chat_action(chat_id, ChatAction::Typing));
 
-                try!(api.send_location(chat_id, lat, lng, None, None));
-            },
-            MessageType::Contact(c) => {
-                // Print event
-                println!("<{}> send a contact: {}", name,
-                         json::encode(&c).unwrap());
+                    // Calculate and send the location on the other side of the
+                    // earth.
+                    let lat = -loc.latitude;
+                    let lng = if loc.longitude > 0.0 {
+                        loc.longitude - 180.0
+                    } else {
+                        loc.longitude + 180.0
+                    };
 
-                // Just forward the contact back to the sender...
-                try!(api.forward_message(chat_id, chat_id, u.message.message_id));
+                    try!(api.send_location(chat_id, lat, lng, None, None));
+                },
+                MessageType::Contact(c) => {
+                    // Print event
+                    println!("<{}> send a contact: {}", name,
+                        json::encode(&c).unwrap());
+
+                    // Just forward the contact back to the sender...
+                    try!(api.forward_message(chat_id, chat_id, m.message_id));
+                }
+                _ => {}
             }
-            _ => {}
+
         }
         Ok(ListeningAction::Continue)
     });

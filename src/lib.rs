@@ -6,21 +6,24 @@
 //!
 //! // Create the Api from a bot token saved in a environment variable and
 //! // test an Api-call
-//! let mut api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
+//! let api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
 //! println!("getMe: {:?}", api.get_me());
 //! // We want to listen for new updates via LongPoll
 //! let mut listener = api.listener(ListeningMethod::LongPoll(None));
 //!
 //! // Fetch new updates
 //! listener.listen(|u| {
-//!     // if the message was a text message:
-//!     if let MessageType::Text(_) = u.message.msg {
-//!         // Answer message with "Hi"
-//!         try!(api.send_message(
-//!             u.message.chat.id(),
-//!             format!("Hi, {}!", u.message.from.first_name),
-//!             None, None, None)
-//!         );
+//!     // If the received update contains a message...
+//!     if let Some(m) = u.message {
+//!         // if the message was a text message:
+//!         if let MessageType::Text(_) = m.msg {
+//!             // Answer message with "Hi"
+//!             try!(api.send_message(
+//!                 m.chat.id(),
+//!                 format!("Hi, {}!", m.from.first_name),
+//!                 None, None, None)
+//!             );
+//!         }
 //!     }
 //!
 //!     // If none of the "try!" statements returned an error: It's Ok!

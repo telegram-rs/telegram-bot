@@ -10,25 +10,28 @@ fn main() {
 
     // Fetch new updates via long poll method
     let res = listener.listen(|u| {
-        let name = u.message.from.first_name;
+        // If the received update contains a message...
+        if let Some(m) = u.message {
+            let name = m.from.first_name;
 
-        // Match message type
-        match u.message.msg {
-            MessageType::Text(t) => {
-                // Print received text message to stdout
-                println!("<{}> {}", name, t);
+            // Match message type
+            match m.msg {
+                MessageType::Text(t) => {
+                    // Print received text message to stdout
+                    println!("<{}> {}", name, t);
 
-                if t == "/exit" {
-                    return Ok(ListeningAction::Stop);
-                }
+                    if t == "/exit" {
+                        return Ok(ListeningAction::Stop);
+                    }
 
-                // Answer message with "Hi"
-                try!(api.send_message(
-                    u.message.chat.id(),
-                    format!("Hi, {}! You just wrote '{}'", name, t),
-                    None, None, None));
-            },
-            _ => {}
+                    // Answer message with "Hi"
+                    try!(api.send_message(
+                        m.chat.id(),
+                        format!("Hi, {}! You just wrote '{}'", name, t),
+                        None, None, None));
+                },
+                _ => {}
+            }
         }
 
         // If none of the "try!" statements returned an error: It's Ok!
