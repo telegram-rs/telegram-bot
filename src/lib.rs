@@ -251,7 +251,11 @@ impl Api {
     }
 
     /// Corresponds to the `sendPhoto` method of the API.
-    pub fn send_photo(&self, chat_id: Integer, path: String, caption: Option<String>, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+    pub fn send_photo(&self, chat_id: Integer, path: String,
+                      caption: Option<String>,
+                      reply_to_message_id: Option<Integer>,
+                      reply_markup: Option<ReplyMarkup>)
+                      -> Result<Message> {
         // Prepare parameters
         let mut params = Params::new();
         params.add_get("chat_id", chat_id);
@@ -266,7 +270,13 @@ impl Api {
     }
 
     /// Corresponds to the `sendAudio` method of the API.
-    pub fn send_audio(&self, chat_id: Integer, path: String, duration: Option<Integer>, performer: Option<String>, title: Option<String>, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+    pub fn send_audio(&self, chat_id: Integer, path: String,
+                      duration: Option<Integer>,
+                      performer: Option<String>,
+                      title: Option<String>,
+                      reply_to_message_id: Option<Integer>,
+                      reply_markup: Option<ReplyMarkup>)
+                      -> Result<Message> {
         // Prepare parameters
         let mut params = Params::new();
         params.add_get("chat_id", chat_id);
@@ -283,7 +293,11 @@ impl Api {
     }
 
     /// Corresponds to the `sendVoice` method of the API.
-    pub fn send_voice(&self, chat_id: Integer, path: String, duration: Option<Integer>, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+    pub fn send_voice(&self, chat_id: Integer, path: String,
+                      duration: Option<Integer>,
+                      reply_to_message_id: Option<Integer>,
+                      reply_markup: Option<ReplyMarkup>)
+                      -> Result<Message> {
         // Prepare parameters
         let mut params = Params::new();
         params.add_get("chat_id", chat_id);
@@ -299,7 +313,10 @@ impl Api {
 
 
     /// Corresponds to the `sendDocument` method of the API.
-    pub fn send_document(&self, chat_id: Integer, path: String, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+    pub fn send_document(&self, chat_id: Integer, path: String,
+                         reply_to_message_id: Option<Integer>,
+                         reply_markup: Option<ReplyMarkup>)
+                         -> Result<Message> {
         // Prepare parameters
         let mut params = Params::new();
         params.add_get("chat_id", chat_id);
@@ -313,7 +330,10 @@ impl Api {
     }
 
     /// Corresponds to the `sendSticker` method of the API.
-    pub fn send_sticker(&self, chat_id: Integer, path: String, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+    pub fn send_sticker(&self, chat_id: Integer, path: String,
+                        reply_to_message_id: Option<Integer>,
+                        reply_markup: Option<ReplyMarkup>)
+                        -> Result<Message> {
         // Prepare parameters
         let mut params = Params::new();
         params.add_get("chat_id", chat_id);
@@ -327,7 +347,12 @@ impl Api {
     }
 
     /// Corresponds to the `sendVideo` method of the API.
-    pub fn send_video(&self, chat_id: Integer, path: String, caption: Option<String>, duration: Option<Integer>, reply_to_message_id: Option<Integer>, reply_markup: Option<ReplyMarkup>) -> Result<Message> {
+    pub fn send_video(&self, chat_id: Integer, path: String,
+                      caption: Option<String>,
+                      duration: Option<Integer>,
+                      reply_to_message_id: Option<Integer>,
+                      reply_markup: Option<ReplyMarkup>)
+                      -> Result<Message> {
         // Prepare parameters
         let mut params = Params::new();
         params.add_get("chat_id", chat_id);
