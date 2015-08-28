@@ -18,7 +18,7 @@ use telegram_bot::*;
 
 fn main() {
     // Create bot, test simple API call and print bot information
-    let mut api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
+    let api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
     println!("getMe: {:?}", api.get_me());
     let mut listener = api.listener(ListeningMethod::LongPoll(None));
 
@@ -83,6 +83,6 @@ Please submit pull request against the `dev` branch, unless all changes are just
   - [x] "getUserProfilePhotos"
 - [x] "getUpdates" and `long_poll`
 - [ ] "setWebhook" and `listen`
-- [ ] sending files ("sendAudio", "sendDocument", ...)
+- [x] sending files ("sendAudio", "sendDocument", ...)
 - [x] More good documentation and examples
 - [x] Maybe think about multithreading stuff

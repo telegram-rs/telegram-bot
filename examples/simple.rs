@@ -4,7 +4,7 @@ use telegram_bot::*;
 
 fn main() {
     // Create bot, test simple API call and print bot information
-    let mut api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
+    let api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
     println!("getMe: {:?}", api.get_me());
     let mut listener = api.listener(ListeningMethod::LongPoll(None));
 
