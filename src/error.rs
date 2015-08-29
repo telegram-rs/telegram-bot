@@ -25,6 +25,8 @@ pub enum Error {
     InvalidTokenFormat(::url::ParseError),
     /// The given environment variable could not be fetched.
     InvalidEnvironmentVar(env::VarError),
+    /// The given path is not valid.
+    InvalidPath(String),
 }
 
 impl ::std::error::Error for Error {
@@ -38,6 +40,7 @@ impl ::std::error::Error for Error {
             Error::InvalidState(ref s) => &s,
             Error::InvalidTokenFormat(ref e) => e.description(),
             Error::InvalidEnvironmentVar(ref e) => e.description(),
+            Error::InvalidPath(ref s) => &s,
         }
     }
 }
@@ -53,6 +56,7 @@ impl fmt::Display for Error {
             Error::InvalidState(ref s) => s.fmt(f),
             Error::InvalidTokenFormat(ref e) => e.fmt(f),
             Error::InvalidEnvironmentVar(ref e) => e.fmt(f),
+            Error::InvalidPath(ref s) => s.fmt(f),
         }
     }
 }
