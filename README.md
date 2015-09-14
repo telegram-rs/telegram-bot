@@ -1,12 +1,12 @@
 Rust Telegram Bot Library
 =========================
-[![Build Status](https://img.shields.io/travis/LukasKalbertodt/telegram-bot.svg)](https://travis-ci.org/LukasKalbertodt/telegram-bot)
+[![Build Status](https://img.shields.io/travis/LukasKalbertodt/telegram-bot/master.svg)](https://travis-ci.org/LukasKalbertodt/telegram-bot)
 [![License](https://img.shields.io/github/license/LukasKalbertodt/telegram-bot.svg)]()
 [![Crates.io](https://img.shields.io/crates/v/telegram-bot.svg)](https://crates.io/crates/telegram-bot)
 
 [**Documentation**](https://lukaskalbertodt.github.io/telegram-bot/telegram_bot/)
 
-A library for writing your own [Telegram](https://telegram.org/) bots. More information [here](https://core.telegram.org/bots). Official API [here](https://core.telegram.org/bots/api). **Note:** Work in progress!
+A library for writing your own [Telegram](https://telegram.org/) bots. More information [here](https://core.telegram.org/bots). Official API [here](https://core.telegram.org/bots/api). **Note:** It's usable, but not feature complete yet.
 
 ## Example
 Here is a simple example (see [`example/simple.rs`](https://github.com/LukasKalbertodt/telegram-bot/blob/master/examples/simple.rs)):
@@ -63,7 +63,7 @@ You can find a bigger example in the `examples` folder.
 This library is available via `crates.io`. In order to use it, just add this to your `Cargo.toml`:
 
 ```
-telegram-bot = "*"
+telegram-bot = "0.3"
 ```
 
 ## Collaboration
