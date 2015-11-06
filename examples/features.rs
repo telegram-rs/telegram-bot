@@ -41,7 +41,7 @@ fn main() {
                     try!(api.send_message(
                         chat_id,
                         format!("Hi, {}!", name),
-                        None, None, Some(keyboard.into())));
+                        None, None, None, Some(keyboard.into())));
 
                 },
                 MessageType::Location(loc) => {
