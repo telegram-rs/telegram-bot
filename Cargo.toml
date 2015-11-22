@@ -17,5 +17,5 @@ exclude = ["deploy.sh"]
 [dependencies]
 hyper = "*"
 rustc-serialize = "*"
-url = "*"
+url = "0.2"
 multipart = "*"
