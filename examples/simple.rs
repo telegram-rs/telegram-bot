@@ -28,7 +28,7 @@ fn main() {
                     try!(api.send_message(
                         m.chat.id(),
                         format!("Hi, {}! You just wrote '{}'", name, t),
-                        None, None, None));
+                        None, None, None, None));
                 },
                 _ => {}
             }
