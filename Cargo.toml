@@ -15,7 +15,7 @@ license = "MIT"
 exclude = ["deploy.sh"]
 
 [dependencies]
-hyper = "0.6"
+hyper = "0.7"
 rustc-serialize = "0.3"
 url = "0.2"
 multipart = "0.3"
