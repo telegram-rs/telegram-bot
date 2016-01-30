@@ -267,7 +267,7 @@ impl Decodable for Message {
                 chat: try_field!(d, "chat"),
                 date: try_field!(d, "date"),
                 forward: try_field!(d, "forward"),
-                reply: try_field!(d, "reply"),
+                reply: try_field!(d, "reply_to_message"),
                 msg: try!(MessageType::decode(d)),
                 caption: try_field!(d, "caption"),
             })
