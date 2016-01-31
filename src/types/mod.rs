@@ -247,8 +247,9 @@ pub struct Message {
     pub chat: Chat,
     pub date: Integer,
 
-    // forward_from and forward_date in one
-    pub forward: Option<(User, Integer)>,
+    // forward_from and forward_date in one is BS
+    pub forward_from: Option<(User)>,
+    pub forward_date: Option<(Integer)>,
     pub reply: Option<Box<Message>>,
 
     pub msg: MessageType,
@@ -266,7 +267,8 @@ impl Decodable for Message {
                 from: try_field!(d, "from"),
                 chat: try_field!(d, "chat"),
                 date: try_field!(d, "date"),
-                forward: try_field!(d, "forward"),
+                forward_from: try_field!(d, "forward_from"),
+                forward_date: try_field!(d, "forward_date"),
                 reply: try_field!(d, "reply_to_message"),
                 msg: try!(MessageType::decode(d)),
                 caption: try_field!(d, "caption"),
