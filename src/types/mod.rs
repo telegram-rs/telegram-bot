@@ -59,8 +59,8 @@ macro_rules! try_field {
 // ===========================================================================
 // Telegram primitive types
 // ===========================================================================
-/// The Telegram "Integer": Currently i32.
-pub type Integer = i32;
+/// The Telegram "Integer": Currently i64.
+pub type Integer = i64;
 /// The Telegram "Float": Currently f32.
 pub type Float = f32;
 
