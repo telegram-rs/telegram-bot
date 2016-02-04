@@ -531,7 +531,7 @@ impl Api {
         // Change connect("&") to join("&") when rust 1.3 becomes stable
         let bodyparams = p.get_params().into_iter().map(|&(k, ref  v)| {
             format!("{}={}", k, &**v)
-        }).collect::<Vec<_>>().connect("&");
+        }).collect::<Vec<_>>().join("&");
 
         // Create the request with the body and headers
         let req = client
