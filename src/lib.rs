@@ -21,7 +21,7 @@
 //!             try!(api.send_message(
 //!                 m.chat.id(),
 //!                 format!("Hi, {}!", m.from.first_name),
-//!                 None, None, None)
+//!                 None, None, None, None)
 //!             );
 //!         }
 //!     }
