@@ -58,6 +58,33 @@ fn decode_group_chat() {
 }
 
 #[test]
+fn decode_supergroup_chat() {
+    use Chat;
+
+    let blob = r#"{"title":"This is a group chat","id":-12345678,"type":"supergroup"}"#;
+    let chat: Chat = json::decode(&blob).unwrap();
+    assert!(chat.is_supergroup());
+}
+
+#[test]
+fn decode_channel_chat() {
+    use Chat;
+
+    let blob = r#"{"title":"This is a group chat","id":-12345678,"type":"channel"}"#;
+    let chat: Chat = json::decode(&blob).unwrap();
+    assert!(chat.is_channel());
+}
+
+#[test]
+fn decode_channel_with_username_chat() {
+    use Chat;
+
+    let blob = r#"{"title":"This is a group chat","id":-12345678,"type":"channel", "username": "foo"}"#;
+    let chat: Chat = json::decode(&blob).unwrap();
+    assert!(chat.is_channel());
+}
+
+#[test]
 fn decode_user_chat() {
     use Chat;
     use User;
