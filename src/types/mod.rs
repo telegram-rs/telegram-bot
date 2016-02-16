@@ -249,7 +249,7 @@ impl Decodable for Chat {
             let id : Integer = try_field!(d, "id");
             let typ: String = try_field!(d, "type");
 
-            match typ.as_str() {
+            match typ.as_ref() {
                 "private" => {
                     Ok(Chat::Private {
                         id: id,
