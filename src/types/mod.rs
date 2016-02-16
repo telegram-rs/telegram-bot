@@ -255,7 +255,7 @@ impl Decodable for Chat {
                         name: try_field!(d, "username"),
                     }))
                 }
-                _ => panic!("Not implemented")
+                _ => Err(d.error(&format!("Invalid chat type: {}", typ)))
             }
         })
     }
