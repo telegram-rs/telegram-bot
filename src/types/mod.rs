@@ -460,60 +460,6 @@ impl_encode!(User, 4,
     [0 => id, 1 => first_name],
     [2 => last_name, 3 => username]);
 
-
-// ---------------------------------------------------------------------------
-/// Telegram type "GroupChat" (directly mapped)
-#[derive(Debug, PartialEq, Clone)]
-pub struct GroupChat {
-    pub id: Integer,
-    pub title: String,
-    pub is_supergroup: bool
-}
-
-impl Encodable for GroupChat {
-    fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
-        e.emit_struct("GroupChat", 3, |e| {
-            try!(e.emit_struct_field("id", 0, |e| {
-                self.id.encode(e)
-            }));
-            try!(e.emit_struct_field("title", 1, |e| {
-                self.title.encode(e)
-            }));
-            try!(e.emit_struct_field("type", 2, |e| {
-                let typ = if self.is_supergroup { "supergroup" } else { "group" };
-                typ.encode(e)
-            }));
-            Ok(())
-        })
-    }
-}
-
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Channel {
-    pub id: Integer,
-    pub title: String,
-    pub name: Option<String>,
-}
-
-impl Encodable for Channel {
-    fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
-        e.emit_struct("Channel", 3, |e| {
-            try!(e.emit_struct_field("id", 0, |e| {
-                self.id.encode(e)
-            }));
-            try!(e.emit_struct_field("title", 1, |e| {
-                self.title.encode(e)
-            }));
-            try!(e.emit_struct_field("name", 2, |e| {
-                self.name.encode(e)
-            }));
-            Ok(())
-        })
-    }
-}
-
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
