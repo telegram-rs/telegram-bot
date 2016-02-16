@@ -229,6 +229,17 @@ impl Chat {
     pub fn is_channel(&self) -> bool {
         if let &Chat::Channel {..} = self { true } else { false }
     }
+
+    pub fn to_user(&self) -> Option<User> {
+        if let &Chat::Private { ref id, ref first_name, ref last_name, ref username } = self {
+            Some(User {
+                id: *id,
+                first_name: first_name.clone(),
+                last_name: last_name.clone(),
+                username: username.clone(),
+            })
+        } else { None }
+    }
 }
 
 impl Decodable for Chat {
