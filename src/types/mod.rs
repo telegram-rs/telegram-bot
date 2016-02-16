@@ -596,6 +596,8 @@ pub struct Location {
     pub latitude: Float,
 }
 
+// ---------------------------------------------------------------------------
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct GroupToSuperGroupMigration {
     pub from: Integer,
