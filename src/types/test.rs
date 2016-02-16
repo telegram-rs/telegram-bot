@@ -91,10 +91,9 @@ fn decode_user_chat() {
 
     let blob = r#"{"first_name":"test","id":123456789,"username":"test","type":"private"}"#;
     let chat: Chat = json::decode(&blob).unwrap();
-    let user: User = json::decode(&blob).unwrap();
+    json::decode::<User>(&blob).unwrap();
 
     assert!(chat.is_user());
-    assert_eq!(Chat::Private(user), chat);
 }
 
 #[test]
