@@ -71,7 +71,7 @@ fn decode_user_chat() {
     let user: User = json::decode(&blob).unwrap();
 
     assert!(chat.is_user());
-    assert_eq!(Chat::User(user), chat);
+    assert_eq!(Chat::Private(user), chat);
 }
 
 #[test]

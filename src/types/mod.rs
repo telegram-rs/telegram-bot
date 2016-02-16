@@ -182,27 +182,39 @@ impl Encodable for ChatAction {
 /// useful methods for less typing.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Chat {
-    User(User),
+    Private(User),
     Group(GroupChat),
+    Channel(Channel),
 }
 
 impl Chat {
     /// Returns the chat id, which is needed to send messages.
     pub fn id(&self) -> Integer {
         match self {
-            &Chat::User(ref u) => u.id,
+            &Chat::Private(ref u) => u.id,
             &Chat::Group(ref g) => g.id,
+            &Chat::Channel(ref c) => c.id,
         }
     }
 
     /// Returns if the Chat is a User
     pub fn is_user(&self) -> bool {
-        if let &Chat::User(_) = self { true } else { false }
+        if let &Chat::Private(_) = self { true } else { false }
     }
 
     /// Returns if the Chat is a Group
     pub fn is_group(&self) -> bool {
-        !self.is_user()
+        if let &Chat::Group(ref g) = self { !g.is_supergroup } else { false }
+    }
+
+    /// Returns if the Chat is a SuperGroup
+    pub fn is_supergroup(&self) -> bool {
+        if let &Chat::Group(ref g) = self { g.is_supergroup } else { false }
+    }
+
+    /// Returns if the Chat is a Channel
+    pub fn is_channel(&self) -> bool {
+        if let &Chat::Channel(_) = self { true } else { false }
     }
 }
 
@@ -211,20 +223,39 @@ impl Decodable for Chat {
         d.read_struct("", 0, |d| {
             // Both User and GroupChat have an 'id' field
             let id : Integer = try_field!(d, "id");
+            let typ: String = try_field!(d, "type");
 
-            // If there is a 'title' field, it's a GroupChat. A User otherwise.
-            if let Some(title) = try_field!(d, "title") {
-                Ok(Chat::Group(GroupChat {
-                    id: id,
-                    title: title,
-                }))
-            } else {
-                Ok(Chat::User(User {
-                    id: id,
-                    first_name: try_field!(d, "first_name"),
-                    last_name: try_field!(d, "last_name"),
-                    username: try_field!(d, "username"),
-                }))
+            match typ.as_str() {
+                "private" => {
+                    Ok(Chat::Private(User {
+                        id: id,
+                        first_name: try_field!(d, "first_name"),
+                        last_name: try_field!(d, "last_name"),
+                        username: try_field!(d, "username"),
+                    }))
+                }
+                "group" => {
+                    Ok(Chat::Group(GroupChat {
+                        id: id,
+                        title: try_field!(d, "title"),
+                        is_supergroup: false
+                    }))
+                }
+                "supergroup" => {
+                    Ok(Chat::Group(GroupChat {
+                        id: id,
+                        title: try_field!(d, "title"),
+                        is_supergroup: true
+                    }))
+                }
+                "channel" => {
+                    Ok(Chat::Channel(Channel {
+                        id: id,
+                        title: try_field!(d, "title"),
+                        name: try_field!(d, "username"),
+                    }))
+                }
+                _ => panic!("Not implemented")
             }
         })
     }
@@ -233,8 +264,9 @@ impl Decodable for Chat {
 impl Encodable for Chat {
     fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
         match self {
-            &Chat::User(ref u) => u.encode(e),
+            &Chat::Private(ref u) => u.encode(e),
             &Chat::Group(ref g) => g.encode(e),
+            &Chat::Channel(ref g) => g.encode(e),
         }
     }
 }
@@ -364,6 +396,16 @@ impl_encode!(User, 4,
 pub struct GroupChat {
     pub id: Integer,
     pub title: String,
+    pub is_supergroup: bool
+}
+
+// ---------------------------------------------------------------------------
+
+#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq, Clone)]
+pub struct Channel {
+    pub id: Integer,
+    pub title: String,
+    pub name: String,
 }
 
 // ---------------------------------------------------------------------------
