@@ -401,6 +401,8 @@ pub enum MessageType {
     NewChatPhoto(Vec<PhotoSize>),
     DeleteChatPhoto,
     GroupChatCreated,
+    SuperGroupChatCreated(GroupToSuperGroupMigration),
+    ChannelChatCreated,
 }
 
 impl Decodable for MessageType {
@@ -443,6 +445,19 @@ impl Decodable for MessageType {
         if let Some(true) = try!(d.read_struct_field(
             "group_chat_created", 0, Decodable::decode)) {
             return Ok(MessageType::GroupChatCreated);
+        };
+
+        if let Some(true) = try!(d.read_struct_field(
+            "supergroup_chat_created", 0, Decodable::decode)) {
+            return Ok(MessageType::SuperGroupChatCreated(GroupToSuperGroupMigration {
+                from: try_field!(d, "migrate_from_chat_id"),
+                to: try_field!(d, "migrate_to_chat_id"),
+            }))
+        };
+
+        if let Some(true) = try!(d.read_struct_field(
+            "channel_chat_created", 0, Decodable::decode)) {
+            return Ok(MessageType::ChannelChatCreated);
         };
 
         // None of the tested fields is present: This is an error
@@ -579,6 +594,12 @@ impl_encode!(Contact, 4,
 pub struct Location {
     pub longitude: Float,
     pub latitude: Float,
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct GroupToSuperGroupMigration {
+    pub from: Integer,
+    pub to: Integer,
 }
 
 // ---------------------------------------------------------------------------
