@@ -182,78 +182,91 @@ impl Encodable for ChatAction {
 /// useful methods for less typing.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Chat {
-    Private(User),
-    Group(GroupChat),
-    Channel(Channel),
+    Private {
+        id: Integer,
+        first_name: String,
+        last_name: Option<String>,
+        username: Option<String>,
+    },
+    Group {
+        id: Integer,
+        title: String,
+        is_supergroup: bool
+    },
+    Channel {
+        id: Integer,
+        title: String,
+        name: Option<String>
+    },
 }
 
 impl Chat {
     /// Returns the chat id, which is needed to send messages.
     pub fn id(&self) -> Integer {
         match self {
-            &Chat::Private(ref u) => u.id,
-            &Chat::Group(ref g) => g.id,
-            &Chat::Channel(ref c) => c.id,
+            &Chat::Private { id, .. } => id,
+            &Chat::Group { id, .. } => id,
+            &Chat::Channel { id, .. } => id,
         }
     }
 
     /// Returns if the Chat is a User
     pub fn is_user(&self) -> bool {
-        if let &Chat::Private(_) = self { true } else { false }
+        if let &Chat::Private {..} = self { true } else { false }
     }
 
     /// Returns if the Chat is a Group
     pub fn is_group(&self) -> bool {
-        if let &Chat::Group(ref g) = self { !g.is_supergroup } else { false }
+        if let &Chat::Group { is_supergroup, .. } = self { !is_supergroup } else { false }
     }
 
     /// Returns if the Chat is a SuperGroup
     pub fn is_supergroup(&self) -> bool {
-        if let &Chat::Group(ref g) = self { g.is_supergroup } else { false }
+        if let &Chat::Group { is_supergroup, .. } = self { is_supergroup } else { false }
     }
 
     /// Returns if the Chat is a Channel
     pub fn is_channel(&self) -> bool {
-        if let &Chat::Channel(_) = self { true } else { false }
+        if let &Chat::Channel {..} = self { true } else { false }
     }
 }
 
 impl Decodable for Chat {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        d.read_struct("", 0, |d| {
-            // Both User and GroupChat have an 'id' field
+        d.read_struct("Chat", 0, |d| {
+            // All kinds of chat have an 'id' and a 'type' fields
             let id : Integer = try_field!(d, "id");
             let typ: String = try_field!(d, "type");
 
             match typ.as_str() {
                 "private" => {
-                    Ok(Chat::Private(User {
+                    Ok(Chat::Private {
                         id: id,
                         first_name: try_field!(d, "first_name"),
                         last_name: try_field!(d, "last_name"),
                         username: try_field!(d, "username"),
-                    }))
+                    })
                 }
                 "group" => {
-                    Ok(Chat::Group(GroupChat {
+                    Ok(Chat::Group {
                         id: id,
                         title: try_field!(d, "title"),
                         is_supergroup: false
-                    }))
+                    })
                 }
                 "supergroup" => {
-                    Ok(Chat::Group(GroupChat {
+                    Ok(Chat::Group {
                         id: id,
                         title: try_field!(d, "title"),
                         is_supergroup: true
-                    }))
+                    })
                 }
                 "channel" => {
-                    Ok(Chat::Channel(Channel {
+                    Ok(Chat::Channel {
                         id: id,
                         title: try_field!(d, "title"),
                         name: try_field!(d, "username"),
-                    }))
+                    })
                 }
                 _ => Err(d.error(&format!("Invalid chat type: {}", typ)))
             }
@@ -263,10 +276,57 @@ impl Decodable for Chat {
 
 impl Encodable for Chat {
     fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
+
         match self {
-            &Chat::Private(ref u) => u.encode(e),
-            &Chat::Group(ref g) => g.encode(e),
-            &Chat::Channel(ref g) => g.encode(e),
+            &Chat::Private { ref id, ref first_name, ref last_name, ref username } => {
+                e.emit_struct("Chat", 5, |e| {
+                    try!(e.emit_struct_field("id", 0, |e| {
+                        id.encode(e)
+                    }));
+                    try!(e.emit_struct_field("type", 1, |e| {
+                        "private".encode(e)
+                    }));
+                    try!(e.emit_struct_field("first_name", 2, |e| {
+                        first_name.encode(e)
+                    }));
+                    try!(e.emit_struct_field("last_name", 3, |e| {
+                        last_name.encode(e)
+                    }));
+                    try!(e.emit_struct_field("type", 4, |e| {
+                        username.encode(e)
+                    }));
+                    Ok(())
+                })
+            },
+            &Chat::Group { ref id, ref title, ref is_supergroup} => {
+                e.emit_struct("Chat", 3, |e| {
+                    try!(e.emit_struct_field("id", 0, |e| {
+                        id.encode(e)
+                    }));
+                    try!(e.emit_struct_field("type", 1, |e| {
+                        let typ = if *is_supergroup { "supergroup" } else { "group" };
+                        typ.encode(e)
+                    }));
+                    try!(e.emit_struct_field("title", 2, |e| {
+                        title.encode(e)
+                    }));
+                    Ok(())
+                })
+            },
+            &Chat::Channel { ref id, ref title, ref name} => {
+                e.emit_struct("Channel", 3, |e| {
+                    try!(e.emit_struct_field("id", 0, |e| {
+                        id.encode(e)
+                    }));
+                    try!(e.emit_struct_field("title", 1, |e| {
+                        title.encode(e)
+                    }));
+                    try!(e.emit_struct_field("username", 2, |e| {
+                        name.encode(e)
+                    }));
+                    Ok(())
+                })
+            },
         }
     }
 }
