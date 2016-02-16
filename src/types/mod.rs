@@ -350,9 +350,8 @@ pub struct Message {
     pub chat: Chat,
     pub date: Integer,
 
-    // forward_from and forward_date in one is BS
-    pub forward_from: Option<(User)>,
-    pub forward_date: Option<(Integer)>,
+    // forward_from and forward_date in one
+    pub forward: Option<(User, Integer)>,
     pub reply: Option<Box<Message>>,
 
     pub msg: MessageType,
@@ -364,14 +363,19 @@ pub struct Message {
 // JSON field.
 impl Decodable for Message {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        d.read_struct("", 0, |d| {
+        d.read_struct("Message", 0, |d| {
+            let maybe_forward_from = try!(d.read_struct_field("forward_from", 0, Decodable::decode));
+            let maybe_forward_date = try!(d.read_struct_field("forward_date", 0, Decodable::decode));
+            let maybe_forward = match (maybe_forward_date, maybe_forward_from) {
+                (Some(from), Some(date)) => Some((from, date)),
+                _ => None,
+            };
             Ok(Message {
                 message_id: try_field!(d, "message_id"),
                 from: try_field!(d, "from"),
                 chat: try_field!(d, "chat"),
                 date: try_field!(d, "date"),
-                forward_from: try_field!(d, "forward_from"),
-                forward_date: try_field!(d, "forward_date"),
+                forward: maybe_forward,
                 reply: try_field!(d, "reply_to_message"),
                 msg: try!(MessageType::decode(d)),
                 caption: try_field!(d, "caption"),
