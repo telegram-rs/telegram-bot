@@ -392,7 +392,7 @@ impl_encode!(User, 4,
 
 // ---------------------------------------------------------------------------
 /// Telegram type "GroupChat" (directly mapped)
-#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq, Clone)]
+#[derive(RustcEncodable, Debug, PartialEq, Clone)]
 pub struct GroupChat {
     pub id: Integer,
     pub title: String,
