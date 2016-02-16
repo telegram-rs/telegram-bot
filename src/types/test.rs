@@ -48,18 +48,14 @@ fn keyboard_markup() {
         r#"{"force_reply":true,"selective":true}"#.to_string());
 }
 
-// #[test]
-// fn decode_group_chat() {
-//     use Chat;
-//     use GroupChat;
+#[test]
+fn decode_group_chat() {
+    use Chat;
 
-//     let blob = r#"{"title":"This is a group chat","id":-12345678,"type":"group"}"#;
-//     let groupchat: GroupChat = json::decode(&blob).unwrap();
-//     let chat: Chat = json::decode(&blob).unwrap();
-
-//     assert!(chat.is_group());
-//     assert_eq!(Chat::Group(groupchat), chat);
-// }
+    let blob = r#"{"title":"This is a group chat","id":-12345678,"type":"group"}"#;
+    let chat: Chat = json::decode(&blob).unwrap();
+    assert!(chat.is_group());
+}
 
 #[test]
 fn decode_user_chat() {
