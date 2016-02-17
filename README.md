@@ -42,7 +42,7 @@ fn main() {
                     try!(api.send_message(
                         m.chat.id(),
                         format!("Hi, {}! You just wrote '{}'", name, t),
-                        None, None, None));
+                        None, None, None, None));
                 },
                 _ => {}
             }
@@ -63,7 +63,7 @@ You can find a bigger example in the `examples` folder.
 This library is available via `crates.io`. In order to use it, just add this to your `Cargo.toml`:
 
 ```
-telegram-bot = "0.3"
+telegram-bot = "0.4"
 ```
 
 ## Collaboration

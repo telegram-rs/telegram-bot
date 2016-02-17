@@ -21,7 +21,7 @@
 //!             try!(api.send_message(
 //!                 m.chat.id(),
 //!                 format!("Hi, {}!", m.from.first_name),
-//!                 None, None, None)
+//!                 None, None, None, None)
 //!             );
 //!         }
 //!     }
@@ -161,6 +161,7 @@ impl Api {
 
     /// Corresponds to the "sendMessage" method of the API.
     pub fn send_message(&self, chat_id: Integer, text: String,
+                        parse_mode: Option<ParseMode>,
                         disable_web_page_preview: Option<bool>,
                         reply_to_message_id: Option<Integer>,
                         reply_markup: Option<ReplyMarkup>)
@@ -169,6 +170,7 @@ impl Api {
         let mut params = Params::new();
         params.add_get("chat_id", chat_id);
         params.add_get("text", text);
+        params.add_get_opt("parse_mode", parse_mode);
         params.add_get_opt("disable_web_page_preview", disable_web_page_preview);
         params.add_get_opt("reply_to_message_id", reply_to_message_id);
         try!(params.add_get_json_opt("reply_markup", reply_markup));
@@ -531,7 +533,7 @@ impl Api {
         // Change connect("&") to join("&") when rust 1.3 becomes stable
         let bodyparams = p.get_params().into_iter().map(|&(k, ref  v)| {
             format!("{}={}", k, &**v)
-        }).collect::<Vec<_>>().connect("&");
+        }).collect::<Vec<_>>().join("&");
 
         // Create the request with the body and headers
         let req = client

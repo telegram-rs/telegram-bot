@@ -12,6 +12,7 @@
 
 use rustc_serialize::{Decodable, Encodable, Decoder, Encoder};
 use std::convert::Into;
+use std::fmt;
 
 // ===========================================================================
 // Helpers
@@ -59,8 +60,8 @@ macro_rules! try_field {
 // ===========================================================================
 // Telegram primitive types
 // ===========================================================================
-/// The Telegram "Integer": Currently i32.
-pub type Integer = i32;
+/// The Telegram "Integer": Currently i64.
+pub type Integer = i64;
 /// The Telegram "Float": Currently f32.
 pub type Float = f32;
 
@@ -178,53 +179,108 @@ impl Encodable for ChatAction {
 }
 
 // ---------------------------------------------------------------------------
-/// Either a User or a GroupChat. Used in "chat" field of Message. Has some
+/// Either a Private or a Group or a Channel. Used in "chat" field of Message. Has some
 /// useful methods for less typing.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Chat {
-    User(User),
-    Group(GroupChat),
+    Private {
+        id: Integer,
+        first_name: String,
+        last_name: Option<String>,
+        username: Option<String>,
+    },
+    Group {
+        id: Integer,
+        title: String,
+        is_supergroup: bool
+    },
+    Channel {
+        id: Integer,
+        title: String,
+        name: Option<String>
+    },
 }
 
 impl Chat {
     /// Returns the chat id, which is needed to send messages.
     pub fn id(&self) -> Integer {
         match self {
-            &Chat::User(ref u) => u.id,
-            &Chat::Group(ref g) => g.id,
+            &Chat::Private { id, .. } => id,
+            &Chat::Group { id, .. } => id,
+            &Chat::Channel { id, .. } => id,
         }
     }
 
     /// Returns if the Chat is a User
     pub fn is_user(&self) -> bool {
-        if let &Chat::User(_) = self { true } else { false }
+        if let &Chat::Private {..} = self { true } else { false }
     }
 
     /// Returns if the Chat is a Group
     pub fn is_group(&self) -> bool {
-        !self.is_user()
+        if let &Chat::Group { is_supergroup, .. } = self { !is_supergroup } else { false }
+    }
+
+    /// Returns if the Chat is a SuperGroup
+    pub fn is_supergroup(&self) -> bool {
+        if let &Chat::Group { is_supergroup, .. } = self { is_supergroup } else { false }
+    }
+
+    /// Returns if the Chat is a Channel
+    pub fn is_channel(&self) -> bool {
+        if let &Chat::Channel {..} = self { true } else { false }
+    }
+
+    pub fn to_user(&self) -> Option<User> {
+        if let &Chat::Private { id, ref first_name, ref last_name, ref username } = self {
+            Some(User {
+                id: id,
+                first_name: first_name.clone(),
+                last_name: last_name.clone(),
+                username: username.clone(),
+            })
+        } else { None }
     }
 }
 
 impl Decodable for Chat {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        d.read_struct("", 0, |d| {
-            // Both User and GroupChat have an 'id' field
+        d.read_struct("Chat", 0, |d| {
+            // All kinds of chat have an 'id' and a 'type' fields
             let id : Integer = try_field!(d, "id");
+            let typ: String = try_field!(d, "type");
 
-            // If there is a 'title' field, it's a GroupChat. A User otherwise.
-            if let Some(title) = try_field!(d, "title") {
-                Ok(Chat::Group(GroupChat {
-                    id: id,
-                    title: title,
-                }))
-            } else {
-                Ok(Chat::User(User {
-                    id: id,
-                    first_name: try_field!(d, "first_name"),
-                    last_name: try_field!(d, "last_name"),
-                    username: try_field!(d, "username"),
-                }))
+            match typ.as_ref() {
+                "private" => {
+                    Ok(Chat::Private {
+                        id: id,
+                        first_name: try_field!(d, "first_name"),
+                        last_name: try_field!(d, "last_name"),
+                        username: try_field!(d, "username"),
+                    })
+                }
+                "group" => {
+                    Ok(Chat::Group {
+                        id: id,
+                        title: try_field!(d, "title"),
+                        is_supergroup: false
+                    })
+                }
+                "supergroup" => {
+                    Ok(Chat::Group {
+                        id: id,
+                        title: try_field!(d, "title"),
+                        is_supergroup: true
+                    })
+                }
+                "channel" => {
+                    Ok(Chat::Channel {
+                        id: id,
+                        title: try_field!(d, "title"),
+                        name: try_field!(d, "username"),
+                    })
+                }
+                _ => Err(d.error(&format!("Invalid chat type: {}", typ)))
             }
         })
     }
@@ -232,9 +288,57 @@ impl Decodable for Chat {
 
 impl Encodable for Chat {
     fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
+
         match self {
-            &Chat::User(ref u) => u.encode(e),
-            &Chat::Group(ref g) => g.encode(e),
+            &Chat::Private { id, ref first_name, ref last_name, ref username } => {
+                e.emit_struct("Chat", 5, |e| {
+                    try!(e.emit_struct_field("id", 0, |e| {
+                        id.encode(e)
+                    }));
+                    try!(e.emit_struct_field("type", 1, |e| {
+                        "private".encode(e)
+                    }));
+                    try!(e.emit_struct_field("first_name", 2, |e| {
+                        first_name.encode(e)
+                    }));
+                    try!(e.emit_struct_field("last_name", 3, |e| {
+                        last_name.encode(e)
+                    }));
+                    try!(e.emit_struct_field("type", 4, |e| {
+                        username.encode(e)
+                    }));
+                    Ok(())
+                })
+            },
+            &Chat::Group { id, ref title, is_supergroup} => {
+                e.emit_struct("Chat", 3, |e| {
+                    try!(e.emit_struct_field("id", 0, |e| {
+                        id.encode(e)
+                    }));
+                    try!(e.emit_struct_field("type", 1, |e| {
+                        let typ = if is_supergroup { "supergroup" } else { "group" };
+                        typ.encode(e)
+                    }));
+                    try!(e.emit_struct_field("title", 2, |e| {
+                        title.encode(e)
+                    }));
+                    Ok(())
+                })
+            },
+            &Chat::Channel { id, ref title, ref name} => {
+                e.emit_struct("Channel", 3, |e| {
+                    try!(e.emit_struct_field("id", 0, |e| {
+                        id.encode(e)
+                    }));
+                    try!(e.emit_struct_field("title", 1, |e| {
+                        title.encode(e)
+                    }));
+                    try!(e.emit_struct_field("username", 2, |e| {
+                        name.encode(e)
+                    }));
+                    Ok(())
+                })
+            },
         }
     }
 }
@@ -260,14 +364,20 @@ pub struct Message {
 // JSON field.
 impl Decodable for Message {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        d.read_struct("", 0, |d| {
+        d.read_struct("Message", 0, |d| {
+            let maybe_forward_from = try!(d.read_struct_field("forward_from", 0, Decodable::decode));
+            let maybe_forward_date = try!(d.read_struct_field("forward_date", 0, Decodable::decode));
+            let maybe_forward = match (maybe_forward_date, maybe_forward_from) {
+                (Some(from), Some(date)) => Some((from, date)),
+                _ => None,
+            };
             Ok(Message {
                 message_id: try_field!(d, "message_id"),
                 from: try_field!(d, "from"),
                 chat: try_field!(d, "chat"),
                 date: try_field!(d, "date"),
-                forward: try_field!(d, "forward"),
-                reply: try_field!(d, "reply"),
+                forward: maybe_forward,
+                reply: try_field!(d, "reply_to_message"),
                 msg: try!(MessageType::decode(d)),
                 caption: try_field!(d, "caption"),
             })
@@ -292,6 +402,8 @@ pub enum MessageType {
     NewChatPhoto(Vec<PhotoSize>),
     DeleteChatPhoto,
     GroupChatCreated,
+    SuperGroupChatCreated(GroupToSuperGroupMigration),
+    ChannelChatCreated,
 }
 
 impl Decodable for MessageType {
@@ -336,8 +448,47 @@ impl Decodable for MessageType {
             return Ok(MessageType::GroupChatCreated);
         };
 
+        if let Some(true) = try!(d.read_struct_field(
+            "supergroup_chat_created", 0, Decodable::decode)) {
+            return Ok(MessageType::SuperGroupChatCreated(GroupToSuperGroupMigration {
+                from: try_field!(d, "migrate_from_chat_id"),
+                to: try_field!(d, "migrate_to_chat_id"),
+            }))
+        };
+
+        if let Some(true) = try!(d.read_struct_field(
+            "channel_chat_created", 0, Decodable::decode)) {
+            return Ok(MessageType::ChannelChatCreated);
+        };
+
         // None of the tested fields is present: This is an error
         Err(d.error("No field for inferring message type is set"))
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct GroupToSuperGroupMigration {
+    pub from: Integer,
+    pub to: Integer,
+}
+
+// ---------------------------------------------------------------------------
+/// Strongly typed ParseMode. Instead of passing a String to the
+/// `send_message` method, this is used.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum ParseMode {
+    Markdown,
+    Html,
+}
+
+impl fmt::Display for ParseMode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match *self {
+            ParseMode::Markdown => "Markdown",
+            ParseMode::Html => "HTML",
+        })
     }
 }
 
@@ -356,15 +507,6 @@ pub struct User {
 impl_encode!(User, 4,
     [0 => id, 1 => first_name],
     [2 => last_name, 3 => username]);
-
-
-// ---------------------------------------------------------------------------
-/// Telegram type "GroupChat" (directly mapped)
-#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq, Clone)]
-pub struct GroupChat {
-    pub id: Integer,
-    pub title: String,
-}
 
 // ---------------------------------------------------------------------------
 /// Telegram type "PhotoSize" (directly mapped)
@@ -466,7 +608,7 @@ pub struct Contact {
     pub phone_number: String,
     pub first_name: String,
     pub last_name: Option<String>,
-    pub user_id: Option<String>,
+    pub user_id: Option<Integer>,
 }
 
 impl_encode!(Contact, 4,
@@ -525,7 +667,6 @@ impl Default for ReplyKeyboardMarkup {
 impl_encode!(ReplyKeyboardMarkup, 4,
     [0 => keyboard],
     [1 => resize_keyboard, 2 => one_time_keyboard, 3 => selective]);
-
 
 // ===========================================================================
 // Unit tests (mainly encode & decode)
