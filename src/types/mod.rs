@@ -232,9 +232,9 @@ impl Chat {
     }
 
     pub fn to_user(&self) -> Option<User> {
-        if let &Chat::Private { ref id, ref first_name, ref last_name, ref username } = self {
+        if let &Chat::Private { id, ref first_name, ref last_name, ref username } = self {
             Some(User {
-                id: *id,
+                id: id,
                 first_name: first_name.clone(),
                 last_name: last_name.clone(),
                 username: username.clone(),
@@ -290,7 +290,7 @@ impl Encodable for Chat {
     fn encode<E: Encoder>(&self, e: &mut E) -> Result<(), E::Error> {
 
         match self {
-            &Chat::Private { ref id, ref first_name, ref last_name, ref username } => {
+            &Chat::Private { id, ref first_name, ref last_name, ref username } => {
                 e.emit_struct("Chat", 5, |e| {
                     try!(e.emit_struct_field("id", 0, |e| {
                         id.encode(e)
@@ -310,13 +310,13 @@ impl Encodable for Chat {
                     Ok(())
                 })
             },
-            &Chat::Group { ref id, ref title, ref is_supergroup} => {
+            &Chat::Group { id, ref title, is_supergroup} => {
                 e.emit_struct("Chat", 3, |e| {
                     try!(e.emit_struct_field("id", 0, |e| {
                         id.encode(e)
                     }));
                     try!(e.emit_struct_field("type", 1, |e| {
-                        let typ = if *is_supergroup { "supergroup" } else { "group" };
+                        let typ = if is_supergroup { "supergroup" } else { "group" };
                         typ.encode(e)
                     }));
                     try!(e.emit_struct_field("title", 2, |e| {
@@ -325,7 +325,7 @@ impl Encodable for Chat {
                     Ok(())
                 })
             },
-            &Chat::Channel { ref id, ref title, ref name} => {
+            &Chat::Channel { id, ref title, ref name} => {
                 e.emit_struct("Channel", 3, |e| {
                     try!(e.emit_struct_field("id", 0, |e| {
                         id.encode(e)
