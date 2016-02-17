@@ -654,7 +654,7 @@ impl_encode!(ReplyKeyboardMarkup, 4,
 
 /// Strongly typed ParseMode. Instead of passing a String to the
 /// `send_message` method, this is used.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum ParseMode {
     Markdown,
     Html,
