@@ -179,7 +179,7 @@ impl Encodable for ChatAction {
 }
 
 // ---------------------------------------------------------------------------
-/// Either a User or a GroupChat. Used in "chat" field of Message. Has some
+/// Either a Private or a Group or a Channel. Used in "chat" field of Message. Has some
 /// useful methods for less typing.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Chat {
