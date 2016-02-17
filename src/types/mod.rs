@@ -466,6 +466,14 @@ impl Decodable for MessageType {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct GroupToSuperGroupMigration {
+    pub from: Integer,
+    pub to: Integer,
+}
+
 // ===========================================================================
 // Telegram types directly mapped to Rust types
 // ===========================================================================
@@ -595,14 +603,6 @@ impl_encode!(Contact, 4,
 pub struct Location {
     pub longitude: Float,
     pub latitude: Float,
-}
-
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub struct GroupToSuperGroupMigration {
-    pub from: Integer,
-    pub to: Integer,
 }
 
 // ---------------------------------------------------------------------------
