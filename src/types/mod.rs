@@ -474,6 +474,24 @@ pub struct GroupToSuperGroupMigration {
     pub to: Integer,
 }
 
+// ---------------------------------------------------------------------------
+/// Strongly typed ParseMode. Instead of passing a String to the
+/// `send_message` method, this is used.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum ParseMode {
+    Markdown,
+    Html,
+}
+
+impl fmt::Display for ParseMode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match *self {
+            ParseMode::Markdown => "Markdown",
+            ParseMode::Html => "HTML",
+        })
+    }
+}
+
 // ===========================================================================
 // Telegram types directly mapped to Rust types
 // ===========================================================================
@@ -649,25 +667,6 @@ impl Default for ReplyKeyboardMarkup {
 impl_encode!(ReplyKeyboardMarkup, 4,
     [0 => keyboard],
     [1 => resize_keyboard, 2 => one_time_keyboard, 3 => selective]);
-
-// ---------------------------------------------------------------------------
-
-/// Strongly typed ParseMode. Instead of passing a String to the
-/// `send_message` method, this is used.
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum ParseMode {
-    Markdown,
-    Html,
-}
-
-impl fmt::Display for ParseMode {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match *self {
-            ParseMode::Markdown => "Markdown",
-            ParseMode::Html => "HTML",
-        })
-    }
-}
 
 // ===========================================================================
 // Unit tests (mainly encode & decode)
