@@ -25,6 +25,9 @@ All notable changes to this project will be documented in this file.
 
 ## 0.1.2 - 2015-07-30
 
+### Changed
+- `Api::long_poll` method to take `FnMut` instead of `Fn`.
+
 ## 0.1.1 - 2015-07-26
 
 ## 0.1.0 - 2015-06-30
