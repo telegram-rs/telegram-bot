@@ -367,7 +367,7 @@ impl Decodable for Message {
         d.read_struct("Message", 0, |d| {
             let maybe_forward_from = try!(d.read_struct_field("forward_from", 0, Decodable::decode));
             let maybe_forward_date = try!(d.read_struct_field("forward_date", 0, Decodable::decode));
-            let maybe_forward = match (maybe_forward_date, maybe_forward_from) {
+            let maybe_forward = match (maybe_forward_from, maybe_forward_date) {
                 (Some(from), Some(date)) => Some((from, date)),
                 _ => None,
             };
