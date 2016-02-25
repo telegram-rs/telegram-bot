@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 ## 0.4.1 - 2016-02-25
 
 ### Fixed
-- Fix a buf with broken forward messages.
+- Fix a bug with broken forward messages.
 
 ## 0.4.0 - 2016-02-18
 
