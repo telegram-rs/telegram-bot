@@ -1,6 +1,6 @@
 [package]
 name = "telegram-bot"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
 
 description = "A library for creating Telegram bots."
@@ -15,7 +15,7 @@ license = "MIT"
 exclude = ["deploy.sh"]
 
 [dependencies]
-hyper = "0.8"
+hyper = "0.7"
 rustc-serialize = "0.3"
 url = "0.5"
-multipart = "0.3"
+multipart = "0.5"
