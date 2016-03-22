@@ -480,10 +480,10 @@ impl Api {
         let mut req = try!(Multipart::from_request(r));
 
         for &(k, ref v) in p.get_params().into_iter() {
-            req.write_text(k, v);
+            try!(req.write_text(k, v));
         }
 
-        match file {
+        try!(match file {
             SendPath::File(name, path) => {
                 match path.to_str() {
                     Some(p) => req.write_file(&name, p),
@@ -491,7 +491,7 @@ impl Api {
                 }
             },
             SendPath::Id(name, id) => req.write_text(&name, id),
-        };
+        });
 
         // Send request and check if it failed
         let mut resp = try!(req.send());
