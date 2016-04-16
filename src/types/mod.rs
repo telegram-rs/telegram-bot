@@ -346,12 +346,12 @@ impl Encodable for Chat {
 // ---------------------------------------------------------------------------
 #[derive(Debug, PartialEq, Clone)]
 pub struct Message {
-    pub message_id: Integer,
-    pub from: User,
-    pub chat: Chat,
-    pub date: Integer,
+    pub message_id: Integer, /// Unique message identifier
+    pub from: User, /// FIXME(Optional since 2.0) Sender, can be empty for messages sent to channels
+    pub chat: Chat, /// Conversation the message belongs to
+    pub date: Integer, /// Date the message was sent in Unix time
 
-    // forward_from and forward_date in one
+    /// forward_from and forward_date in one
     pub forward: Option<(User, Integer)>,
     pub reply: Option<Box<Message>>,
 
@@ -498,8 +498,8 @@ impl fmt::Display for ParseMode {
 /// Telegram type "User" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct User {
-    pub id: Integer,
-    pub first_name: String,
+    pub id: Integer, /// Unique identifier for this user or bot
+    pub first_name: String, /// User‘s or bot’s first name
     pub last_name: Option<String>,
     pub username: Option<String>,
 }
