@@ -396,6 +396,7 @@ pub enum MessageType {
     Video(Video),
     Contact(Contact),
     Location(Location),
+    Venue(Venue),
     NewChatParticipant(User),
     LeftChatParticipant(User),
     NewChatTitle(String),
@@ -621,6 +622,16 @@ impl_encode!(Contact, 4,
 pub struct Location {
     pub longitude: Float,
     pub latitude: Float,
+}
+
+// ---------------------------------------------------------------------------
+/// Telegram type "Venue" (directly mapped)
+#[derive(RustcDecodable, RustcEncodable, Debug, PartialEq, Clone)]
+pub struct Venue {
+    pub location: Location,
+    pub title: String,
+    pub address: String,
+    pub foursquare_id: String,
 }
 
 // ---------------------------------------------------------------------------
