@@ -658,7 +658,7 @@ pub struct UserProfilePhotos {
 /// Telegram type "ReplyKeyboardMarkup" (directly mapped)
 #[derive(RustcDecodable, Debug, PartialEq, Clone)]
 pub struct ReplyKeyboardMarkup {
-    pub keyboard: Vec<Vec<String>>,
+    pub keyboard: Vec<Vec<KeyboardButton>>,
     pub resize_keyboard: Option<bool>,
     pub one_time_keyboard: Option<bool>,
     pub selective: Option<bool>,
@@ -679,6 +679,51 @@ impl_encode!(ReplyKeyboardMarkup, 4,
     [0 => keyboard],
     [1 => resize_keyboard, 2 => one_time_keyboard, 3 => selective]);
 
+// ---------------------------------------------------------------------------
+/// Telegram type "KeyboardButton" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
+pub struct KeyboardButton {
+    pub text: String,
+    pub request_contact: Option<bool>,
+    /// Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
+    pub request_location: Option<bool>,
+}
+
+impl Default for KeyboardButton {
+    fn default() -> Self {
+        KeyboardButton {
+            text: "".into(),
+            request_contact: None,
+            request_location: None,
+        }
+    }
+}
+impl From<&'static str> for KeyboardButton {
+    fn from(text: &'static str) -> Self {
+        KeyboardButton::new(text, None, None)
+    }
+}
+impl From<String> for KeyboardButton {
+    fn from(text: String) -> Self {
+        KeyboardButton::new(text, None, None)
+    }
+}
+impl KeyboardButton {
+    pub fn new<S>(text : S, request_contact: Option<bool>, request_location: Option<bool
+    >) -> Self where S: Into<String> {
+        KeyboardButton {
+            text: text.into(),
+            request_contact: request_contact,
+            request_location: request_location,
+        }
+    }
+}
+
+impl_encode!(KeyboardButton, 3,
+    [0 => text],
+    [1 => request_contact, 2 => request_location]);
+
+    
 // ===========================================================================
 // Unit tests (mainly encode & decode)
 // ===========================================================================

@@ -31,8 +31,9 @@ fn main() {
 
                     // Define one time response keyboard
                     let keyboard = ReplyKeyboardMarkup {
-                        keyboard: vec![vec![t],
-                                       vec!["Yes".into(), "No".into()]],
+                        keyboard: vec![vec![t.into()],
+                                       vec!["Yes".into(), "No".into()],
+                                       vec![KeyboardButton::new("Your number", Some(true), None), KeyboardButton::new("Your location", None, Some(true))]],
                        one_time_keyboard: Some(true),
                         .. Default::default()
                     };

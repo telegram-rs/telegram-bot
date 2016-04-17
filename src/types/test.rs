@@ -4,6 +4,7 @@ use rustc_serialize::json;
 #[test]
 fn reply_keyboard_markup() {
     use ReplyKeyboardMarkup as RKM;
+    use KeyboardButton as KB;
 
     // Test default values
     assert_eq!(RKM::default(), RKM {
@@ -22,12 +23,15 @@ fn reply_keyboard_markup() {
         r#"{"keyboard":[],"resize_keyboard":true}"#.to_string());
 
     let x = RKM {
-        keyboard: vec![vec!["ABC".into()], vec!["X".into(), "Y".into()]],
+        keyboard: vec![
+            vec![ KB::new("Send Contact", Some(true), None), KB::new("Send Location", None, Some(true)) ], 
+            vec![ "Just Text".into(), "Another Text".into() ]
+        ],
         resize_keyboard: Some(false),
         ..Default::default()
     };
     assert_eq!(json::encode(&x).unwrap(),
-        r#"{"keyboard":[["ABC"],["X","Y"]],"resize_keyboard":false}"#.to_string());
+        r#"{"keyboard":[[{"text":"Send Contact","request_contact":true},{"text":"Send Location","request_location":true}],[{"text":"Just Text"},{"text":"Another Text"}]],"resize_keyboard":false}"#.to_string());
 }
 
 #[test]
