@@ -402,8 +402,10 @@ pub enum MessageType {
     NewChatPhoto(Vec<PhotoSize>),
     DeleteChatPhoto,
     GroupChatCreated,
-    SuperGroupChatCreated(GroupToSuperGroupMigration),
     ChannelChatCreated,
+    SuperGroupChatCreated,
+    MigrateFromChatId(Integer),
+    MigrateToChatId(Integer),
 }
 
 impl Decodable for MessageType {
@@ -437,6 +439,8 @@ impl Decodable for MessageType {
         maybe_field!(d, "left_chat_participant", LeftChatParticipant);
         maybe_field!(d, "new_chat_title", NewChatTitle);
         maybe_field!(d, "new_chat_photo", NewChatPhoto);
+        maybe_field!(d, "migrate_from_chat_id", MigrateFromChatId);
+        maybe_field!(d, "migrate_to_chat_id", MigrateToChatId);
 
         // Message types without additional data
         if let Some(true) = try!(d.read_struct_field(
@@ -450,10 +454,7 @@ impl Decodable for MessageType {
 
         if let Some(true) = try!(d.read_struct_field(
             "supergroup_chat_created", 0, Decodable::decode)) {
-            return Ok(MessageType::SuperGroupChatCreated(GroupToSuperGroupMigration {
-                from: try_field!(d, "migrate_from_chat_id"),
-                to: try_field!(d, "migrate_to_chat_id"),
-            }))
+            return Ok(MessageType::SuperGroupChatCreated);
         };
 
         if let Some(true) = try!(d.read_struct_field(
