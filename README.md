@@ -57,7 +57,11 @@ fn main() {
     }
 }
 ```
-You can find a bigger example in the `examples` folder.
+You can find a bigger example in the `examples` folder and run them like this:
+
+```bash
+TELEGRAM_BOT_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXxx cargo run --example features
+```
 
 ## Usage
 This library is available via `crates.io`. In order to use it, just add this to your `Cargo.toml`:
@@ -69,7 +73,7 @@ telegram-bot = "0.4"
 ## Collaboration
 Yes please! Every type of contribution is welcome: Create issues, hack some code or make suggestions. If you don't know where to start, just contact me (my email is on my github profile).
 
-Please submit pull request against the `dev` branch, unless all changes are just documentation fixes.
+Please submit pull request against the `master` branch, unless all changes are just documentation fixes.
 
 ## Todo
 
