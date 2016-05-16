@@ -55,6 +55,10 @@
 //!
 //! There are two examples in the `examples/` directory in the project's
 //! repository.
+
+#[macro_use]
+extern crate log;
+
 extern crate hyper;
 extern crate rustc_serialize;
 extern crate url;
@@ -587,6 +591,7 @@ pub enum ListeningMethod {
 /// A listening handler returns this type to signal the listening-method either
 /// to stop or to continue. If a handler returns `Stop`, the update it was
 /// passed counts as "handled" and won't be handled again.
+#[derive(Debug)]
 pub enum ListeningAction {
     Continue,
     Stop
@@ -652,7 +657,15 @@ impl Listener {
                 loop {
                     // Receive updates with correct offset. We don't specify a
                     // limit (Telegram limits to 100 automatically).
-                    let updates = try!(self.send_get_updates(handled_until, timeout, None));
+                    let updates = match self.send_get_updates(handled_until, timeout, None) {
+                        Ok(val) => val,
+                        Err(e) => {
+                            // TODO Add better logic here to distinguish between
+                            //      transient and persistent errors.
+                            error!("{:?}", e);
+                            continue
+                        }
+                    };
 
                     self.confirmed = handled_until;
 
@@ -662,7 +675,6 @@ impl Listener {
 
                         // Execute the handler and save it's result.
                         let res = handler(u);
-
                         // If an error was returned: Confirm the update before
                         // (if necessary) and return the given error.
                         if let Err(e) = res {
@@ -670,6 +682,7 @@ impl Listener {
                             // updates.
                             // We don't specify a timeout (Telegram timeout 0 seconds by default)
                             let _ = try!(self.send_get_updates(handled_until, None, Some(0)));
+                            error!("{:?}", e);
                             self.confirmed = handled_until;
 
                             return Err(e);
