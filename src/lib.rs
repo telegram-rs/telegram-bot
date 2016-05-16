@@ -74,6 +74,7 @@ use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc;
+use std::time::Duration;
 use std::thread;
 use hyper::{Client, Url};
 use hyper::client::IntoUrl;
@@ -97,6 +98,13 @@ enum SendPath {
     Id(String, String),
 }
 
+fn create_default_client() -> Client {
+    let mut c = Client::new();
+    c.set_read_timeout(Some(Duration::new(5, 0)));
+    c.set_write_timeout(Some(Duration::new(5, 0)));
+    c
+}
+
 /// Main type for sending requests to the Telegram bot API.
 ///
 /// You can create an `API` object via `from_token` or `from_env`. A `Listener`
@@ -112,7 +120,7 @@ impl Clone for Api {
     fn clone(&self) -> Api {
         Api {
             url: self.url.clone(),
-            client: Client::new(),
+            client: create_default_client(),
         }
     }
 }
@@ -133,7 +141,7 @@ impl Api {
         };
         Ok(Api {
             url: url,
-            client: Client::new(),
+            client: create_default_client(),
         })
     }
 
@@ -434,7 +442,7 @@ impl Api {
             method: method,
             confirmed: 0,
             url: self.url.clone(),
-            client: Client::new(),
+            client: create_default_client()
         }
     }
 
@@ -662,7 +670,6 @@ impl Listener {
                             // updates.
                             // We don't specify a timeout (Telegram timeout 0 seconds by default)
                             let _ = try!(self.send_get_updates(handled_until, None, Some(0)));
-
                             self.confirmed = handled_until;
 
                             return Err(e);
