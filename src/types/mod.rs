@@ -577,12 +577,13 @@ pub struct Sticker {
     pub width: Integer,
     pub height: Integer,
     pub thumb: Option<PhotoSize>,
+    pub emoji: Option<String>,
     pub file_size: Option<Integer>,
 }
 
-impl_encode!(Sticker, 5,
-    [0 => file_id, 1 => width, 2 => height, 3 => thumb],
-    [4 => file_size]);
+impl_encode!(Sticker, 6,
+    [0 => file_id, 1 => width, 2 => height],
+    [3 => thumb, 4 => emoji, 5 => file_size]);
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Video" (directly mapped)
