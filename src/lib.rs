@@ -179,6 +179,30 @@ impl Api {
         self.send_request("sendMessage", params, RequestType::Post)
     }
 
+     /// Corresponds to the "editMessageText" method of the API.
+    pub fn edit_message_text(&self,
+                             chat_id: Option<Integer>,
+                             message_id: Option<Integer>,
+                             inline_message_id: Option<String>,
+                             text: String,
+                             parse_mode: Option<ParseMode>,
+                             disable_web_page_preview: Option<bool>,
+                             reply_markup: Option<ReplyMarkup>)
+                             -> Result<Message> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get_opt("chat_id", chat_id);
+        params.add_get_opt("message_id", message_id);
+        params.add_get_opt("inline_message_id",inline_message_id);
+        params.add_get("text", text);
+        params.add_get_opt("parse_mode", parse_mode);
+        params.add_get_opt("disable_web_page_preview", disable_web_page_preview);
+        try!(params.add_get_json_opt("reply_markup", reply_markup));
+
+        // Execute request
+        self.send_request("editMessageText", params, RequestType::Post)
+    }
+
     /// Corresponds to the "forwardMessage" method of the API.
     pub fn forward_message(&self, chat_id: Integer, from_chat_id: Integer,
                            message_id: Integer) -> Result<Message> {
