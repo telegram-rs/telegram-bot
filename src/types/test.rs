@@ -171,3 +171,37 @@ fn decode_get_updates_response() {
 
     let _: Response<Vec<Update>> = json::decode(&blob).unwrap();
 }
+
+#[test]
+fn test_handle_unknown_message_type() {
+    use Response;
+    use Update;
+    use MessageType;
+
+    let blob = r#"{
+        "result" : [
+            {
+                "message" : {
+                    "foo": "bar",
+                    "from" : {
+                        "username" : "test",
+                        "id" : 123456789,
+                        "first_name" : "Test"
+                    },
+                    "date" : 1437821579,
+                    "message_id" : 78,
+                    "chat" : {
+                        "username" : "test",
+                        "id" : 123456789,
+                        "first_name" : "Test",
+                        "type": "private"
+                    }
+                },
+                "update_id" : 123456789
+            }
+        ],
+        "ok" : true
+    }"#;
+    let response: Response<Vec<Update>> = json::decode(&blob).unwrap();
+    assert_eq!(response.result.unwrap().remove(0).message.unwrap().msg, MessageType::Unknown);
+}

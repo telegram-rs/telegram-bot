@@ -404,6 +404,7 @@ pub enum MessageType {
     GroupChatCreated,
     SuperGroupChatCreated(GroupToSuperGroupMigration),
     ChannelChatCreated,
+    Unknown,
 }
 
 impl Decodable for MessageType {
@@ -461,8 +462,8 @@ impl Decodable for MessageType {
             return Ok(MessageType::ChannelChatCreated);
         };
 
-        // None of the tested fields is present: This is an error
-        Err(d.error("No field for inferring message type is set"))
+        // None of the tested fields is present.
+        Ok(MessageType::Unknown)
     }
 }
 
