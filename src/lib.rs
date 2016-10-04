@@ -470,11 +470,10 @@ impl Api {
         // Prepare URL for request: Clone and change the last path fragment
         // to the method name and append GET parameters.
         let mut url = url.clone();
-        url.path_mut().map(|path| {         // if theres a path: Change it
-            path.last_mut().map(|last| {    // if its not empty: Change last...
-                *last = method.into()       // ... into method name
-            })
-        });
+        // if theres a path: Change it
+        if let Ok(mut segments_mut) = url.path_segments_mut() {
+            segments_mut.pop().push(method.into()); // Change last into method name
+        }
 
         let r = try!(Request::new(Method::Post, url));
         let mut req = try!(Multipart::from_request(r));
@@ -523,11 +522,10 @@ impl Api {
         // Prepare URL for request: Clone and change the last path fragment
         // to the method name and append GET parameters.
         let mut url = url.clone();
-        url.path_mut().map(|path| {         // if theres a path: Change it
-            path.last_mut().map(|last| {    // if its not empty: Change last...
-                *last = method.into()       // ... into method name
-            })
-        });
+        // if theres a path: Change it
+        if let Ok(mut segments_mut) = url.path_segments_mut() {
+            segments_mut.pop().push(method.into()); // Change last into method name
+        }
 
         // Change the parameters to a well formed url-encoded string.
         // Change connect("&") to join("&") when rust 1.3 becomes stable
