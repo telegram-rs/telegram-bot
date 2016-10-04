@@ -204,5 +204,4 @@ fn test_handle_unknown_message_type() {
     }"#;
     let response: Response<Vec<Update>> = json::decode(&blob).unwrap();
     assert_eq!(response.result.unwrap().remove(0).message.unwrap().msg, MessageType::Unknown);
-
 }
