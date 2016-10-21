@@ -698,13 +698,18 @@ impl Default for KeyboardButton {
         }
     }
 }
-impl From<&'static str> for KeyboardButton {
-    fn from(text: &'static str) -> Self {
-        KeyboardButton::new(text, None, None)
-    }
-}
-impl From<String> for KeyboardButton {
-    fn from(text: String) -> Self {
+//impl From<&'static str> for KeyboardButton {
+//    fn from(text: &'static str) -> Self {
+//        KeyboardButton::new(text, None, None)
+//    }
+//}
+//impl From<String> for KeyboardButton {
+//    fn from(text: String) -> Self {
+//        KeyboardButton::new(text, None, None)
+//    }
+//}
+impl From<Into<String>> for KeyboardButton {
+    fn from(text: Into<String>) -> Self {
         KeyboardButton::new(text, None, None)
     }
 }
