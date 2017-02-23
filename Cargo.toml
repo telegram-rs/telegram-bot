@@ -1,21 +1,2 @@
-[package]
-name = "telegram-bot"
-version = "0.5.0"
-authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
-
-description = "A library for creating Telegram bots."
-
-documentation = "https://lukaskalbertodt.github.io/telegram-bot/telegram_bot/"
-repository = "https://github.com/LukasKalbertodt/telegram-bot"
-readme = "README.md"
-
-keywords = ["telegram", "bot", "chat", "api"]
-license = "MIT"
-
-exclude = ["deploy.sh"]
-
-[dependencies]
-hyper = "0.9"
-rustc-serialize = "0.3"
-url = "1.2.0"
-multipart = "0.8"
+[workspace]
+members = ["raw"]
