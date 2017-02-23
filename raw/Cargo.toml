@@ -16,3 +16,6 @@ license = "MIT"
 serde = "0.9.8"
 #serde_json = "0.9.8"
 serde_derive = "0.9.8"
+
+[dev-dependencies]
+serde_json = "0.9.8"

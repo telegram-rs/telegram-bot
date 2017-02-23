@@ -1,0 +1,19 @@
+{
+  "update_id": 424151280,
+  "message": {
+    "message_id": 1,
+    "from": {
+      "id": 174976101,
+      "first_name": "Fedor",
+      "last_name": "Gogolev",
+      "username": "FedorGogolev"
+    },
+    "chat": {
+      "id": -1001113717682,
+      "title": "supergroup-test-knsd",
+      "type": "supergroup"
+    },
+    "date": 1487852026,
+    "migrate_from_chat_id": -216055857
+  }
+}
