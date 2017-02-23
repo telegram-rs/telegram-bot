@@ -3,6 +3,11 @@ rust:
   - nightly
   - beta
   - stable
+
+script:
+  - cargo build --verbose -p telegram-bot-raw
+  - cargo test --verbose -p telegram-bot-raw
+
 after_success:
   - |
         test ${TRAVIS_PULL_REQUEST} == "false" && \
