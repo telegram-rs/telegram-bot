@@ -4,11 +4,19 @@ Rust Telegram Bot Library
 [![License](https://img.shields.io/github/license/LukasKalbertodt/telegram-bot.svg)]()
 [![Crates.io](https://img.shields.io/crates/v/telegram-bot.svg)](https://crates.io/crates/telegram-bot)
 
-[**Documentation**](https://lukaskalbertodt.github.io/telegram-bot/telegram_bot/)
+<table>
+  <tbody>
+    <tr>
+      <td><b>Documentation:</b></td>
+      <td><a href="https://docs.rs/telegram-bot/0.5.0/telegram_bot/">Latest crates.io version</a></td>
+      <td><a href="https://lukaskalbertodt.github.io/telegram-bot/telegram_bot/"><code>master</code></a></td>
+    </tr>
+  </tbody>
+</table>
 
-A library for writing your own [Telegram](https://telegram.org/) bots. More information [here](https://core.telegram.org/bots). Official API [here](https://core.telegram.org/bots/api). 
+A library for writing your own [Telegram](https://telegram.org/) bots. More information [here](https://core.telegram.org/bots). Official API [here](https://core.telegram.org/bots/api).
 
-## **Warning!** 
+## **Warning!**
 
 This library will undergo a major rewrite in the next few months. Currently the **development is stalled** and many new API parts are not supported right now! If you need to write a production ready application, either wait or use another (non-Rust) library. We're sorry :(
 
