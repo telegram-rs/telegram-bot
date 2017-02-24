@@ -96,7 +96,7 @@ pub enum MessageKind {
     }
 }
 
-impl Deserialize for Message {
+impl Deserialize for Message {  // TODO(knsd): Remove .clone()
     fn deserialize<D>(deserializer: D) -> Result<Message, D::Error> where D: Deserializer {
         let raw: RawMessage = Deserialize::deserialize(deserializer)?;
 
