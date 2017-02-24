@@ -1,7 +1,7 @@
 Rust Telegram Bot Library
 =========================
-[![Build Status](https://img.shields.io/travis/LukasKalbertodt/telegram-bot/master.svg)](https://travis-ci.org/LukasKalbertodt/telegram-bot)
-[![License](https://img.shields.io/github/license/LukasKalbertodt/telegram-bot.svg)]()
+[![Build Status](https://img.shields.io/travis/telegram-rs/telegram-bot/master.svg)](https://travis-ci.org/telegram-rs/telegram-bot)
+[![License](https://img.shields.io/github/license/telegram-rs/telegram-bot.svg)]()
 [![Crates.io](https://img.shields.io/crates/v/telegram-bot.svg)](https://crates.io/crates/telegram-bot)
 
 <table>
@@ -9,7 +9,7 @@ Rust Telegram Bot Library
     <tr>
       <td><b>Documentation:</b></td>
       <td><a href="https://docs.rs/telegram-bot/0.5.0/telegram_bot/">Latest crates.io version</a></td>
-      <td><a href="https://lukaskalbertodt.github.io/telegram-bot/telegram_bot/"><code>master</code></a></td>
+      <td><a href="https://telegram-rs.github.io/telegram-bot/telegram_bot/"><code>master</code></a></td>
     </tr>
   </tbody>
 </table>
@@ -21,7 +21,7 @@ A library for writing your own [Telegram](https://telegram.org/) bots. More info
 This library will undergo a major rewrite in the next few months. Currently the **development is stalled** and many new API parts are not supported right now! If you need to write a production ready application, either wait or use another (non-Rust) library. We're sorry :(
 
 ## Example
-Here is a simple example (see [`example/simple.rs`](https://github.com/LukasKalbertodt/telegram-bot/blob/master/examples/simple.rs)):
+Here is a simple example (see [`example/simple.rs`](https://github.com/telegram-rs/telegram-bot/blob/master/examples/simple.rs)):
 
 ``` rust
 extern crate telegram_bot;
