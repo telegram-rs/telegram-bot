@@ -1,3 +1,5 @@
+use std::ops::Not;
+
 use serde::ser::{Serialize, Serializer};
 
 use types::primitive::*;
@@ -5,21 +7,27 @@ use types::primitive::*;
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ReplyKeyboardMarkup {
     pub keyboard: Vec<Vec<KeyboardButton>>,
+    #[serde(skip_serializing_if = "Not::not")]
     pub resize_keyboard: bool,
+    #[serde(skip_serializing_if = "Not::not")]
     pub one_time_keyboard: bool,
+    #[serde(skip_serializing_if = "Not::not")]
     pub selective: bool
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct KeyboardButton {
     pub text: String,
+    #[serde(skip_serializing_if = "Not::not")]
     pub request_contact: bool,
+    #[serde(skip_serializing_if = "Not::not")]
     pub request_location: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ReplyKeyboardRemove {
     pub remove_keyboard: True,
+    #[serde(skip_serializing_if = "Not::not")]
     pub selective: bool,
 }
 
@@ -71,9 +79,13 @@ pub enum InlineKeyboardButtonKind {
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 struct InlineKeyboardButtonRaw<'a> {
     text: &'a str,
+    #[serde(skip_serializing_if = "Option::is_none")]
     url: Option<&'a str>, // TODO(knsd): Url?
+    #[serde(skip_serializing_if = "Option::is_none")]
     callback_data: Option<&'a str>, //TODO(knsd) Validate size?
+    #[serde(skip_serializing_if = "Option::is_none")]
     switch_inline_query: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     switch_inline_query_current_chat: Option<&'a str>,
 //    callback_game: Option<CallbackGame>,
 }
@@ -82,5 +94,6 @@ struct InlineKeyboardButtonRaw<'a> {
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ForceReply {
     pub force_reply: True,
-    pub selective: Option<bool>,
+    #[serde(skip_serializing_if = "Not::not")]
+    pub selective: bool,
 }
