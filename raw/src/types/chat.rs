@@ -41,6 +41,18 @@ pub enum Chat {
     Unknown(RawChat),
 }
 
+impl Chat {
+    pub fn id(&self) -> Integer {
+        match *self {
+            Chat::Private(ref x) => x.id,
+            Chat::Group(ref x) => x.id,
+            Chat::Supergroup(ref x) => x.id,
+            Chat::Channel(ref x) => x.id,
+            Chat::Unknown(ref x) => x.id,
+        }
+    }
+}
+
 impl Deserialize for Chat {
     fn deserialize<D>(deserializer: D) -> Result<Chat, D::Error> where D: Deserializer {
         let raw: RawChat = Deserialize::deserialize(deserializer)?;
