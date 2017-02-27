@@ -5,6 +5,10 @@ use types::message::*;
 use types::primitive::*;
 use types::reply_markup::*;
 
+pub trait Request {
+    type Response;
+}
+
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum ChatId<'a> {
     ById(Integer),
