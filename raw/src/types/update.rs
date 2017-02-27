@@ -1,7 +1,6 @@
 use serde::de::{Deserialize, Deserializer};
 
-use types::primitive::*;
-use types::message::*;
+use types::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Update {

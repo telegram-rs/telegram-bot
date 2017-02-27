@@ -1,4 +1,4 @@
-use types::primitive::*;
+use types::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct ResponseParameters {

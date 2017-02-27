@@ -1,5 +1,5 @@
 use requests::_base::*;
-use types::chat::*;
+use types::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct GetMe;

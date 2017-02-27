@@ -3,7 +3,7 @@ use std::fmt;
 use serde::de;
 use serde::de::{Deserialize, Deserializer, Visitor};
 
-use types::chat::*;
+use types::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum ChatMemberStatus {

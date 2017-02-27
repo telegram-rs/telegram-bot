@@ -1,8 +1,6 @@
 use std::ops::Not;
 
-use types::chat::*;
-use types::primitive::*;
-use types::message::*;
+use types::*;
 use requests::_base::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

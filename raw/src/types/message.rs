@@ -1,7 +1,6 @@
 use serde::de::{Deserialize, Deserializer, Error};
 
-use types::primitive::*;
-use types::chat::*;
+use types::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Message {

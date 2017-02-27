@@ -1,6 +1,5 @@
 use requests::_base::*;
-use types::primitive::*;
-use types::update::*;
+use types::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct GetUpdates {

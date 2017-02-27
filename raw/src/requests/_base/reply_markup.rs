@@ -2,7 +2,7 @@ use std::ops::Not;
 
 use serde::ser::{Serialize, Serializer};
 
-use types::primitive::*;
+use types::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ReplyKeyboardMarkup {
