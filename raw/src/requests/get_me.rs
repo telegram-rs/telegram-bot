@@ -1,4 +1,4 @@
-use requests::_base::*;
+use requests::*;
 use types::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]

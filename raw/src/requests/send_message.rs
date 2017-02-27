@@ -1,7 +1,7 @@
 use std::ops::Not;
 
 use types::*;
-use requests::_base::*;
+use requests::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendMessage<'c, 's> {
