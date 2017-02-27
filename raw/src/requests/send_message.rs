@@ -21,6 +21,10 @@ pub struct SendMessage<'c, 's> {
     pub reply_markup: Option<ReplyMarkup>,
 }
 
+impl<'c, 's> Request for SendMessage<'c, 's> {
+    type Response = Message;
+}
+
 impl<'c, 's> SendMessage<'c, 's> {
     pub fn new<C>(chat: C, text: &'s str) -> Self where C: Into<ChatId<'c>> {
         SendMessage {
