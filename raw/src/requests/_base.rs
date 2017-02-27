@@ -30,6 +30,12 @@ impl<'a> Serialize for ChatId<'a> {
     }
 }
 
+impl<'a> From<Integer> for ChatId<'a> {
+    fn from(value: Integer) -> ChatId<'a> {
+        ChatId::from_id(value)
+    }
+}
+
 impl<'a> From<&'a Chat> for ChatId<'a> {
     fn from(value: &'a Chat) -> ChatId<'a> {
         ChatId::from_id(value.id())
