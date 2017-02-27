@@ -1,2 +1,2 @@
 [workspace]
-members = ["raw"]
+members = ["raw", "tokio"]

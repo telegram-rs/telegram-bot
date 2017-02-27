@@ -1,0 +1,17 @@
+[package]
+name = "telegram-bot-tokio"
+version = "0.5.0"
+authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
+
+description = "A library for creating Telegram bots."
+
+keywords = ["telegram", "bot", "chat", "api"]
+license = "MIT"
+
+[dependencies]
+serde = "0.9.8"
+tokio-core = "0.1.4"
+
+[dependencies.hyper]
+git = "https://github.com/hyperium/hyper.git"
+rev = "2fa414fb5fe6dbc922da25cca9960652edf32591"
