@@ -6,4 +6,8 @@ pub struct GetMe;
 
 impl Request for GetMe {
     type Response = User;
+
+    fn name() -> &'static str {
+        "getMe"
+    }
 }

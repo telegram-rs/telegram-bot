@@ -11,6 +11,10 @@ pub struct GetUpdates {
 
 impl Request for GetUpdates {
     type Response = Vec<Update>;
+
+    fn name() -> &'static str {
+        "getUpdates"
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
