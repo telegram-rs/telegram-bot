@@ -1,9 +1,11 @@
-mod reply_markup;
+#[macro_use]
+pub mod reply_markup;
 
 use serde::ser::{Serialize, Serializer};
 
 use types::*;
-use requests::_base::reply_markup::*;
+
+pub use self::reply_markup::*;
 
 pub trait Request {
     type Response;
@@ -73,25 +75,6 @@ impl Serialize for ParseMode {
             ParseMode::Markdown => "markdown",
             ParseMode::HTML => "HTML",
         })
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub enum ReplyMarkup {
-    InlineKeyboardMarkup(InlineKeyboardMarkup),
-    ReplyKeyboardMarkup(ReplyKeyboardMarkup),
-    ReplyKeyboardRemove(ReplyKeyboardRemove),
-    ForceReply(ForceReply),
-}
-
-impl Serialize for ReplyMarkup {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-        match *self {
-            ReplyMarkup::InlineKeyboardMarkup(ref value) => value.serialize(serializer),
-            ReplyMarkup::ReplyKeyboardMarkup(ref value) => value.serialize(serializer),
-            ReplyMarkup::ReplyKeyboardRemove(ref value) => value.serialize(serializer),
-            ReplyMarkup::ForceReply(ref value) => value.serialize(serializer),
-        }
     }
 }
 

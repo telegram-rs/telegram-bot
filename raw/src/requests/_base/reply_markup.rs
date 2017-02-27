@@ -4,6 +4,49 @@ use serde::ser::{Serialize, Serializer};
 
 use types::*;
 
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub enum ReplyMarkup {
+    InlineKeyboardMarkup(InlineKeyboardMarkup),
+    ReplyKeyboardMarkup(ReplyKeyboardMarkup),
+    ReplyKeyboardRemove(ReplyKeyboardRemove),
+    ForceReply(ForceReply),
+}
+
+impl From<InlineKeyboardMarkup> for ReplyMarkup {
+    fn from(value: InlineKeyboardMarkup) -> ReplyMarkup {
+        ReplyMarkup::InlineKeyboardMarkup(value)
+    }
+}
+
+impl From<ReplyKeyboardMarkup> for ReplyMarkup {
+    fn from(value: ReplyKeyboardMarkup) -> ReplyMarkup {
+        ReplyMarkup::ReplyKeyboardMarkup(value)
+    }
+}
+
+impl From<ReplyKeyboardRemove> for ReplyMarkup {
+    fn from(value: ReplyKeyboardRemove) -> ReplyMarkup {
+        ReplyMarkup::ReplyKeyboardRemove(value)
+    }
+}
+
+impl From<ForceReply> for ReplyMarkup {
+    fn from(value: ForceReply) -> ReplyMarkup {
+        ReplyMarkup::ForceReply(value)
+    }
+}
+
+impl Serialize for ReplyMarkup {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        match *self {
+            ReplyMarkup::InlineKeyboardMarkup(ref value) => value.serialize(serializer),
+            ReplyMarkup::ReplyKeyboardMarkup(ref value) => value.serialize(serializer),
+            ReplyMarkup::ReplyKeyboardRemove(ref value) => value.serialize(serializer),
+            ReplyMarkup::ForceReply(ref value) => value.serialize(serializer),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ReplyKeyboardMarkup {
     pub keyboard: Vec<Vec<KeyboardButton>>,
@@ -15,6 +58,17 @@ pub struct ReplyKeyboardMarkup {
     pub selective: bool
 }
 
+impl ReplyKeyboardMarkup {
+    pub fn new() -> Self {
+        ReplyKeyboardMarkup {
+            keyboard: Vec::new(),
+            resize_keyboard: false,
+            one_time_keyboard: false,
+            selective: false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct KeyboardButton {
     pub text: String,
@@ -22,6 +76,16 @@ pub struct KeyboardButton {
     pub request_contact: bool,
     #[serde(skip_serializing_if = "Not::not")]
     pub request_location: bool,
+}
+
+impl<'a> From<&'a str> for KeyboardButton {
+    fn from(value: &'a str) -> KeyboardButton {
+        KeyboardButton {
+            text: value.to_string(),
+            request_contact: false,
+            request_location: false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

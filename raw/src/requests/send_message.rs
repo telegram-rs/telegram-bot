@@ -56,8 +56,8 @@ impl<'c, 's> SendMessage<'c, 's> {
         self
     }
 
-    pub fn reply_markup(mut self, reply_markup: ReplyMarkup) -> Self { // TODO(knsd): nice builder?
-        self.reply_markup = Some(reply_markup);
+    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
+        self.reply_markup = Some(reply_markup.into());
         self
     }
 }
