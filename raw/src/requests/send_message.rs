@@ -81,6 +81,17 @@ send_chat_type!(Group);
 send_chat_type!(Supergroup);
 send_chat_type!(Channel);
 
+impl ForwardFrom {
+    pub fn text<'c, 's>(&'c self, text: &'s str) -> SendMessage<'c, 's> {
+        let id = match *self {
+            ForwardFrom::User {ref user, ..} => user.id,
+            ForwardFrom::Channel {ref channel, ..} => channel.id,
+        };
+
+        SendMessage::new(id, text)
+    }
+}
+
 impl Message {
     pub fn text_reply<'c, 's>(&'c self, text: &'s str) -> SendMessage<'c, 's> {
         self.chat.text(text).reply_to(self)
