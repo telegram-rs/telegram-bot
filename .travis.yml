@@ -7,6 +7,8 @@ rust:
 script:
   - cargo build --verbose -p telegram-bot-raw
   - cargo test --verbose -p telegram-bot-raw
+  - cargo build --verbose -p telegram-bot-tokio
+  - cargo test --verbose -p telegram-bot-tokio
 
 after_success:
   - |
