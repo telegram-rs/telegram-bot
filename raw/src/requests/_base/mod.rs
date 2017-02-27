@@ -1,9 +1,11 @@
+mod reply_markup;
+
 use serde::ser::{Serialize, Serializer};
 
 use types::chat::*;
 use types::message::*;
 use types::primitive::*;
-use types::reply_markup::*;
+use requests::_base::reply_markup::*;
 
 pub trait Request {
     type Response;
