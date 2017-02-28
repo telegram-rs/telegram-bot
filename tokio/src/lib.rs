@@ -57,20 +57,18 @@ pub struct Bot {
 
 #[derive(Debug, Clone)]
 struct BotInner {
-    base_url: Url,
+    token: String,
     client: Client<HttpsConnector>,
 }
 
 impl Bot {
     pub fn from_token(handle: &Handle, token: &str) -> Result<Self> {
-        let base_url = Url::parse(&format!("{}{}/", TELEGRAM_URL, token))?;
-
         let connector = HttpsConnector::new(1, handle);
         let config = Client::configure().connector(connector);
 
         Ok(Bot {
             inner: Arc::new(BotInner {
-                base_url: base_url,
+                token: token.to_string(),
                 client: config.build(handle),
             }),
         })
@@ -79,12 +77,7 @@ impl Bot {
     pub fn send<Req>(&self, request: Req) -> TelegramFuture<Req::Response>
         where Req: Request + 'static, <Req as Request>::Response: std::marker::Send + 'static {
 
-        let bot = self.clone();
-        let name = request.name();
-        let url = futures::lazy(move || {
-            result(Url::parse(&format!("{}{}", bot.inner.base_url.as_str(), name)))
-        }).map_err(From::from);
-
+        let url = result(url(&self.inner.token, request.name()));
         let body = futures::lazy(move || {
             serde_json::to_vec(&request).map(Body::from)
         }).map_err(From::from);
@@ -123,4 +116,8 @@ impl Bot {
             inner: Box::new(future)
         }
     }
+}
+
+fn url(token: &str, method: &str) -> Result<Url> {
+    Url::parse(&format!("{}bot{}/{}", TELEGRAM_URL, token, method)).map_err(From::from)
 }
