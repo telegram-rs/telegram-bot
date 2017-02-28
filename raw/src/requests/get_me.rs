@@ -1,7 +1,7 @@
 use requests::*;
 use types::*;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct GetMe;
 
 impl Request for GetMe {

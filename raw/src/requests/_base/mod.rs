@@ -1,14 +1,15 @@
 #[macro_use]
 pub mod reply_markup;
 
+use serde::de::Deserialize;
 use serde::ser::{Serialize, Serializer};
 
 use types::*;
 
 pub use self::reply_markup::*;
 
-pub trait Request {
-    type Response;
+pub trait Request: Serialize {
+    type Response: Deserialize;
 
     fn name(&self) -> &'static str;
 }
