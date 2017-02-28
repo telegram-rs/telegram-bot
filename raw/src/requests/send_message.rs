@@ -22,7 +22,7 @@ pub struct SendMessage<'c, 's> {
 impl<'c, 's> Request for SendMessage<'c, 's> {
     type Response = Message;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "sendMessage"
     }
 }

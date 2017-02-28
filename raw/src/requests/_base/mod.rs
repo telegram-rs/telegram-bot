@@ -10,7 +10,7 @@ pub use self::reply_markup::*;
 pub trait Request {
     type Response;
 
-    fn name() -> &'static str;
+    fn name(&self) -> &'static str;
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
