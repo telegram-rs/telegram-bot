@@ -12,6 +12,7 @@ license = "MIT"
 serde = "0.9.8"
 tokio-core = "0.1.4"
 url = "1.0"
+error-chain = "0.10.0"
 
 telegram-bot-raw = { version = "=0.5.0", path = "../raw" }
 
