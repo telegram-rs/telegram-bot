@@ -67,15 +67,15 @@ impl<'c, 's> SendMessage<'c, 's> {
 }
 
 pub trait CanSendMessage {
-    fn text<'c, 's>(&'c self, text: &'s str) -> SendMessage<'c, 's>;
+    fn text<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's>;
 }
 
 pub trait CanReplySendMessage {
-    fn text_reply<'c, 's>(&'c self, text: &'s str) -> SendMessage<'c, 's>;
+    fn text_reply<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's>;
 }
 
 impl CanSendMessage for Chat {
-    fn text<'c, 's>(&'c self, text: &'s str) -> SendMessage<'c, 's> {
+    fn text<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's> {
         SendMessage::new(self, text)
     }
 }
@@ -83,7 +83,7 @@ impl CanSendMessage for Chat {
 macro_rules! send_chat_type {
     ($chat: ident) => {
         impl CanSendMessage for $chat {
-            fn text<'c, 's>(&'c self, text: &'s str) -> SendMessage<'c, 's> {
+            fn text<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's> {
                 SendMessage::new(self, text)
             }
         }
@@ -96,7 +96,7 @@ send_chat_type!(Supergroup);
 send_chat_type!(Channel);
 
 impl CanSendMessage for ForwardFrom {
-    fn text<'c, 's>(&'c self, text: &'s str) -> SendMessage<'c, 's> {
+    fn text<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's> {
         let id = match *self {
             ForwardFrom::User {ref user, ..} => user.id,
             ForwardFrom::Channel {ref channel, ..} => channel.id,
@@ -107,7 +107,7 @@ impl CanSendMessage for ForwardFrom {
 }
 
 impl CanReplySendMessage for Message {
-    fn text_reply<'c, 's>(&'c self, text: &'s str) -> SendMessage<'c, 's> {
+    fn text_reply<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's> {
         self.chat.text(text).reply_to(self)
     }
 }

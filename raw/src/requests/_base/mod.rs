@@ -45,16 +45,16 @@ impl<'a> From<Integer> for ChatId<'a> {
     }
 }
 
-impl<'a> From<&'a Chat> for ChatId<'a> {
-    fn from(value: &'a Chat) -> ChatId<'a> {
+impl<'a, 'b> From<&'b Chat> for ChatId<'a> {
+    fn from(value: &'b Chat) -> ChatId<'a> {
         ChatId::from_id(value.id())
     }
 }
 
 macro_rules! from_chat_type {
     ($chat: ident) => {
-        impl<'a> From<&'a $chat> for ChatId<'a> {
-            fn from(value: &'a $chat) -> ChatId<'a> {
+        impl<'a, 'b> From<&'b $chat> for ChatId<'a> {
+            fn from(value: &'b $chat) -> ChatId<'a> {
                 ChatId::from_id(value.id)
             }
         }
