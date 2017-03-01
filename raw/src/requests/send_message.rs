@@ -1,4 +1,5 @@
 use std::ops::Not;
+use std::borrow::Cow;
 
 use types::*;
 use requests::*;
@@ -6,7 +7,7 @@ use requests::*;
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendMessage<'c, 's> {
     pub chat_id: ChatId<'c>,
-    pub text: &'s str,
+    pub text: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parse_mode: Option<ParseMode>,
     #[serde(skip_serializing_if = "Not::not")]
@@ -28,10 +29,10 @@ impl<'c, 's> Request for SendMessage<'c, 's> {
 }
 
 impl<'c, 's> SendMessage<'c, 's> {
-    pub fn new<C>(chat: C, text: &'s str) -> Self where C: Into<ChatId<'c>> {
+    pub fn new<C, T>(chat: C, text: T) -> Self where C: Into<ChatId<'c>>, T: Into<Cow<'s, str>> {
         SendMessage {
             chat_id: chat.into(),
-            text: text,
+            text: text.into(),
             parse_mode: None,
             disable_web_page_preview: false,
             disable_notification: false,
@@ -67,15 +68,15 @@ impl<'c, 's> SendMessage<'c, 's> {
 }
 
 pub trait CanSendMessage {
-    fn text<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's>;
+    fn text<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
 }
 
 pub trait CanReplySendMessage {
-    fn text_reply<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's>;
+    fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
 }
 
 impl CanSendMessage for Chat {
-    fn text<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's> {
+    fn text<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
         SendMessage::new(self, text)
     }
 }
@@ -83,7 +84,7 @@ impl CanSendMessage for Chat {
 macro_rules! send_chat_type {
     ($chat: ident) => {
         impl CanSendMessage for $chat {
-            fn text<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's> {
+            fn text<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
                 SendMessage::new(self, text)
             }
         }
@@ -96,7 +97,7 @@ send_chat_type!(Supergroup);
 send_chat_type!(Channel);
 
 impl CanSendMessage for ForwardFrom {
-    fn text<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's> {
+    fn text<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
         let id = match *self {
             ForwardFrom::User {ref user, ..} => user.id,
             ForwardFrom::Channel {ref channel, ..} => channel.id,
@@ -107,7 +108,7 @@ impl CanSendMessage for ForwardFrom {
 }
 
 impl CanReplySendMessage for Message {
-    fn text_reply<'c, 's>(&self, text: &'s str) -> SendMessage<'c, 's> {
+    fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
         self.chat.text(text).reply_to(self)
     }
 }
