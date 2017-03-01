@@ -41,6 +41,7 @@ error_chain! {
     }
 }
 
+#[must_use = "futures do nothing unless polled"]
 pub struct TelegramFuture<T> {
     inner: Box<Future<Item=T, Error=Error>>
 }
@@ -54,6 +55,7 @@ impl<T> Future for TelegramFuture<T> {
     }
 }
 
+#[must_use = "streams do nothing unless polled"]
 pub struct UpdatesStream {
     bot: Bot,
     last_update: Integer,
