@@ -14,6 +14,7 @@ use futures::{Future, Stream, Poll};
 use futures::future::{result};
 use hyper::{Body, Method};
 use hyper::client::Client;
+use hyper::header::ContentType;
 use hyper_tls::HttpsConnector;
 use tokio_core::reactor::Handle;
 use url::Url;
@@ -86,6 +87,7 @@ impl Bot {
         let response = url.join(body).and_then(move |(url, body)| {
             let mut http_request = hyper::client::Request::new(Method::Post, url);
             http_request.set_body(body);
+            http_request.headers_mut().set(ContentType::json());
 
             bot.inner.client.request(http_request).map_err(From::from)
         });
