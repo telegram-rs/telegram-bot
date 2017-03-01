@@ -9,8 +9,10 @@ extern crate url;
 extern crate telegram_bot_raw;
 
 use std::sync::Arc;
+use std::cmp::max;
+use std::collections::VecDeque;
 
-use futures::{Future, Stream, Poll};
+use futures::{Future, Stream, Poll, Async};
 use futures::future::{result};
 use hyper::{Body, Method};
 use hyper::client::Client;
@@ -19,9 +21,10 @@ use hyper_tls::HttpsConnector;
 use tokio_core::reactor::Handle;
 use url::Url;
 
-use telegram_bot_raw::{Request, Response, ResponseParameters};
+use telegram_bot_raw::{GetUpdates, Request, Response, ResponseParameters, Update, Integer};
 
 const TELEGRAM_URL: &'static str = "https://api.telegram.org/";
+const TELEGRAM_LONG_POLL_TIMEOUT: usize = 5;
 
 error_chain! {
     foreign_links {
@@ -51,6 +54,79 @@ impl<T> Future for TelegramFuture<T> {
     }
 }
 
+pub struct UpdatesStream {
+    bot: Bot,
+    last_update: Integer,
+    buffer: VecDeque<Update>,
+    current_request: Option<TelegramFuture<Vec<Update>>>,
+    timeout: usize,
+}
+
+impl Stream for UpdatesStream {
+    type Item = Update;
+    type Error = Error;
+
+    fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
+        if let Some(value) = self.buffer.pop_front() {
+            return Ok(Async::Ready(Some(value)))
+        }
+
+        let result = match self.current_request {
+            None => None,
+            Some(ref mut current_request) => {
+                let polled_update = current_request.poll();
+                match polled_update {
+                    Ok(Async::NotReady) => return Ok(Async::NotReady),
+                    Ok(Async::Ready(updates)) => {
+                        if updates.is_empty() {
+                            None
+                        } else {
+                            for update in updates.iter() {
+                                self.last_update = max(update.id, self.last_update);
+                            }
+                            Some(updates)
+                        }
+                    },
+                    Err(err) => return Err(err)
+                }
+            }
+        };
+
+        match result {
+            None => {
+                let request = self.bot.send(GetUpdates {
+                    offset: Some(self.last_update + 1),
+                    limit: None,
+                    timeout: Some(self.timeout as Integer),
+                    allowed_updates: Vec::new(),
+                });
+
+                self.current_request = Some(request);
+                self.poll()
+            },
+            Some(mut updates) => {
+                self.current_request = None;
+                // Updates are guarantied to be not empty
+                self.buffer.extend(updates.drain(1..));
+                let result = updates.pop().unwrap();
+                return Ok(Async::Ready(Some(result)))
+            }
+        }
+    }
+}
+
+impl UpdatesStream {
+    fn new(bot: &Bot) -> Self {
+        UpdatesStream {
+            bot: bot.clone(),
+            last_update: 0,
+            buffer: VecDeque::new(),
+            current_request: None,
+            timeout: TELEGRAM_LONG_POLL_TIMEOUT,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Bot {
     inner: Arc<BotInner>,
@@ -73,6 +149,10 @@ impl Bot {
                 client: config.build(handle),
             }),
         })
+    }
+
+    pub fn stream(&self) -> UpdatesStream {
+        UpdatesStream::new(self)
     }
 
     pub fn send<Req>(&self, request: Req) -> TelegramFuture<Req::Response>
