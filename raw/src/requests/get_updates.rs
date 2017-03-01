@@ -3,8 +3,11 @@ use types::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct GetUpdates {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub offset: Option<Integer>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<Integer>, // TODO(knsd): Values between 1—100 are accepted
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timeout: Option<Integer>, // TODO(knsd): Should be positive
     pub allowed_updates: Vec<AllowedUpdate> // TODO(knsd) BitSet? HashSet? BTreeSet?
 }
