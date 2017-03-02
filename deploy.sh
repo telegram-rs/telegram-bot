@@ -13,7 +13,7 @@ git init
 git config user.name "Lukas Kalbertodt"
 git config user.email "lukas.kalbertodt@gmail.com"
 
-git remote add upstream "https://${GH_TOKEN}@github.com/LukasKalbertodt/telegram-bot.git"
+git remote add upstream "https://${GH_TOKEN}@github.com/telegram-rs/telegram-bot.git"
 git fetch upstream
 git reset upstream/gh-pages
 
