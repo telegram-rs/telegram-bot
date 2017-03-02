@@ -57,7 +57,7 @@ impl<T> Future for TelegramFuture<T> {
 
 #[must_use = "streams do nothing unless polled"]
 pub struct UpdatesStream {
-    bot: Bot,
+    api: Api,
     last_update: Integer,
     buffer: VecDeque<Update>,
     current_request: Option<TelegramFuture<Vec<Update>>>,
@@ -96,7 +96,7 @@ impl Stream for UpdatesStream {
 
         match result {
             None => {
-                let request = self.bot.send(GetUpdates {
+                let request = self.api.send(GetUpdates {
                     offset: Some(self.last_update + 1),
                     limit: None,
                     timeout: Some(self.timeout as Integer),
@@ -118,9 +118,9 @@ impl Stream for UpdatesStream {
 }
 
 impl UpdatesStream {
-    fn new(bot: &Bot) -> Self {
+    fn new(api: &Api) -> Self {
         UpdatesStream {
-            bot: bot.clone(),
+            api: api.clone(),
             last_update: 0,
             buffer: VecDeque::new(),
             current_request: None,
@@ -130,24 +130,24 @@ impl UpdatesStream {
 }
 
 #[derive(Clone)]
-pub struct Bot {
-    inner: Arc<BotInner>,
+pub struct Api {
+    inner: Arc<ApiInner>,
 }
 
 #[derive(Clone)]
-struct BotInner {
+struct ApiInner {
     token: String,
     client: Client<HttpsConnector>,
     handle: Handle,
 }
 
-impl Bot {
+impl Api {
     pub fn from_token(handle: &Handle, token: &str) -> Result<Self> {
         let connector = HttpsConnector::new(1, handle);
         let config = Client::configure().connector(connector);
 
-        Ok(Bot {
-            inner: Arc::new(BotInner {
+        Ok(Api {
+            inner: Arc::new(ApiInner {
                 token: token.to_string(),
                 client: config.build(handle),
                 handle: handle.clone(),
@@ -173,13 +173,13 @@ impl Bot {
             serde_json::to_vec(&request).map(Body::from)
         }).map_err(From::from);
 
-        let bot = self.clone();
+        let api = self.clone();
         let response = url.join(body).and_then(move |(url, body)| {
             let mut http_request = hyper::client::Request::new(Method::Post, url);
             http_request.set_body(body);
             http_request.headers_mut().set(ContentType::json());
 
-            bot.inner.client.request(http_request).map_err(From::from)
+            api.inner.client.request(http_request).map_err(From::from)
         });
 
         let bytes = response.and_then(|response| {
