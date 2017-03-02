@@ -10,6 +10,7 @@ extern crate telegram_bot_raw;
 
 mod api;
 mod errors;
+pub mod prelude;
 mod stream;
 
 pub use self::api::{Api, TelegramFuture};
