@@ -129,15 +129,16 @@ impl UpdatesStream {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Bot {
     inner: Arc<BotInner>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct BotInner {
     token: String,
     client: Client<HttpsConnector>,
+    handle: Handle,
 }
 
 impl Bot {
@@ -149,12 +150,19 @@ impl Bot {
             inner: Arc::new(BotInner {
                 token: token.to_string(),
                 client: config.build(handle),
+                handle: handle.clone(),
             }),
         })
     }
 
     pub fn stream(&self) -> UpdatesStream {
         UpdatesStream::new(self)
+    }
+
+    pub fn spawn<Req>(&self, request: Req)
+        where Req: Request + 'static, <Req as Request>::Response: std::marker::Send + 'static {
+
+        self.inner.handle.spawn(self.send(request).then(|_| Ok(())))
     }
 
     pub fn send<Req>(&self, request: Req) -> TelegramFuture<Req::Response>
