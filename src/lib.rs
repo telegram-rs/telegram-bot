@@ -369,6 +369,31 @@ impl Api {
         self.send_request("sendVideo", params, RequestType::Multipart(path_file))
     }
 
+    /// Corresponds to the `getFile` method of the API.
+    pub fn get_file(&self, file_id: &str) -> Result<types::File> {
+        // Prepare parameters
+        let mut params = Params::new();
+        params.add_get("file_id", file_id);
+
+        // Execute request
+        self.send_request("getFile", params, RequestType::Post)
+    }
+
+    /// Return the URL associated with a given path.
+    /// URL is in the form of
+    /// `https://api.telegram.org/file/bot<token>/<file_path>`.
+    pub fn get_file_url(&self, file_path: &str) -> String {
+        let mut url = self.url.clone();
+        url.path_mut().map(|path| {
+            path.insert(0, "file".into());
+            path.last_mut().map(|last| {
+                *last = file_path.into()
+            })
+        });
+
+        url.serialize()
+    }
+
     /// Corresponds to the `setWebhook` method of the API.
     ///
     /// **Note:**

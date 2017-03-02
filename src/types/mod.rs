@@ -390,7 +390,8 @@ pub enum MessageType {
     Text(String),
     Audio(Audio),
     Voice(Voice),
-    File(Document),
+    Document(Document),
+    File(File),
     Photo(Vec<PhotoSize>),
     Sticker(Sticker),
     Video(Video),
@@ -427,9 +428,9 @@ impl Decodable for MessageType {
         maybe_field!(d, "text", Text);
         maybe_field!(d, "audio", Audio);
         maybe_field!(d, "voice", Voice);
-        maybe_field!(d, "file", File);
+        maybe_field!(d, "file_id", File);
         maybe_field!(d, "photo", Photo);
-        maybe_field!(d, "document", File);
+        maybe_field!(d, "document", Document);
         maybe_field!(d, "sticker", Sticker);
         maybe_field!(d, "video", Video);
         maybe_field!(d, "contact", Contact);
@@ -569,6 +570,19 @@ pub struct Document {
 impl_encode!(Document, 5,
     [0 => file_id, 1 => thumb],
     [2 => file_name, 3 => mime_type, 4 => file_size]);
+
+// ---------------------------------------------------------------------------
+/// Telegram type "File" (directly mapped)
+#[derive(RustcDecodable, Debug, PartialEq, Clone)]
+pub struct File {
+    pub file_id: String,
+    pub file_size: Option<Integer>,
+    pub file_path: Option<String>,
+}
+
+impl_encode!(File, 3,
+    [0 => file_id],
+    [1 => file_size, 2 => file_path]);
 
 // ---------------------------------------------------------------------------
 /// Telegram type "Sticker" (directly mapped)
