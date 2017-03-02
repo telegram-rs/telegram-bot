@@ -9,4 +9,4 @@ pub use telegram_bot_raw::{Contact, Location, Venue};
 pub use telegram_bot_raw::{ParseMode, ChatId, MessageId};
 pub use telegram_bot_raw::{ReplyMarkup, InlineKeyboardMarkup, ReplyKeyboardMarkup};
 pub use telegram_bot_raw::{ReplyKeyboardRemove, ForceReply};
-pub use telegram_bot_raw::{SendMessage, GetMe};
+pub use telegram_bot_raw::{GetMe, ForwardMessage, SendMessage};
