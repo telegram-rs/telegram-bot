@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 use futures;
 use futures::{Future, Stream, Poll};
@@ -36,7 +36,7 @@ impl<T> Future for TelegramFuture<T> {
 
 #[derive(Clone)]
 pub struct Api {
-    inner: Arc<ApiInner>,
+    inner: Rc<ApiInner>,
 }
 
 #[derive(Clone)]
@@ -52,7 +52,7 @@ impl Api {
         let config = Client::configure().connector(connector);
 
         Ok(Api {
-            inner: Arc::new(ApiInner {
+            inner: Rc::new(ApiInner {
                 token: token.to_string(),
                 client: config.build(handle),
                 handle: handle.clone(),
