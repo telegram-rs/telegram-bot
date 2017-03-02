@@ -56,7 +56,7 @@ impl<'c, 's> SendMessage<'c, 's> {
         self
     }
 
-    pub fn reply_to<R>(mut self, to: R) -> Self where R: Into<ReplyTo> {
+    pub fn reply_to<R>(mut self, to: R) -> Self where R: Into<MessageId> {
         self.reply_to_message_id = Some(to.into().0);
         self
     }

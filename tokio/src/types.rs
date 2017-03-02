@@ -6,7 +6,7 @@ pub use telegram_bot_raw::{MessageEntity, MessageEntityKind, RawMessageEntity};
 pub use telegram_bot_raw::{Audio, Document, PhotoSize, Sticker, Video, Voice};
 pub use telegram_bot_raw::{Contact, Location, Venue};
 
-pub use telegram_bot_raw::{ParseMode, ChatId, ReplyTo};
+pub use telegram_bot_raw::{ParseMode, ChatId, MessageId};
 pub use telegram_bot_raw::{ReplyMarkup, InlineKeyboardMarkup, ReplyKeyboardMarkup};
 pub use telegram_bot_raw::{ReplyKeyboardRemove, ForceReply};
 pub use telegram_bot_raw::{SendMessage, GetMe};

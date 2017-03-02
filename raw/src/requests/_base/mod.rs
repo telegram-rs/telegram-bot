@@ -82,22 +82,22 @@ impl Serialize for ParseMode {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub struct ReplyTo(pub Integer);
+pub struct MessageId(pub Integer);
 
-impl Serialize for ReplyTo {
+impl Serialize for MessageId {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
         serializer.serialize_i64(self.0)
     }
 }
 
-impl From<Integer> for ReplyTo {
+impl From<Integer> for MessageId {
     fn from(value: Integer) -> Self {
-        ReplyTo(value)
+        MessageId(value)
     }
 }
 
-impl<'a> From<&'a Message> for ReplyTo {
+impl<'a> From<&'a Message> for MessageId {
     fn from(value: &Message) -> Self {
-        ReplyTo(value.id)
+        MessageId(value.id)
     }
 }
