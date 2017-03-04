@@ -67,44 +67,18 @@ impl<'c, 's> SendMessage<'c, 's> {
     }
 }
 
-pub trait CanSendMessage {
-    fn text<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
+pub trait CanSendMessage<'bc, 'c> {
+    fn text<'s, T>(&'bc self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
+}
+
+impl<'c, 'bc, C: 'bc> CanSendMessage<'bc, 'c> for C where &'bc C: Into<ChatId<'c>> {
+    fn text<'s, T>(&'bc self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
+        SendMessage::new(self.into(), text)
+    }
 }
 
 pub trait CanReplySendMessage {
     fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
-}
-
-impl CanSendMessage for Chat {
-    fn text<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
-        SendMessage::new(self, text)
-    }
-}
-
-macro_rules! send_chat_type {
-    ($chat: ident) => {
-        impl CanSendMessage for $chat {
-            fn text<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
-                SendMessage::new(self, text)
-            }
-        }
-    };
-}
-
-send_chat_type!(User);
-send_chat_type!(Group);
-send_chat_type!(Supergroup);
-send_chat_type!(Channel);
-
-impl CanSendMessage for ForwardFrom {
-    fn text<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
-        let id = match *self {
-            ForwardFrom::User {ref user, ..} => user.id,
-            ForwardFrom::Channel {ref channel, ..} => channel.id,
-        };
-
-        SendMessage::new(id, text)
-    }
 }
 
 impl CanReplySendMessage for Message {

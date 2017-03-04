@@ -51,6 +51,16 @@ impl<'a, 'b> From<&'b Chat> for ChatId<'a> {
     }
 }
 
+impl<'a, 'b> From<&'b ForwardFrom> for ChatId<'a> {
+    fn from(value: &'b ForwardFrom) -> ChatId<'a> {
+        let id = match *value {
+            ForwardFrom::User {ref user, ..} => user.id,
+            ForwardFrom::Channel {ref channel, ..} => channel.id,
+        };
+        ChatId::from_id(id)
+    }
+}
+
 macro_rules! from_chat_type {
     ($chat: ident) => {
         impl<'a, 'b> From<&'b $chat> for ChatId<'a> {
