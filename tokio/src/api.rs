@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::time::Duration;
 
 use futures;
 use futures::{Future, Stream, Poll};
@@ -9,7 +10,7 @@ use hyper::client::Client;
 use hyper::header::ContentType;
 use hyper_tls::HttpsConnector;
 use serde_json;
-use tokio_core::reactor::Handle;
+use tokio_core::reactor::{Handle, Timeout};
 use url::Url;
 
 use telegram_bot_raw::{Request, Response};
@@ -68,6 +69,23 @@ impl Api {
         where Req: Request + 'static, <Req as Request>::Response: ::std::marker::Send + 'static {
 
         self.inner.handle.spawn(self.send(request).then(|_| Ok(())))
+    }
+
+    pub fn send_timeout<Req>(
+        &self, request: Req, duration: Duration) -> TelegramFuture<Option<Req::Response>>
+        where Req: Request + 'static, <Req as Request>::Response: ::std::marker::Send + 'static {
+
+        let timeout_future = result(Timeout::new(duration, &self.inner.handle))
+            .flatten().map_err(From::from).map(|()| None);
+        let send_future = self.send(request).map(|resp| Some(resp));
+
+        let future = timeout_future.select(send_future)
+            .map(|(item, _next)| item)
+            .map_err(|(item, _next)| item);
+
+        TelegramFuture {
+            inner: Box::new(future)
+        }
     }
 
     pub fn send<Req>(&self, request: Req) -> TelegramFuture<Req::Response>

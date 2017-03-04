@@ -5,6 +5,7 @@ error_chain! {
         Url(::url::ParseError);
         Hyper(::hyper::Error);
         Json(::serde_json::Error);
+        Io(::std::io::Error);
     }
 
     errors {
