@@ -82,4 +82,9 @@ impl UpdatesStream {
             timeout: TELEGRAM_LONG_POLL_TIMEOUT,
         }
     }
+
+    pub fn timeout(&mut self, timeout: usize) -> &mut Self {
+        self.timeout = timeout;
+        self
+    }
 }
