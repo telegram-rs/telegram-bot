@@ -1,5 +1,6 @@
 use std::cmp::max;
 use std::collections::VecDeque;
+use std::time::Duration;
 
 use futures::{Future, Stream, Poll, Async};
 
@@ -8,15 +9,15 @@ use telegram_bot_raw::{GetUpdates, Update, Integer};
 use api::{Api, TelegramFuture};
 use errors::{Error};
 
-const TELEGRAM_LONG_POLL_TIMEOUT: usize = 5;
+const TELEGRAM_LONG_POLL_TIMEOUT: u64 = 5;
 
 #[must_use = "streams do nothing unless polled"]
 pub struct UpdatesStream {
     api: Api,
     last_update: Integer,
     buffer: VecDeque<Update>,
-    current_request: Option<TelegramFuture<Vec<Update>>>,
-    timeout: usize,
+    current_request: Option<TelegramFuture<Option<Vec<Update>>>>,
+    timeout: u64,
 }
 
 impl Stream for UpdatesStream {
@@ -34,7 +35,8 @@ impl Stream for UpdatesStream {
                 let polled_update = current_request.poll();
                 match polled_update {
                     Ok(Async::NotReady) => return Ok(Async::NotReady),
-                    Ok(Async::Ready(updates)) => {
+                    Ok(Async::Ready(None)) => None,
+                    Ok(Async::Ready(Some(updates))) => {
                         if updates.is_empty() {
                             None
                         } else {
@@ -51,12 +53,14 @@ impl Stream for UpdatesStream {
 
         match result {
             None => {
-                let request = self.api.send(GetUpdates {
+                let timeout = Duration::from_secs(self.timeout + 1);
+
+                let request = self.api.send_timeout(GetUpdates {
                     offset: Some(self.last_update + 1),
                     limit: None,
                     timeout: Some(self.timeout as Integer),
                     allowed_updates: Vec::new(),
-                });
+                }, timeout);
 
                 self.current_request = Some(request);
                 self.poll()
@@ -83,7 +87,7 @@ impl UpdatesStream {
         }
     }
 
-    pub fn timeout(&mut self, timeout: usize) -> &mut Self {
+    pub fn timeout(&mut self, timeout: u64) -> &mut Self {
         self.timeout = timeout;
         self
     }
