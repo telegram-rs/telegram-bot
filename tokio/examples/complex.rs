@@ -58,12 +58,21 @@ fn reply_test(api: &Api, message: &Message, handle: &Handle) {
     })
 }
 
+fn test_forward(api: &Api, message: &Message, _handle: &Handle) {
+    api.spawn(&message.forward(&message.chat));
+
+    if let Some(ref from) = message.from {
+        api.spawn(&message.forward(from))
+    }
+}
+
 fn test(api: &Api, message: &Message, handle: &Handle) {
     if let MessageKind::Text {ref data, ..} = message.kind {
         match data.as_str() {
             "/message" => message_test(api, message, handle),
             "/preview" => preview_test(api, message, handle),
             "/reply" => reply_test(api, message, handle),
+            "/forward" => test_forward(api, message, handle),
             _ => (),
         }
     }
