@@ -76,19 +76,11 @@ from_chat_type!(Group);
 from_chat_type!(Supergroup);
 from_chat_type!(Channel);
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize)]
 pub enum ParseMode {
     Markdown,
-    HTML
-}
-
-impl Serialize for ParseMode {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-        serializer.serialize_str(match *self {
-            ParseMode::Markdown => "markdown",
-            ParseMode::HTML => "HTML",
-        })
-    }
+    #[serde(rename = "HTML")]
+    Html
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
