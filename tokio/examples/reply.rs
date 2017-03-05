@@ -19,7 +19,7 @@ fn main() {
         if let UpdateKind::Message(message) = update.kind {
             if let MessageKind::Text {ref data, ..} = message.kind {
                 let text = format!("Got the message: '{}'", data);
-                api.spawn(message.text_reply(text));
+                api.spawn(&message.text_reply(text));
             }
         }
         Ok(())

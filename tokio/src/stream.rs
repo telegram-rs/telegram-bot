@@ -55,7 +55,7 @@ impl Stream for UpdatesStream {
             None => {
                 let timeout = Duration::from_secs(self.timeout + 1);
 
-                let request = self.api.send_timeout(GetUpdates {
+                let request = self.api.send_timeout(&GetUpdates {
                     offset: Some(self.last_update + 1),
                     limit: None,
                     timeout: Some(self.timeout as Integer),

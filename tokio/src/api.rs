@@ -65,14 +65,14 @@ impl Api {
         UpdatesStream::new(self)
     }
 
-    pub fn spawn<Req>(&self, request: Req)
+    pub fn spawn<Req>(&self, request: &Req)
         where Req: Request + 'static, <Req as Request>::Response: ::std::marker::Send + 'static {
 
         self.inner.handle.spawn(self.send(request).then(|_| Ok(())))
     }
 
     pub fn send_timeout<Req>(
-        &self, request: Req, duration: Duration) -> TelegramFuture<Option<Req::Response>>
+        &self, request: &Req, duration: Duration) -> TelegramFuture<Option<Req::Response>>
         where Req: Request + 'static, <Req as Request>::Response: ::std::marker::Send + 'static {
 
         let timeout_future = result(Timeout::new(duration, &self.inner.handle))
@@ -88,12 +88,15 @@ impl Api {
         }
     }
 
-    pub fn send<Req>(&self, request: Req) -> TelegramFuture<Req::Response>
+    pub fn send<Req>(&self, request: &Req) -> TelegramFuture<Req::Response>
         where Req: Request + 'static, <Req as Request>::Response: ::std::marker::Send + 'static {
 
-        let url = result(url(&self.inner.token, request.name()));
+        let name = request.name();
+        let encoded = serde_json::to_vec(&request);
+
+        let url = result(url(&self.inner.token, name));
         let body = futures::lazy(move || {
-            serde_json::to_vec(&request).map(Body::from)
+            encoded.map(Body::from)
         }).map_err(From::from);
 
         let api = self.clone();
