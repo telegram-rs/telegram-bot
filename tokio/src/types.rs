@@ -10,3 +10,4 @@ pub use telegram_bot_raw::{ParseMode, ChatId, MessageId};
 pub use telegram_bot_raw::{ReplyMarkup, InlineKeyboardMarkup, ReplyKeyboardMarkup};
 pub use telegram_bot_raw::{ReplyKeyboardRemove, ForceReply};
 pub use telegram_bot_raw::{GetMe, ForwardMessage, SendLocation, SendMessage};
+pub use telegram_bot_raw::{ChatAction, SendChatAction};
