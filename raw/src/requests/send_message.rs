@@ -41,27 +41,27 @@ impl<'c, 's> SendMessage<'c, 's> {
         }
     }
 
-    pub fn parse_mode(&mut self, parse_mode: ParseMode) -> &mut Self {
+    pub fn parse_mode(mut self, parse_mode: ParseMode) -> Self {
         self.parse_mode = Some(parse_mode);
         self
     }
 
-    pub fn disable_web_page_preview(&mut self) -> &mut Self { // TODO(knsd): Rename to disable_preview?
+    pub fn disable_web_page_preview(mut self) -> Self { // TODO(knsd): Rename to disable_preview?
         self.disable_web_page_preview = true;
         self
     }
 
-    pub fn disable_notification(&mut self) -> &mut Self {
+    pub fn disable_notification(mut self) -> Self {
         self.disable_notification = true;
         self
     }
 
-    pub fn reply_to<R>(&mut self, to: R) -> &mut Self where R: Into<MessageId> {
+    pub fn reply_to<R>(mut self, to: R) -> Self where R: Into<MessageId> {
         self.reply_to_message_id = Some(to.into().0);
         self
     }
 
-    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
+    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
         self.reply_markup = Some(reply_markup.into());
         self
     }
@@ -83,8 +83,6 @@ pub trait CanReplySendMessage {
 
 impl CanReplySendMessage for Message {
     fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
-        let mut msg = self.chat.text(text);
-        msg.reply_to(self);
-        msg
+        self.chat.text(text).reply_to(self)
     }
 }

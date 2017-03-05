@@ -36,17 +36,17 @@ impl<'c> SendLocation<'c> {
         }
     }
 
-    pub fn disable_notification(&mut self) -> &mut Self {
+    pub fn disable_notification(mut self) -> Self {
         self.disable_notification = true;
         self
     }
 
-    pub fn reply_to<R>(&mut self, to: R) -> &mut Self where R: Into<MessageId> {
+    pub fn reply_to<R>(mut self, to: R) -> Self where R: Into<MessageId> {
         self.reply_to_message_id = Some(to.into().0);
         self
     }
 
-    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
+    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
         self.reply_markup = Some(reply_markup.into());
         self
     }
@@ -68,8 +68,6 @@ pub trait CanReplySendLocation {
 
 impl CanReplySendLocation for Message {
     fn location_reply<'c>(&self, latitude: Float, longitude: Float) -> SendLocation<'c> {
-        let mut msg = self.chat.location(latitude, longitude);
-        msg.reply_to(self);
-        msg
+        self.chat.location(latitude, longitude).reply_to(self)
     }
 }
