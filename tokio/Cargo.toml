@@ -10,7 +10,7 @@ license = "MIT"
 
 [dependencies]
 serde = "0.9.8"
-tokio-core = "0.1.4"
+tokio-core = "0.1"
 url = "1.0"
 error-chain = "0.10.0"
 futures = "0.1"
