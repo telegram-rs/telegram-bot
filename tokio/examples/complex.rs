@@ -9,7 +9,7 @@ use tokio_core::reactor::{Core, Handle};
 use telegram_bot_tokio::{Api, Message, ParseMode, MessageKind, UpdateKind};
 use telegram_bot_tokio::prelude::*;
 
-fn message_test(api: Api, message: Message, handle: &Handle) {
+fn test_message(api: Api, message: Message, handle: &Handle) {
     let simple = api.send(&message.text_reply("Simple message"));
 
     let markdown = api.send(&message.text_reply("`Markdown message`")
@@ -29,7 +29,7 @@ fn message_test(api: Api, message: Message, handle: &Handle) {
     })
 }
 
-fn preview_test(api: Api, message: Message, handle: &Handle) {
+fn test_preview(api: Api, message: Message, handle: &Handle) {
     let preview = api.send(&message.text_reply("Message with preview https://telegram.org"));
 
     let no_preview = api.send(&message.text_reply("Message without preview https://telegram.org")
@@ -43,7 +43,7 @@ fn preview_test(api: Api, message: Message, handle: &Handle) {
     })
 }
 
-fn reply_test(api: Api, message: Message, handle: &Handle) {
+fn test_reply(api: Api, message: Message, handle: &Handle) {
     let msg = api.send(&message.text_reply("Reply to message"));
     let chat = api.send(&message.chat.text("Text to message chat"));
 
@@ -101,9 +101,9 @@ fn test(api: Api, message: Message, handle: &Handle) {
     let function: fn(Api, Message, &Handle) = match message.kind {
         MessageKind::Text {ref data, ..} => {
             match data.as_str() {
-                "/message" => message_test,
-                "/preview" => preview_test,
-                "/reply" => reply_test,
+                "/message" => test_message,
+                "/preview" => test_preview,
+                "/reply" => test_reply,
                 "/forward" => test_forward,
                 "/get_chat" => test_get_chat,
                 "/get_chat_administrators" => test_get_chat_administrators,
