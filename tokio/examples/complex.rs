@@ -92,6 +92,17 @@ fn test_get_chat_administrators(api: Api, message: Message, handle: &Handle) {
     })
 }
 
+fn test_get_chat_members_count(api: Api, message: Message, handle: &Handle) {
+    let count = api.send(&message.chat.get_chat_members_count());
+    let future = count.and_then(move |count| {
+        api.send(&message.text_reply(format!("Members count: {}", count)))
+    });
+
+    handle.spawn({
+        future.map_err(|_| ()).map(|_| ())
+    })
+}
+
 fn test_leave(api: Api, message: Message, _handle: &Handle) {
     api.spawn(&message.chat.leave_chat())
 }
@@ -107,6 +118,7 @@ fn test(api: Api, message: Message, handle: &Handle) {
                 "/forward" => test_forward,
                 "/get_chat" => test_get_chat,
                 "/get_chat_administrators" => test_get_chat_administrators,
+                "/get_chat_members_count" => test_get_chat_members_count,
                 "/leave" => test_leave,
                 _ => return,
             }
