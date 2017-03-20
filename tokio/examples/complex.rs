@@ -92,6 +92,10 @@ fn test_get_chat_administrators(api: Api, message: Message, handle: &Handle) {
     })
 }
 
+fn test_leave(api: Api, message: Message, _handle: &Handle) {
+    api.spawn(&message.chat.leave_chat())
+}
+
 fn test(api: Api, message: Message, handle: &Handle) {
 
     let function: fn(Api, Message, &Handle) = match message.kind {
@@ -103,6 +107,7 @@ fn test(api: Api, message: Message, handle: &Handle) {
                 "/forward" => test_forward,
                 "/get_chat" => test_get_chat,
                 "/get_chat_administrators" => test_get_chat_administrators,
+                "/leave" => test_leave,
                 _ => return,
             }
         }
