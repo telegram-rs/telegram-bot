@@ -66,6 +66,19 @@ fn test_forward(api: &Api, message: &Message, _handle: &Handle) {
     }
 }
 
+fn test_get_chat(api: &Api, message: &Message, handle: &Handle) {
+    let api = api.clone();
+
+    let chat = api.send(&message.chat.get_chat());
+    let future = chat.and_then(move |chat| {
+        api.send(&chat.text(format!("Chat id {}", chat.id())))
+    });
+
+    handle.spawn({
+        future.map_err(|_| ()).map(|_| ())
+    })
+}
+
 fn test(api: &Api, message: &Message, handle: &Handle) {
     if let MessageKind::Text {ref data, ..} = message.kind {
         match data.as_str() {
@@ -73,6 +86,7 @@ fn test(api: &Api, message: &Message, handle: &Handle) {
             "/preview" => preview_test(api, message, handle),
             "/reply" => reply_test(api, message, handle),
             "/forward" => test_forward(api, message, handle),
+            "/get_chat" => test_get_chat(api, message, handle),
             _ => (),
         }
     }
