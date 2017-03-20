@@ -79,6 +79,24 @@ fn test_get_chat(api: &Api, message: &Message, handle: &Handle) {
     })
 }
 
+fn test_get_chat_administrators(api: &Api, message: &Message, handle: &Handle) {
+    let api = api.clone();
+    let message = message.clone();
+
+    let administrators = api.send(&message.chat.get_chat_administrators());
+    let future = administrators.and_then(move |administrators| {
+        let mut response = Vec::new();
+        for member in administrators {
+            response.push(member.user.first_name.clone())
+        }
+        api.send(&message.text_reply(format!("Administrators: {}", response.join(", "))))
+    });
+
+    handle.spawn({
+        future.map_err(|_| ()).map(|_| ())
+    })
+}
+
 fn test(api: &Api, message: &Message, handle: &Handle) {
     if let MessageKind::Text {ref data, ..} = message.kind {
         match data.as_str() {
@@ -87,6 +105,7 @@ fn test(api: &Api, message: &Message, handle: &Handle) {
             "/reply" => reply_test(api, message, handle),
             "/forward" => test_forward(api, message, handle),
             "/get_chat" => test_get_chat(api, message, handle),
+            "/get_chat_administrators" => test_get_chat_administrators(api, message, handle),
             _ => (),
         }
     }
