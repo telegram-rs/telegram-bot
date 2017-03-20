@@ -9,7 +9,7 @@ use tokio_core::reactor::{Core, Handle};
 use telegram_bot_tokio::{Api, Message, ParseMode, MessageKind, UpdateKind};
 use telegram_bot_tokio::prelude::*;
 
-fn message_test(api: &Api, message: &Message, handle: &Handle) {
+fn message_test(api: Api, message: Message, handle: &Handle) {
     let simple = api.send(&message.text_reply("Simple message"));
 
     let markdown = api.send(&message.text_reply("`Markdown message`")
@@ -29,7 +29,7 @@ fn message_test(api: &Api, message: &Message, handle: &Handle) {
     })
 }
 
-fn preview_test(api: &Api, message: &Message, handle: &Handle) {
+fn preview_test(api: Api, message: Message, handle: &Handle) {
     let preview = api.send(&message.text_reply("Message with preview https://telegram.org"));
 
     let no_preview = api.send(&message.text_reply("Message without preview https://telegram.org")
@@ -43,7 +43,7 @@ fn preview_test(api: &Api, message: &Message, handle: &Handle) {
     })
 }
 
-fn reply_test(api: &Api, message: &Message, handle: &Handle) {
+fn reply_test(api: Api, message: Message, handle: &Handle) {
     let msg = api.send(&message.text_reply("Reply to message"));
     let chat = api.send(&message.chat.text("Text to message chat"));
 
@@ -58,7 +58,7 @@ fn reply_test(api: &Api, message: &Message, handle: &Handle) {
     })
 }
 
-fn test_forward(api: &Api, message: &Message, _handle: &Handle) {
+fn test_forward(api: Api, message: Message, _handle: &Handle) {
     api.spawn(&message.forward(&message.chat));
 
     if let Some(ref from) = message.from {
@@ -66,9 +66,7 @@ fn test_forward(api: &Api, message: &Message, _handle: &Handle) {
     }
 }
 
-fn test_get_chat(api: &Api, message: &Message, handle: &Handle) {
-    let api = api.clone();
-
+fn test_get_chat(api: Api, message: Message, handle: &Handle) {
     let chat = api.send(&message.chat.get_chat());
     let future = chat.and_then(move |chat| {
         api.send(&chat.text(format!("Chat id {}", chat.id())))
@@ -79,10 +77,7 @@ fn test_get_chat(api: &Api, message: &Message, handle: &Handle) {
     })
 }
 
-fn test_get_chat_administrators(api: &Api, message: &Message, handle: &Handle) {
-    let api = api.clone();
-    let message = message.clone();
-
+fn test_get_chat_administrators(api: Api, message: Message, handle: &Handle) {
     let administrators = api.send(&message.chat.get_chat_administrators());
     let future = administrators.and_then(move |administrators| {
         let mut response = Vec::new();
@@ -97,18 +92,24 @@ fn test_get_chat_administrators(api: &Api, message: &Message, handle: &Handle) {
     })
 }
 
-fn test(api: &Api, message: &Message, handle: &Handle) {
-    if let MessageKind::Text {ref data, ..} = message.kind {
-        match data.as_str() {
-            "/message" => message_test(api, message, handle),
-            "/preview" => preview_test(api, message, handle),
-            "/reply" => reply_test(api, message, handle),
-            "/forward" => test_forward(api, message, handle),
-            "/get_chat" => test_get_chat(api, message, handle),
-            "/get_chat_administrators" => test_get_chat_administrators(api, message, handle),
-            _ => (),
+fn test(api: Api, message: Message, handle: &Handle) {
+
+    let function: fn(Api, Message, &Handle) = match message.kind {
+        MessageKind::Text {ref data, ..} => {
+            match data.as_str() {
+                "/message" => message_test,
+                "/preview" => preview_test,
+                "/reply" => reply_test,
+                "/forward" => test_forward,
+                "/get_chat" => test_get_chat,
+                "/get_chat_administrators" => test_get_chat_administrators,
+                _ => return,
+            }
         }
-    }
+        _ => return
+    };
+
+    function(api, message, handle)
 }
 
 fn main() {
@@ -117,11 +118,11 @@ fn main() {
     let mut core = Core::new().unwrap();
     let handle = core.handle();
 
-    let api = Api::from_token(&core.handle(), &token).unwrap();
+    let api = Api::from_token(&handle, &token).unwrap();
 
     let future = api.stream().for_each(|update| {
         if let UpdateKind::Message(message) = update.kind {
-            test(&api, &message, &handle)
+            test(api.clone(), message, &handle)
         }
         Ok(())
     });
