@@ -30,29 +30,33 @@ impl Stream for UpdatesStream {
         }
 
         let result = match self.current_request {
-            None => None,
+            None => Ok(None),
             Some(ref mut current_request) => {
                 let polled_update = current_request.poll();
                 match polled_update {
                     Ok(Async::NotReady) => return Ok(Async::NotReady),
-                    Ok(Async::Ready(None)) => None,
+                    Ok(Async::Ready(None)) => Ok(None),
                     Ok(Async::Ready(Some(updates))) => {
                         if updates.is_empty() {
-                            None
+                            Ok(None)
                         } else {
                             for update in updates.iter() {
                                 self.last_update = max(update.id, self.last_update);
                             }
-                            Some(updates)
+                            Ok(Some(updates))
                         }
                     },
-                    Err(err) => return Err(err)
+                    Err(err) => Err(err)
                 }
             }
         };
 
         match result {
-            None => {
+            Err(err) => {
+                self.current_request = None;
+                return Err(err)
+            }
+            Ok(None) => {
                 let timeout = Duration::from_secs(self.timeout + 1);
 
                 let request = self.api.send_timeout(&GetUpdates {
@@ -65,7 +69,7 @@ impl Stream for UpdatesStream {
                 self.current_request = Some(request);
                 self.poll()
             },
-            Some(mut updates) => {
+            Ok(Some(mut updates)) => {
                 self.current_request = None;
                 // Updates are guarantied to be not empty
                 self.buffer.extend(updates.drain(1..));
