@@ -20,8 +20,6 @@ telegram-bot-raw = { version = "=0.5.0", path = "../raw" }
 
 [dependencies.hyper]
 git = "https://github.com/hyperium/hyper.git"
-rev = "359f5ff4d79c46e923c2d512247947eab3b9710d"
 
 [dependencies.hyper-tls]
 git = "https://github.com/hyperium/hyper-tls.git"
-rev = "7425bd8d45ac90acab92591701ea5009f3248947"
