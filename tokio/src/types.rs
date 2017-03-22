@@ -1,4 +1,4 @@
-pub use telegram_bot_raw::{Integer, Float, True};
+pub use telegram_bot_raw::{Integer, Float, True, Request};
 pub use telegram_bot_raw::{Update, UpdateKind, RawUpdate};
 pub use telegram_bot_raw::{User, Group, Supergroup, Channel, Chat, RawChat};
 pub use telegram_bot_raw::{Message, MessageKind, RawMessage, Forward, ForwardFrom};
