@@ -1,17 +1,17 @@
 use std::rc::Rc;
 use std::time::Duration;
 
+use std::str::FromStr;
 use futures;
 use futures::{Future, Stream, Poll};
 use futures::future::{result};
 use hyper;
-use hyper::{Body, Method};
+use hyper::{Body, Method, Uri};
 use hyper::client::Client;
 use hyper::header::ContentType;
 use hyper_tls::HttpsConnector;
 use serde_json;
 use tokio_core::reactor::{Handle, Timeout};
-use url::Url;
 
 use telegram_bot_raw::{Request, Response};
 
@@ -136,6 +136,6 @@ impl Api {
     }
 }
 
-fn url(token: &str, method: &str) -> Result<Url> {
-    Url::parse(&format!("{}bot{}/{}", TELEGRAM_URL, token, method)).map_err(From::from)
+fn url(token: &str, method: &str) -> Result<Uri> {
+    Uri::from_str(&format!("{}bot{}/{}", TELEGRAM_URL, token, method)).map_err(From::from)
 }
