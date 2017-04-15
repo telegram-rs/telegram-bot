@@ -103,6 +103,25 @@ fn test_get_chat_members_count(api: Api, message: Message, handle: &Handle) {
     })
 }
 
+fn test_get_chat_member(api: Api, message: Message, handle: &Handle) {
+    let user = match message.from {
+        Some(ref user) => user.clone(),
+        None => return,
+    };
+
+    let member = api.send(&message.chat.get_chat_member(&user));
+    let future = member.and_then(move |member| {
+        let first_name = member.user.first_name.clone();
+        let status = member.status;
+        api.send(&message.text_reply(format!("Member {}, status {:?}", first_name, status)))
+    });
+
+    handle.spawn({
+        future.map_err(|_| ()).map(|_| ())
+    })
+
+}
+
 fn test_leave(api: Api, message: Message, _handle: &Handle) {
     api.spawn(&message.chat.leave_chat())
 }
@@ -119,6 +138,7 @@ fn test(api: Api, message: Message, handle: &Handle) {
                 "/get_chat" => test_get_chat,
                 "/get_chat_administrators" => test_get_chat_administrators,
                 "/get_chat_members_count" => test_get_chat_members_count,
+                "/get_chat_member" => test_get_chat_member,
                 "/leave" => test_leave,
                 _ => return,
             }
