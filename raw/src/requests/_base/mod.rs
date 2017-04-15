@@ -76,6 +76,35 @@ from_chat_type!(Group);
 from_chat_type!(Supergroup);
 from_chat_type!(Channel);
 
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct UserId {
+    inner: Integer
+}
+
+impl<'a> Serialize for UserId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        serializer.serialize_i64(self.inner)
+    }
+}
+
+impl From<Integer> for UserId {
+    fn from(value: Integer) -> UserId {
+        UserId { inner: value }
+    }
+}
+
+impl<'b> From<&'b User> for UserId {
+    fn from(value: &User) -> UserId {
+        UserId { inner: value.id }
+    }
+}
+
+impl<'b> From<&'b ChatMember> for UserId {
+    fn from(value: &ChatMember) -> UserId {
+        UserId { inner: value.user.id }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize)]
 pub enum ParseMode {
     Markdown,
