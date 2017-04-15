@@ -5,7 +5,6 @@ extern crate hyper;
 extern crate hyper_tls;
 extern crate serde_json;
 extern crate tokio_core;
-extern crate url;
 extern crate telegram_bot_raw;
 
 mod api;
