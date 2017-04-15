@@ -14,4 +14,4 @@ pub use telegram_bot_raw::{GetChat, LeaveChat};
 pub use telegram_bot_raw::{ChatAction, SendChatAction};
 pub use telegram_bot_raw::{GetChatAdministrators, GetChatMember, GetChatMembersCount};
 pub use telegram_bot_raw::{KickChatMember, UnbanChatMember};
-pub use telegram_bot_raw::{EditMessageText};
+pub use telegram_bot_raw::{EditMessageText, EditMessageCaption};
