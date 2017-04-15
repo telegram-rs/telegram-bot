@@ -3,9 +3,10 @@ extern crate tokio_core;
 extern crate futures;
 
 use std::env;
+use std::time::Duration;
 
 use futures::{Future, Stream};
-use tokio_core::reactor::{Core, Handle};
+use tokio_core::reactor::{Core, Handle, Timeout};
 use telegram_bot_tokio::{Api, Message, ParseMode, MessageKind, UpdateKind};
 use telegram_bot_tokio::prelude::*;
 
@@ -64,6 +65,31 @@ fn test_forward(api: Api, message: Message, _handle: &Handle) {
     if let Some(ref from) = message.from {
         api.spawn(&message.forward(from))
     }
+}
+
+fn test_edit_message(api: Api, message: Message, handle: &Handle) {
+    let round_1 = api.send(&message.text_reply("Round 1"));
+
+    let duration_1 = Duration::from_secs(2);
+
+    let sleep_1 = Timeout::new(duration_1, handle)
+        .unwrap().map_err(From::from);
+
+    let round_2_api = api.clone();
+    let round_2 = round_1.join(sleep_1).and_then(move |(message, _)| {
+        round_2_api.send(&message.edit_text("Round 2"))
+    });
+
+    let duration_2 = Duration::from_secs(4);
+    let sleep_2 = Timeout::new(duration_2, handle)
+        .unwrap().map_err(From::from);
+
+    let round_3 = round_2.join(sleep_2).map_err(|_| ()).and_then(move |(message, _)| {
+        api.spawn(&message.edit_text("Round 3"));
+        Ok(())
+    });
+
+    handle.spawn(round_3)
 }
 
 fn test_get_chat(api: Api, message: Message, handle: &Handle) {
@@ -135,6 +161,7 @@ fn test(api: Api, message: Message, handle: &Handle) {
                 "/preview" => test_preview,
                 "/reply" => test_reply,
                 "/forward" => test_forward,
+                "/edit-message" => test_edit_message,
                 "/get_chat" => test_get_chat,
                 "/get_chat_administrators" => test_get_chat_administrators,
                 "/get_chat_members_count" => test_get_chat_members_count,

@@ -1,4 +1,5 @@
 pub mod _base;
+pub mod edit_message_text;
 pub mod forward_message;
 pub mod get_chat;
 pub mod get_chat_administrators;
@@ -14,6 +15,7 @@ pub mod send_message;
 pub mod unban_chat_member;
 
 pub use self::_base::*;
+pub use self::edit_message_text::*;
 pub use self::forward_message::*;
 pub use self::get_chat::*;
 pub use self::get_chat_administrators::*;
