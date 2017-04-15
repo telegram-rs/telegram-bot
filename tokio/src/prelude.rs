@@ -7,4 +7,4 @@ pub use telegram_bot_raw::{CanGetChatMemberForChat, CanGetChatMemberForUser};
 pub use telegram_bot_raw::{CanKickChatMemberForChat, CanKickChatMemberForUser};
 pub use telegram_bot_raw::{CanUnbanChatMemberForChat, CanUnbanChatMemberForUser};
 pub use telegram_bot_raw::{CanLeaveChat};
-pub use telegram_bot_raw::{CanEditMessageText, CanEditMessageCaption};
+pub use telegram_bot_raw::{CanEditMessageText, CanEditMessageCaption, CanEditMessageReplyMarkup};
