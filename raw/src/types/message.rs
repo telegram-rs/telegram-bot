@@ -90,6 +90,7 @@ pub enum MessageKind {
     PinnedMessage {
         data: Box<Message>,
     },
+    #[doc(hidden)]
     Unknown {
         raw: RawMessage
     }
