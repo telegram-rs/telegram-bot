@@ -259,6 +259,7 @@ pub enum MessageEntityKind {
     Pre,
     TextLink(String), // TODO(knsd) URL?
     TextMention(User),
+    #[doc(hidden)]
     Unknown(RawMessageEntity),
 }
 
