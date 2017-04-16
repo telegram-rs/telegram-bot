@@ -17,6 +17,7 @@ pub enum UpdateKind {
 //    InlineQuery(InlineQuery),
 //    ChosenInlineResult(ChosenInlineResult),
 //    CallbackQuery(OptionCallbackQuery),
+    #[doc(hidden)]
     Unknown(RawUpdate)
 }
 
