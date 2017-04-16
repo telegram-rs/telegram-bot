@@ -3,8 +3,8 @@ use requests::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct KickChatMember<'c> {
-    pub chat_id: ChatId<'c>,
-    pub user_id: UserId,
+    chat_id: ChatId<'c>,
+    user_id: UserId,
 }
 
 impl<'c> Request for KickChatMember<'c> {

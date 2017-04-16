@@ -6,18 +6,18 @@ use requests::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendMessage<'c, 's> {
-    pub chat_id: ChatId<'c>,
-    pub text: Cow<'s, str>,
+    chat_id: ChatId<'c>,
+    text: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub parse_mode: Option<ParseMode>,
+    parse_mode: Option<ParseMode>,
     #[serde(skip_serializing_if = "Not::not")]
-    pub disable_web_page_preview: bool,
+    disable_web_page_preview: bool,
     #[serde(skip_serializing_if = "Not::not")]
-    pub disable_notification: bool,
+    disable_notification: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reply_to_message_id: Option<Integer>,
+    reply_to_message_id: Option<Integer>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reply_markup: Option<ReplyMarkup>,
+    reply_markup: Option<ReplyMarkup>,
 }
 
 impl<'c, 's> Request for SendMessage<'c, 's> {

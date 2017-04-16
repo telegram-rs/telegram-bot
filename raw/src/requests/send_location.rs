@@ -5,15 +5,15 @@ use requests::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendLocation<'c> {
-    pub chat_id: ChatId<'c>,
-    pub latitude: Float,
-    pub longitude: Float,
+    chat_id: ChatId<'c>,
+    latitude: Float,
+    longitude: Float,
     #[serde(skip_serializing_if = "Not::not")]
-    pub disable_notification: bool,
+    disable_notification: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reply_to_message_id: Option<Integer>,
+    reply_to_message_id: Option<Integer>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reply_markup: Option<ReplyMarkup>,
+    reply_markup: Option<ReplyMarkup>,
 }
 
 impl<'c> Request for SendLocation<'c> {

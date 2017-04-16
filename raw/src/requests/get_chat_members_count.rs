@@ -3,7 +3,7 @@ use requests::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct GetChatMembersCount<'c> {
-    pub chat_id: ChatId<'c>
+    chat_id: ChatId<'c>
 }
 
 impl<'c> Request for GetChatMembersCount<'c> {

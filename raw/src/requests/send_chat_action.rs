@@ -23,8 +23,8 @@ pub enum ChatAction {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendChatAction<'c> {
-    pub chat_id: ChatId<'c>,
-    pub action: ChatAction,
+    chat_id: ChatId<'c>,
+    action: ChatAction,
 }
 
 impl<'c> Request for SendChatAction<'c> {

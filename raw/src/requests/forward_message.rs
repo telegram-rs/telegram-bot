@@ -5,11 +5,11 @@ use requests::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ForwardMessage<'c, 'f> {
-    pub chat_id: ChatId<'c>,
-    pub from_chat_id: ChatId<'f>,
+    chat_id: ChatId<'c>,
+    from_chat_id: ChatId<'f>,
     #[serde(skip_serializing_if = "Not::not")]
-    pub disable_notification: bool,
-    pub message_id: Integer,
+    disable_notification: bool,
+    message_id: Integer,
 }
 
 impl<'c, 'f> Request for ForwardMessage<'c, 'f> {

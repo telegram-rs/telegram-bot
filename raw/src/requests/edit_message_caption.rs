@@ -5,11 +5,11 @@ use requests::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct EditMessageCaption<'c, 's> {
-    pub chat_id: ChatId<'c>,
-    pub message_id: MessageId,
-    pub caption: Cow<'s, str>,
+    chat_id: ChatId<'c>,
+    message_id: MessageId,
+    caption: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reply_markup: Option<ReplyMarkup>,
+    reply_markup: Option<ReplyMarkup>,
 }
 
 impl<'c, 's> Request for EditMessageCaption<'c, 's> {

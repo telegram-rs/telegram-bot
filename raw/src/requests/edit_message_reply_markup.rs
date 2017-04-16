@@ -3,10 +3,10 @@ use requests::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct EditMessageReplyMarkup<'c> {
-    pub chat_id: ChatId<'c>,
-    pub message_id: MessageId,
+    chat_id: ChatId<'c>,
+    message_id: MessageId,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reply_markup: Option<ReplyMarkup>,
+    reply_markup: Option<ReplyMarkup>,
 }
 
 impl<'c> Request for EditMessageReplyMarkup<'c> {
