@@ -1,5 +1,5 @@
 [package]
-name = "telegram-bot-tokio"
+name = "telegram-bot"
 version = "0.5.0"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
 

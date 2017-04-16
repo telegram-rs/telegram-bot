@@ -1,4 +1,4 @@
-extern crate telegram_bot_tokio;
+extern crate telegram_bot;
 extern crate tokio_core;
 extern crate futures;
 
@@ -6,8 +6,8 @@ use std::env;
 
 use futures::{Stream};
 use tokio_core::reactor::Core;
-use telegram_bot_tokio::{Api, MessageKind, UpdateKind};
-use telegram_bot_tokio::prelude::*;
+use telegram_bot::{Api, MessageKind, UpdateKind};
+use telegram_bot::prelude::*;
 
 fn main() {
     let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();

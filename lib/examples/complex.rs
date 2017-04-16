@@ -1,4 +1,4 @@
-extern crate telegram_bot_tokio;
+extern crate telegram_bot;
 extern crate tokio_core;
 extern crate futures;
 
@@ -7,8 +7,8 @@ use std::time::Duration;
 
 use futures::{Future, Stream};
 use tokio_core::reactor::{Core, Handle, Timeout};
-use telegram_bot_tokio::{Api, Message, ParseMode, MessageKind, UpdateKind};
-use telegram_bot_tokio::prelude::*;
+use telegram_bot::{Api, Message, ParseMode, MessageKind, UpdateKind};
+use telegram_bot::prelude::*;
 
 fn test_message(api: Api, message: Message, handle: &Handle) {
     let simple = api.send(&message.text_reply("Simple message"));
