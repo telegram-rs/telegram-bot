@@ -38,6 +38,7 @@ pub enum Chat {
     Group(Group),
     Supergroup(Supergroup),
     Channel(Channel),
+    #[doc(hidden)]
     Unknown(RawChat),
 }
 
