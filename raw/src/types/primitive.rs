@@ -4,7 +4,10 @@ use serde::de;
 use serde::ser::{Serialize, Serializer};
 use serde::de::{Deserialize, Deserializer, Visitor, Unexpected};
 
+/// The Telegram `Integer`, currently i64.
 pub type Integer = i64;
+
+/// The Telegram `Float`, currently f32.
 pub type Float = f32;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
