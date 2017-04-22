@@ -119,7 +119,7 @@ impl Api {
         let future = bytes.and_then(|bytes| {
             result(serde_json::from_slice(&bytes).map_err(From::from).and_then(|value| {
                 match value {
-                    Response::Success {result} => Ok(result),
+                    Response::Success {result} => Ok(Req::map(result)),
                     Response::Error { description, parameters } => {
                         Err(ErrorKind::TelegramError {
                             description: description,

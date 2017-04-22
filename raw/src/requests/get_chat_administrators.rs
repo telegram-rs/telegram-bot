@@ -8,6 +8,11 @@ pub struct GetChatAdministrators<'c> {
 
 impl<'c> Request for GetChatAdministrators<'c> {
     type Response = Vec<ChatMember>;
+    type RawResponse = Vec<ChatMember>;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "getChatAdministrators"

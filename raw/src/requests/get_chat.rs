@@ -8,6 +8,11 @@ pub struct GetChat<'c> {
 
 impl<'c> Request for GetChat<'c> {
     type Response = Chat;
+    type RawResponse = Chat;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "getChat"

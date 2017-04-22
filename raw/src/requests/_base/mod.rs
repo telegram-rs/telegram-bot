@@ -9,7 +9,10 @@ use types::*;
 pub use self::reply_markup::*;
 
 pub trait Request: Serialize {
-    type Response: Deserialize;
+    type Response;
+    type RawResponse: Deserialize;
+
+    fn map(raw: Self::RawResponse) -> Self::Response;
 
     fn name(&self) -> &'static str;
 }

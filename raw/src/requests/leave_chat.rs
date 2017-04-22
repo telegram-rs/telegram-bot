@@ -8,6 +8,11 @@ pub struct LeaveChat<'c> {
 
 impl<'c> Request for LeaveChat<'c> {
     type Response = True;
+    type RawResponse = True;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "leaveChat"

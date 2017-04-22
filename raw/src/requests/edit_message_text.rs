@@ -19,6 +19,11 @@ pub struct EditMessageText<'c, 's> {
 
 impl<'c, 's> Request for EditMessageText<'c, 's> {
     type Response = Message;
+    type RawResponse = Message;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "editMessageText"

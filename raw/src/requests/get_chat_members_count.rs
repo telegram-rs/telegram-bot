@@ -8,6 +8,11 @@ pub struct GetChatMembersCount<'c> {
 
 impl<'c> Request for GetChatMembersCount<'c> {
     type Response = Integer;
+    type RawResponse = Integer;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "getChatMembersCount"

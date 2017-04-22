@@ -11,6 +11,11 @@ pub struct EditMessageReplyMarkup<'c> {
 
 impl<'c> Request for EditMessageReplyMarkup<'c> {
     type Response = Message;
+    type RawResponse = Message;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "editMessageReplyMarkup"

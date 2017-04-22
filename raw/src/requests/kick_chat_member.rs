@@ -9,6 +9,11 @@ pub struct KickChatMember<'c> {
 
 impl<'c> Request for KickChatMember<'c> {
     type Response = True;
+    type RawResponse = True;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "kickChatMember"

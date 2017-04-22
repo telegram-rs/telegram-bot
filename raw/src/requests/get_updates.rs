@@ -14,6 +14,11 @@ pub struct GetUpdates {
 
 impl Request for GetUpdates {
     type Response = Vec<Update>;
+    type RawResponse = Vec<Update>;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "getUpdates"

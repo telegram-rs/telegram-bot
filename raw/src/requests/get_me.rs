@@ -6,6 +6,11 @@ pub struct GetMe;
 
 impl Request for GetMe {
     type Response = User;
+    type RawResponse = User;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "getMe"

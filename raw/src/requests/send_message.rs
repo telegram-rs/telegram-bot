@@ -22,6 +22,11 @@ pub struct SendMessage<'c, 's> {
 
 impl<'c, 's> Request for SendMessage<'c, 's> {
     type Response = Message;
+    type RawResponse = Message;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        raw
+    }
 
     fn name(&self) -> &'static str {
         "sendMessage"
