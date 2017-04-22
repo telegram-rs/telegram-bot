@@ -2,32 +2,49 @@ use serde::de::{Deserialize, Deserializer, Error};
 
 use types::*;
 
+/// This object represents a message.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Message {
+    /// Unique message identifier inside this chat.
     pub id: Integer,
+    /// Sender, can be empty for messages sent to channels.
     pub from: Option<User>,
+    /// Date the message was sent in Unix time.
     pub date: Integer,
+    /// Conversation the message belongs to.
     pub chat: Chat,
+    /// Information about the original message.
     pub forward: Option<Forward>,
+    /// For replies, the original message. Note that the Message object in this field will not
+    /// contain further reply_to_message fields even if it itself is a reply.
     pub reply_to_message: Option<Box<Message>>,
+    /// Date the message was last edited in Unix time.
     pub edit_date: Option<Integer>,
-    pub caption: Option<String>,
+    pub caption: Option<String>,  // TODO(knsd): move to document, photo & video variants
+    /// Kind of the message.
     pub kind: MessageKind,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Forward {
+    /// Date the original message was sent in Unix time
     pub date: Integer,
+    /// Sender of the original message.
     pub from: ForwardFrom,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum ForwardFrom {
+    /// Sender of the original message.
     User {
+        /// Sender of the original message.
         user: User,
     },
+    /// For messages forwarded from a channel, information about the original channel.
     Channel {
+        /// Original channel.
         channel: Channel,
+        /// Identifier of the original message in the channel
         message_id: Integer
     }
 }
