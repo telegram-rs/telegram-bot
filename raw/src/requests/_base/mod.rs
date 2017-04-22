@@ -8,15 +8,21 @@ use types::*;
 
 pub use self::reply_markup::*;
 
+/// Request corresponds to the specific Telegram API method.
 pub trait Request: Serialize {
     type Response;
+    /// Directly mapped from Telegram API response.
     type RawResponse: Deserialize;
 
+    /// Map `RawResponse` to `Response`, `id` usually.
     fn map(raw: Self::RawResponse) -> Self::Response;
 
+    /// Name of the method.
     fn name() -> &'static str;
 }
 
+/// Unique identifier for the target chat or username of the
+/// target channel (in the format @channelusername)
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum ChatId<'a> {
     ById(Integer),
@@ -24,10 +30,12 @@ pub enum ChatId<'a> {
 }
 
 impl<'a> ChatId<'a> {
+    /// Create chat id from numeric identifier.
     pub fn from_id(id: Integer) -> Self {
         ChatId::ById(id)
     }
 
+    /// Create chat id from channel username.
     pub fn from_username(username: &'a str) -> Self {
         ChatId::ByUsername(username)
     }
@@ -108,9 +116,13 @@ impl<'b> From<&'b ChatMember> for UserId {
     }
 }
 
+/// Strongly typed ParseMode.
+/// See [documentation](https://core.telegram.org/bots/api#formatting-options) for details.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize)]
 pub enum ParseMode {
+    /// Use markdown formatting.
     Markdown,
+    /// Use HTML formatting.
     #[serde(rename = "HTML")]
     Html
 }
