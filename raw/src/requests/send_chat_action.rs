@@ -28,11 +28,11 @@ pub struct SendChatAction<'c> {
 }
 
 impl<'c> Request for SendChatAction<'c> {
-    type Response = True;
+    type Response = ();
     type RawResponse = True;
 
-    fn map(raw: Self::RawResponse) -> Self::Response {
-        raw
+    fn map(_raw: Self::RawResponse) -> Self::Response {
+        ()
     }
 
     fn name(&self) -> &'static str {
