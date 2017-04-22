@@ -59,6 +59,7 @@ impl Deserialize for Update {
     }
 }
 
+/// This object represents an incoming update. Directly mapped.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct RawUpdate {
     /// The update‘s unique identifier. Update identifiers start from a certain
