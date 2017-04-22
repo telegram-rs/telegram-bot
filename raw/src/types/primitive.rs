@@ -11,7 +11,7 @@ pub type Integer = i64;
 pub type Float = f32;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub struct True; // TODO(knsd): Option<True> => bool?
+pub struct True;
 
 impl Deserialize for True {
     fn deserialize<D>(deserializer: D) -> Result<True, D::Error> where D: Deserializer {
