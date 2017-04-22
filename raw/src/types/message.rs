@@ -20,7 +20,6 @@ pub struct Message {
     pub reply_to_message: Option<Box<Message>>,
     /// Date the message was last edited in Unix time.
     pub edit_date: Option<Integer>,
-    pub caption: Option<String>,  // TODO(knsd): move to document, photo & video variants
     /// Kind of the message.
     pub kind: MessageKind,
 }
@@ -60,15 +59,18 @@ pub enum MessageKind {
     },
     Document {
         data: Document,
+        caption: Option<String>,
     },
     Photo {
         data: Vec<PhotoSize>,
+        caption: Option<String>,
     },
     Sticker {
         data: Sticker,
     },
     Video {
         data: Video,
+        caption: Option<String>,
     },
     Voice {
         data: Voice,
@@ -123,7 +125,6 @@ impl Deserialize for Message {  // TODO(knsd): Remove .clone()
         let chat = raw.chat.clone();
         let reply_to_message = raw.reply_to_message.clone();
         let edit_date = raw.edit_date;
-        let caption = raw.caption.clone();
 
         let forward = match (raw.forward_date, &raw.forward_from,
                              &raw.forward_from_chat, raw.forward_from_message_id) {
@@ -159,7 +160,6 @@ impl Deserialize for Message {  // TODO(knsd): Remove .clone()
                 forward: forward,
                 reply_to_message: reply_to_message,
                 edit_date: edit_date,
-                caption: caption,
                 kind: kind,
             })
         };
@@ -169,6 +169,17 @@ impl Deserialize for Message {  // TODO(knsd): Remove .clone()
                 if let Some(val) = raw.$name {
                     return make_message(MessageKind::$variant {
                         data: val
+                    })
+                }
+            }}
+        }
+
+        macro_rules! maybe_field_with_caption {
+            ($name:ident, $variant:ident) => {{
+                if let Some(val) = raw.$name {
+                    return make_message(MessageKind::$variant {
+                        data: val,
+                        caption: raw.caption,
                     })
                 }
             }}
@@ -191,10 +202,10 @@ impl Deserialize for Message {  // TODO(knsd): Remove .clone()
         }
 
         maybe_field!(audio, Audio);
-        maybe_field!(document, Document);
-        maybe_field!(photo, Photo);
+        maybe_field_with_caption!(document, Document);
+        maybe_field_with_caption!(photo, Photo);
         maybe_field!(sticker, Sticker);
-        maybe_field!(video, Video);
+        maybe_field_with_caption!(video, Video);
         maybe_field!(voice, Voice);
         maybe_field!(contact, Contact);
         maybe_field!(location, Location);
