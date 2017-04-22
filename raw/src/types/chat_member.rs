@@ -5,6 +5,7 @@ use serde::de::{Deserialize, Deserializer, Visitor};
 
 use types::*;
 
+/// The member's status in the chat
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum ChatMemberStatus {
     Creator,
@@ -43,8 +44,11 @@ impl Deserialize for ChatMemberStatus {
     }
 }
 
+/// This object contains information about one member of the chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct ChatMember {
+    /// Information about the user.
     pub user: User,
+    /// The member's status in the chat.
     pub status: ChatMemberStatus,
 }
