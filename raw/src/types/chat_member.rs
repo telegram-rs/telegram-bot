@@ -13,6 +13,7 @@ pub enum ChatMemberStatus {
     Member,
     Left,
     Kicked,
+    #[doc(hidden)]
     Unknown(String),
 }
 
