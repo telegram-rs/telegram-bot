@@ -239,13 +239,19 @@ pub struct RawMessage {
     pub pinned_message: Option<Box<Message>>,
 }
 
+/// This object represents one special entity in a text message.
+/// For example, hashtags, usernames, URLs, etc.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct MessageEntity {
+    /// Offset in UTF-16 code units to the start of the entity
     offset: Integer,
+    /// Length of the entity in UTF-16 code units
     length: Integer,
+    /// Kind of the entity.
     kind: MessageEntityKind,
 }
 
+/// Kind of the entity.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum MessageEntityKind {
     Mention,
@@ -304,103 +310,172 @@ impl Deserialize for MessageEntity {
     }
 }
 
+/// This object represents one special entity in a text message.
+/// For example, hashtags, usernames, URLs, etc. Directly mapped.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct RawMessageEntity {
+    /// Type of the entity. Can be mention (@username), hashtag, bot_command, url, email,
+    /// bold (bold text), italic (italic text), code (monowidth string), pre (monowidth block),
+    /// text_link (for clickable text URLs), text_mention (for users without usernames).
     #[serde(rename="type")]
     pub type_: String,
+    /// Offset in UTF-16 code units to the start of the entity.
     pub offset: Integer,
+    /// Length of the entity in UTF-16 code units.
     pub length: Integer,
+    /// For “text_link” only, url that will be opened after user taps on the text.
     pub url: Option<String>,
+    /// For “text_mention” only, the mentioned user.
     pub user: Option<User>,
 }
 
+/// This object represents one size of a photo or a file / sticker thumbnail.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct PhotoSize {
+    /// Unique identifier for this file.
     pub file_id: String,
+    /// Photo width.
     pub width: Integer,
+    /// Photo height.
     pub height: Integer,
+    /// File size.
     pub file_size: Option<Integer>,
 }
 
+/// This object represents an audio file to be treated as music by the Telegram clients.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct Audio {
+    /// Unique identifier for this file.
     pub file_id: String,
+    /// Duration of the audio in seconds as defined by sender.
     pub duration: Integer,
+    /// Performer of the audio as defined by sender or by audio tags.
     pub performer: Option<String>,
+    /// Title of the audio as defined by sender or by audio tags.
     pub title: Option<String>,
+    /// MIME type of the file as defined by sender.
     pub mime_type: Option<String>,
+    /// File size.
     pub file_size: Option<Integer>,
 }
 
+/// This object represents a general file (as opposed to photos, voice messages and audio files).
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct Document {
+    /// Unique file identifier.
     pub file_id: String,
+    /// Document thumbnail as defined by sender.
     pub thumb: Option<PhotoSize>,
+    /// Original filename as defined by sender.
     pub file_name: Option<String>,
+    /// MIME type of the file as defined by sender.
     pub mime_type: Option<String>,
+    /// File size.
     pub file_size: Option<Integer>,
 }
 
+/// This object represents a sticker.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct Sticker {
+    /// Unique identifier for this file.
     pub file_id: String,
+    /// Sticker width.
     pub width: Integer,
+    /// Sticker height.
     pub height: Integer,
+    /// Sticker thumbnail in .webp or .jpg format.
     pub thumb: Option<PhotoSize>,
+    /// Emoji associated with the sticker.
     pub emoji: Option<String>,
+    /// File size.
     pub file_size: Option<Integer>,
 }
 
+/// This object represents a video file.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct Video {
+    /// Unique identifier for this file.
     pub file_id: String,
+    /// Video width as defined by sender.
     pub width: Integer,
+    /// Video height as defined by sender.
     pub height: Integer,
+    /// Duration of the video in seconds as defined by sender.
     pub duration: Integer,
+    /// Video thumbnail.
     pub thumb: Option<PhotoSize>,
+    /// Mime type of a file as defined by sender.
     pub mime_type: Option<String>,
+    /// File size.
     pub file_size: Option<Integer>,
 }
 
+/// This object represents a voice note.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct Voice {
+    /// Unique identifier for this file.
     pub file_id: String,
+    /// Duration of the audio in seconds as defined by sender.
     pub duration: Integer,
+    /// MIME type of the file as defined by sender.
     pub mime_type: Option<String>,
+    /// File size.
     pub file_size: Option<Integer>,
 }
 
+/// This object represents a phone contact.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct Contact {
+    /// Contact's phone number.
     pub phone_number: String,
+    /// Contact's first name.
     pub first_name: String,
+    /// Contact's last name.
     pub last_name: Option<String>,
+    /// Contact's user identifier in Telegram.
     pub user_id: Option<Integer>,
 }
 
+/// This object represents a point on the map.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct Location {
+    /// Longitude as defined by sender.
     pub longitude: Float,
+    /// Latitude as defined by sender.
     pub latitude: Float,
 }
 
+/// This object represents a venue.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct Venue {
+    /// Venue location.
     pub location: Location,
+    /// Name of the venue.
     pub title: String,
+    /// Address of the venue.
     pub address: String,
+    /// Foursquare identifier of the venue.
     pub foursquare_id: Option<String>,
 }
 
+/// This object represent a user's profile pictures.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct UserProfilePhotos {
+    /// Total number of profile pictures the target user has.
     pub total_count: Integer,
+    /// Requested profile pictures (in up to 4 sizes each).
     pub photos: Vec<Vec<PhotoSize>>,
 }
 
+/// This object represents a file ready to be downloaded.
+/// The file can be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>.
+/// It is guaranteed that the link will be valid for at least 1 hour.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct File {
+    /// Unique identifier for this file.
     pub file_id: String,
+    /// File size, if known.
     pub file_size: Option<Integer>,
+    /// File path. Use https://api.telegram.org/file/bot<token>/<file_path> to get the file.
     pub file_path: Option<String>,
 }
