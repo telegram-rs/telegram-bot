@@ -8,10 +8,11 @@ pub struct Update {
     /// The update‘s unique identifier. Update identifiers start from a certain
     /// positive number and increase sequentially.
     pub id: Integer,
+    /// Kind of the incoming update.
     pub kind: UpdateKind,
 }
 
-/// Kind of incoming update.
+/// Kind of the incoming update.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum UpdateKind {
     /// New incoming message of any kind — text, photo, sticker, etc.
