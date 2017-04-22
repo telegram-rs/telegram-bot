@@ -35,7 +35,7 @@ impl<'c> Request for SendChatAction<'c> {
         ()
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "sendChatAction"
     }
 }

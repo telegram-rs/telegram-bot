@@ -20,7 +20,7 @@ impl<'c, 'f> Request for ForwardMessage<'c, 'f> {
         raw
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "forwardMessage"
     }
 }

@@ -14,7 +14,7 @@ impl<'c> Request for GetChatAdministrators<'c> {
         raw
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "getChatAdministrators"
     }
 }

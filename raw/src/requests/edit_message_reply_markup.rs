@@ -17,7 +17,7 @@ impl<'c> Request for EditMessageReplyMarkup<'c> {
         raw
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "editMessageReplyMarkup"
     }
 }

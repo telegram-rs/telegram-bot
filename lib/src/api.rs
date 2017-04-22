@@ -91,7 +91,7 @@ impl Api {
     pub fn send<Req>(&self, request: &Req) -> TelegramFuture<Req::Response>
         where Req: Request + 'static, <Req as Request>::Response: ::std::marker::Send + 'static {
 
-        let name = request.name();
+        let name = Req::name();
         let encoded = serde_json::to_vec(&request);
 
         let url = result(url(&self.inner.token, name));

@@ -25,7 +25,7 @@ impl<'c, 's> Request for EditMessageText<'c, 's> {
         raw
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "editMessageText"
     }
 }

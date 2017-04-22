@@ -28,7 +28,7 @@ impl<'c, 's> Request for SendMessage<'c, 's> {
         raw
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "sendMessage"
     }
 }

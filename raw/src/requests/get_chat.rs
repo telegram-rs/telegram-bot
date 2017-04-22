@@ -14,7 +14,7 @@ impl<'c> Request for GetChat<'c> {
         raw
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "getChat"
     }
 }

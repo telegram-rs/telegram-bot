@@ -14,7 +14,7 @@ pub trait Request: Serialize {
 
     fn map(raw: Self::RawResponse) -> Self::Response;
 
-    fn name(&self) -> &'static str;
+    fn name() -> &'static str;
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]

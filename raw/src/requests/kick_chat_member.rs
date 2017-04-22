@@ -15,7 +15,7 @@ impl<'c> Request for KickChatMember<'c> {
         ()
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "kickChatMember"
     }
 }

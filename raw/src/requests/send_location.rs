@@ -24,7 +24,7 @@ impl<'c> Request for SendLocation<'c> {
         raw
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "sendLocation"
     }
 }

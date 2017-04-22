@@ -20,7 +20,7 @@ impl Request for GetUpdates {
         raw
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "getUpdates"
     }
 }

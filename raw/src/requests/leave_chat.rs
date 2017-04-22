@@ -14,7 +14,7 @@ impl<'c> Request for LeaveChat<'c> {
         ()
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "leaveChat"
     }
 }

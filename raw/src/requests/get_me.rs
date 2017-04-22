@@ -12,7 +12,7 @@ impl Request for GetMe {
         raw
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "getMe"
     }
 }

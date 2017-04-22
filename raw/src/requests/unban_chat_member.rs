@@ -15,7 +15,7 @@ impl<'c> Request for UnbanChatMember<'c> {
         ()
     }
 
-    fn name(&self) -> &'static str {
+    fn name() -> &'static str {
         "unbanChatMember"
     }
 }
