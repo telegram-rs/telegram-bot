@@ -32,6 +32,7 @@ pub struct Forward {
     pub from: ForwardFrom,
 }
 
+/// Information about the original message.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum ForwardFrom {
     /// Sender of the original message.
@@ -48,65 +49,115 @@ pub enum ForwardFrom {
     }
 }
 
+/// Kind of the message.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum MessageKind {
+    /// Text message.
     Text {
+        /// Actual UTF-8 text of the message, 0-4096 characters.
         data: String,
+        /// Special entities like usernames, URLs, bot commands, etc. that appear in the text
         entities: Vec<MessageEntity>,
     },
+    /// Message is an audio file.
     Audio {
+        /// Information about the file.
         data: Audio,
     },
+    /// Message is a general file.
     Document {
+        /// Information about the file.
         data: Document,
+        /// Caption for the document, 0-200 characters.
         caption: Option<String>,
     },
+    /// Message is a photo.
     Photo {
+        /// Available sizes of the photo.
         data: Vec<PhotoSize>,
+        /// Caption for the photo, 0-200 characters.
         caption: Option<String>,
     },
+    /// Message is a sticker.
     Sticker {
+        /// Information about the sticker.
         data: Sticker,
     },
+    /// Message is a video.
     Video {
+        /// Information about the video.
         data: Video,
+        /// Caption for the video, 0-200 characters.
         caption: Option<String>,
     },
+    /// Message is a voice message.
     Voice {
+        /// Information about the file.
         data: Voice,
     },
+    /// Message is a shared contact.
     Contact {
+        /// Information about the contact.
         data: Contact,
     },
+    /// Message is a shared location.
     Location {
+        /// Information about the location.
         data: Location,
     },
+    /// Message is a venue.
     Venue {
+        /// Information about the venue.
         data: Venue,
     },
+    /// A new member was added to the group.
     NewChatMember {
+        /// Information about user (this member may be the bot itself).
         data: User,
     },
+    /// A member was removed from the group.
     LeftChatMember {
+        /// Information about user (this member may be the bot itself).
         data: User,
     },
+    /// New chat title.
     NewChatTitle {
+        /// A chat title was changed to this value.
         data: String,
     },
+    /// New chat photo.
     NewChatPhoto {
+        /// A chat photo was change to this value.
         data: PhotoSize,
     },
+    /// Service message: the chat photo was deleted.
     DeleteChatPhoto,
+    /// Service message: the group has been created.
     GroupChatCreated,
+    /// Service message: the supergroup has been created. This field can‘t be received in a
+    /// message coming through updates, because bot can’t be a member of a supergroup when
+    /// it is created. It can only be found in reply_to_message if someone replies to a very
+    /// first message in a directly created supergroup.
     SupergroupChatCreated,
+    /// Service message: the channel has been created. This field can‘t be received in a message
+    /// coming through updates, because bot can’t be a member of a channel when it is created.
+    /// It can only be found in reply_to_message if someone replies
+    /// to a very first message in a channel.
     ChannelChatCreated,
+    /// The group has been migrated to a supergroup.
     MigrateToChatId {
+        /// Supergroup chat identifier.
         data: Integer,
     },
+    /// The supergroup has been migrated from a group.
     MigrateFromChatId {
+        /// Group chat identifier.
         data: Integer,
     },
+    /// Specified message was pinned.
     PinnedMessage {
+        // Specified message was pinned. Note that the Message object in this field will not
+        // contain further reply_to_message fields even if it is itself a reply.
         data: Box<Message>,
     },
     #[doc(hidden)]
@@ -541,7 +592,7 @@ pub struct UserProfilePhotos {
 }
 
 /// This object represents a file ready to be downloaded.
-/// The file can be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>.
+/// The file can be downloaded via the link `https://api.telegram.org/file/bot<token>/<file_path>`.
 /// It is guaranteed that the link will be valid for at least 1 hour.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct File {
@@ -549,6 +600,6 @@ pub struct File {
     pub file_id: String,
     /// File size, if known.
     pub file_size: Option<Integer>,
-    /// File path. Use https://api.telegram.org/file/bot<token>/<file_path> to get the file.
+    /// File path. Use `https://api.telegram.org/file/bot<token>/<file_path>` to get the file.
     pub file_path: Option<String>,
 }
