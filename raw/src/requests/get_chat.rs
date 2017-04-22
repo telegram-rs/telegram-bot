@@ -1,6 +1,7 @@
 use types::*;
 use requests::*;
 
+/// Use this method to get up to date information about the chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct GetChat<'c> {
     chat_id: ChatId<'c>

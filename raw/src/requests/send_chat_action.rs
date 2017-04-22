@@ -1,6 +1,8 @@
 use types::*;
 use requests::*;
 
+/// Strongly typed ChatAction. Instead of passing a String to the
+/// `chat_action` method, this is used.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum ChatAction {
     #[serde(rename = "typing")]
@@ -21,6 +23,9 @@ pub enum ChatAction {
     FindLocation,
 }
 
+/// Use this method when you need to tell the user that something is happening on the bot's side.
+/// The status is set for 5 seconds or less (when a message arrives from your bot,
+/// Telegram clients clear its typing status).
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendChatAction<'c> {
     chat_id: ChatId<'c>,

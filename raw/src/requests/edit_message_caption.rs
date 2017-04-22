@@ -3,6 +3,7 @@ use std::borrow::Cow;
 use types::*;
 use requests::*;
 
+/// Use this method to edit captions of messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct EditMessageCaption<'c, 's> {
     chat_id: ChatId<'c>,

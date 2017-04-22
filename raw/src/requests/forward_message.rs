@@ -3,6 +3,7 @@ use std::ops::Not;
 use types::*;
 use requests::*;
 
+/// Use this method to forward messages of any kind.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ForwardMessage<'c, 'f> {
     chat_id: ChatId<'c>,

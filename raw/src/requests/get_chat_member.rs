@@ -1,6 +1,7 @@
 use types::*;
 use requests::*;
 
+/// Use this method to get information about a member of a chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct GetChatMember<'c> {
     chat_id: ChatId<'c>,

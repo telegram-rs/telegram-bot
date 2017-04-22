@@ -1,6 +1,7 @@
 use requests::*;
 use types::*;
 
+/// Use this method to receive incoming updates using long polling.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct GetUpdates {
     #[serde(skip_serializing_if = "Option::is_none")]

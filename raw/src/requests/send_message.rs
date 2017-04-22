@@ -4,6 +4,7 @@ use std::borrow::Cow;
 use types::*;
 use requests::*;
 
+/// Use this method to send text messages.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendMessage<'c, 's> {
     chat_id: ChatId<'c>,

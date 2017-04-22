@@ -1,6 +1,7 @@
 use types::*;
 use requests::*;
 
+/// Use this method for your bot to leave a group, supergroup or channel.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct LeaveChat<'c> {
     chat_id: ChatId<'c>

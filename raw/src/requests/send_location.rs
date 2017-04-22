@@ -3,6 +3,7 @@ use std::ops::Not;
 use types::*;
 use requests::*;
 
+/// Use this method to send point on the map.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendLocation<'c> {
     chat_id: ChatId<'c>,

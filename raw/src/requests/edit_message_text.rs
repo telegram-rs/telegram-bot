@@ -4,6 +4,7 @@ use std::borrow::Cow;
 use types::*;
 use requests::*;
 
+/// Use this method to edit text and game messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct EditMessageText<'c, 's> {
     chat_id: ChatId<'c>,
