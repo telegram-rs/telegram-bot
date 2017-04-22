@@ -2,17 +2,25 @@ use serde::de::{Deserialize, Deserializer};
 
 use types::*;
 
+/// This object represents an incoming update.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Update {
+    /// The update‘s unique identifier. Update identifiers start from a certain
+    /// positive number and increase sequentially.
     pub id: Integer,
     pub kind: UpdateKind,
 }
 
+/// Kind of incoming update.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum UpdateKind {
+    /// New incoming message of any kind — text, photo, sticker, etc.
     Message(Message),
+    /// New version of a message that is known to the bot and was edited
     EditedMessage(Message),
+    /// New incoming channel post of any kind — text, photo, sticker, etc.
     ChannelPost(Message),
+    /// New version of a channel post that is known to the bot and was edited
     EditedChannelPost(Message),
 //    InlineQuery(InlineQuery),
 //    ChosenInlineResult(ChosenInlineResult),
@@ -52,10 +60,16 @@ impl Deserialize for Update {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct RawUpdate {
+    /// The update‘s unique identifier. Update identifiers start from a certain
+    /// positive number and increase sequentially.
     pub update_id: Integer,
+    /// New incoming message of any kind — text, photo, sticker, etc.
     pub message: Option<Message>,
+    /// New version of a message that is known to the bot and was edited
     pub edited_message: Option<Message>,
+    /// New incoming channel post of any kind — text, photo, sticker, etc.
     pub channel_post: Option<Message>,
+    /// New version of a channel post that is known to the bot and was edited
     pub edited_channel_post: Option<Message>,
 //    pub inline_query: Option<InlineQuery>,
 //    pub chosen_inline_result: Option<ChosenInlineResult>,
