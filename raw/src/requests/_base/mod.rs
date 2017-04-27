@@ -1,7 +1,7 @@
 #[macro_use]
 pub mod reply_markup;
 
-use serde::de::Deserialize;
+use serde::de::DeserializeOwned;
 use serde::ser::{Serialize, Serializer};
 
 use types::*;
@@ -12,7 +12,7 @@ pub use self::reply_markup::*;
 pub trait Request: Serialize {
     type Response;
     /// Directly mapped from Telegram API response.
-    type RawResponse: Deserialize;
+    type RawResponse: DeserializeOwned;
 
     /// Map `RawResponse` to `Response`, `id` usually.
     fn map(raw: Self::RawResponse) -> Self::Response;
@@ -42,7 +42,9 @@ impl<'a> ChatId<'a> {
 }
 
 impl<'a> Serialize for ChatId<'a> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
         match *self {
             ChatId::ById(id) => serializer.serialize_i64(id),
             ChatId::ByUsername(username) => serializer.serialize_str(username),
@@ -65,8 +67,8 @@ impl<'a, 'b> From<&'b Chat> for ChatId<'a> {
 impl<'a, 'b> From<&'b ForwardFrom> for ChatId<'a> {
     fn from(value: &'b ForwardFrom) -> ChatId<'a> {
         let id = match *value {
-            ForwardFrom::User {ref user, ..} => user.id,
-            ForwardFrom::Channel {ref channel, ..} => channel.id,
+            ForwardFrom::User { ref user, .. } => user.id,
+            ForwardFrom::Channel { ref channel, .. } => channel.id,
         };
         ChatId::from_id(id)
     }
@@ -89,11 +91,13 @@ from_chat_type!(Channel);
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct UserId {
-    inner: Integer
+    inner: Integer,
 }
 
 impl<'a> Serialize for UserId {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
         serializer.serialize_i64(self.inner)
     }
 }
@@ -124,14 +128,16 @@ pub enum ParseMode {
     Markdown,
     /// Use HTML formatting.
     #[serde(rename = "HTML")]
-    Html
+    Html,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MessageId(pub Integer);
 
 impl Serialize for MessageId {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
         serializer.serialize_i64(self.0)
     }
 }

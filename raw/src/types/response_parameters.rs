@@ -19,8 +19,10 @@ pub enum Response<T> {
     },
 }
 
-impl<T: Deserialize> Deserialize for Response<T> {
-    fn deserialize<D>(deserializer: D) -> Result<Response<T>, D::Error> where D: Deserializer {
+impl<'de, T: Deserialize<'de>> Deserialize<'de> for Response<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Response<T>, D::Error>
+        where D: Deserializer<'de>
+    {
         let raw: RawResponse<T> = Deserialize::deserialize(deserializer)?;
         match (raw.ok, raw.description, raw.result) {
             (false, Some(description), None) => {
@@ -28,12 +30,8 @@ impl<T: Deserialize> Deserialize for Response<T> {
                     description: description,
                     parameters: raw.parameters,
                 })
-            },
-            (true, None, Some(result)) => {
-                Ok(Response::Success {
-                    result: result,
-                })
             }
+            (true, None, Some(result)) => Ok(Response::Success { result: result }),
             _ => Err(D::Error::custom("ambiguous response")),
         }
     }

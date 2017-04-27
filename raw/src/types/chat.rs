@@ -72,8 +72,10 @@ impl Chat {
     }
 }
 
-impl Deserialize for Chat {
-    fn deserialize<D>(deserializer: D) -> Result<Chat, D::Error> where D: Deserializer {
+impl<'de> Deserialize<'de> for Chat {
+    fn deserialize<D>(deserializer: D) -> Result<Chat, D::Error>
+        where D: Deserializer<'de>
+    {
         let raw: RawChat = Deserialize::deserialize(deserializer)?;
 
         macro_rules! required_field {
@@ -93,25 +95,29 @@ impl Deserialize for Chat {
                     first_name: required_field!(first_name),
                     last_name: raw.last_name,
                 })
-            },
+            }
             "group" => {
                 Chat::Group(Group {
                     id: raw.id,
                     title: required_field!(title),
                     all_members_are_administrators: required_field!(all_members_are_administrators),
                 })
-            },
-            "supergroup" => Chat::Supergroup(Supergroup {
-                id: raw.id,
-                title: required_field!(title),
-                username: raw.username,
-            }),
-            "channel" => Chat::Channel(Channel {
-                id: raw.id,
-                title: required_field!(title),
-                username: raw.username,
-            }),
-            _ => Chat::Unknown(raw)
+            }
+            "supergroup" => {
+                Chat::Supergroup(Supergroup {
+                    id: raw.id,
+                    title: required_field!(title),
+                    username: raw.username,
+                })
+            }
+            "channel" => {
+                Chat::Channel(Channel {
+                    id: raw.id,
+                    title: required_field!(title),
+                    username: raw.username,
+                })
+            }
+            _ => Chat::Unknown(raw),
         })
     }
 }
