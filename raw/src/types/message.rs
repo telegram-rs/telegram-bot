@@ -310,7 +310,7 @@ pub struct RawMessage {
     pub audio: Option<Audio>,
     /// Message is a general file, information about the file.
     pub document: Option<Document>,
-    //    pub game: Option<Game>,
+    // pub game: Option<Game>,
     /// Message is a photo, available sizes of the photo.
     pub photo: Option<Vec<PhotoSize>>,
     /// Message is a sticker, information about the sticker.

@@ -23,9 +23,9 @@ pub enum UpdateKind {
     ChannelPost(Message),
     /// New version of a channel post that is known to the bot and was edited
     EditedChannelPost(Message),
-    //    InlineQuery(InlineQuery),
-    //    ChosenInlineResult(ChosenInlineResult),
-    //    CallbackQuery(OptionCallbackQuery),
+    // InlineQuery(InlineQuery),
+    // ChosenInlineResult(ChosenInlineResult),
+    // CallbackQuery(OptionCallbackQuery),
     #[doc(hidden)]
     Unknown(RawUpdate),
 }
@@ -50,9 +50,9 @@ impl<'de> Deserialize<'de> for Update {
         maybe_field!(edited_message, EditedMessage);
         maybe_field!(channel_post, ChannelPost);
         maybe_field!(edited_channel_post, EditedChannelPost);
-        //        maybe_field!(inline_query, InlineQuery);
-        //        maybe_field!(chosen_inline_result, ChosenInlineResult);
-        //        maybe_field!(callback_query, CallbackQuery);
+        // maybe_field!(inline_query, InlineQuery);
+        // maybe_field!(chosen_inline_result, ChosenInlineResult);
+        // maybe_field!(callback_query, CallbackQuery);
 
         Ok(Update {
             id: raw.update_id,
