@@ -1,0 +1,24 @@
+[package]
+name = "telegram-bot"
+version = "0.5.0"
+authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
+
+description = "A library for creating Telegram bots."
+
+keywords = ["telegram", "bot", "chat", "api"]
+license = "MIT"
+
+[dependencies]
+serde = "1.0.1"
+tokio-core = "0.1"
+error-chain = "0.10.0"
+futures = "0.1"
+serde_json = "1.0.0"
+
+telegram-bot-raw = { version = "=0.5.0", path = "../raw" }
+
+[dependencies.hyper]
+git = "https://github.com/hyperium/hyper.git"
+
+[dependencies.hyper-tls]
+git = "https://github.com/hyperium/hyper-tls.git"
