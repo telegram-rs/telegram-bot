@@ -17,19 +17,23 @@ pub enum ChatMemberStatus {
     Unknown(String),
 }
 
-impl Deserialize for ChatMemberStatus {
-    fn deserialize<D>(deserializer: D) -> Result<ChatMemberStatus, D::Error> where D: Deserializer {
+impl<'de> Deserialize<'de> for ChatMemberStatus {
+    fn deserialize<D>(deserializer: D) -> Result<ChatMemberStatus, D::Error>
+        where D: Deserializer<'de>
+    {
         struct ChatMemberStatusVisitor;
         use self::ChatMemberStatus::*;
 
-        impl Visitor for ChatMemberStatusVisitor {
+        impl<'de> Visitor<'de> for ChatMemberStatusVisitor {
             type Value = ChatMemberStatus;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("creator | administrator | member | left | kicked")
             }
 
-            fn visit_str<E>(self, value: &str) -> Result<ChatMemberStatus, E> where E: de::Error {
+            fn visit_str<E>(self, value: &str) -> Result<ChatMemberStatus, E>
+                where E: de::Error
+            {
                 Ok(match value {
                     "creator" => Creator,
                     "administrator" => Administrator,

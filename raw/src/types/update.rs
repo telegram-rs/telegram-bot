@@ -23,15 +23,17 @@ pub enum UpdateKind {
     ChannelPost(Message),
     /// New version of a channel post that is known to the bot and was edited
     EditedChannelPost(Message),
-//    InlineQuery(InlineQuery),
-//    ChosenInlineResult(ChosenInlineResult),
-//    CallbackQuery(OptionCallbackQuery),
+    // InlineQuery(InlineQuery),
+    // ChosenInlineResult(ChosenInlineResult),
+    // CallbackQuery(OptionCallbackQuery),
     #[doc(hidden)]
-    Unknown(RawUpdate)
+    Unknown(RawUpdate),
 }
 
-impl Deserialize for Update {
-    fn deserialize<D>(deserializer: D) -> Result<Update, D::Error> where D: Deserializer {
+impl<'de> Deserialize<'de> for Update {
+    fn deserialize<D>(deserializer: D) -> Result<Update, D::Error>
+        where D: Deserializer<'de>
+    {
         let raw: RawUpdate = Deserialize::deserialize(deserializer)?;
         macro_rules! maybe_field {
             ($name:ident, $variant:ident) => {{
@@ -48,9 +50,9 @@ impl Deserialize for Update {
         maybe_field!(edited_message, EditedMessage);
         maybe_field!(channel_post, ChannelPost);
         maybe_field!(edited_channel_post, EditedChannelPost);
-//        maybe_field!(inline_query, InlineQuery);
-//        maybe_field!(chosen_inline_result, ChosenInlineResult);
-//        maybe_field!(callback_query, CallbackQuery);
+        // maybe_field!(inline_query, InlineQuery);
+        // maybe_field!(chosen_inline_result, ChosenInlineResult);
+        // maybe_field!(callback_query, CallbackQuery);
 
         Ok(Update {
             id: raw.update_id,
@@ -72,8 +74,8 @@ pub struct RawUpdate {
     /// New incoming channel post of any kind — text, photo, sticker, etc.
     pub channel_post: Option<Message>,
     /// New version of a channel post that is known to the bot and was edited
-    pub edited_channel_post: Option<Message>,
-//    pub inline_query: Option<InlineQuery>,
-//    pub chosen_inline_result: Option<ChosenInlineResult>,
-//    pub callback_query: Option<CallbackQuery>,
+    pub edited_channel_post: Option<Message>, 
+    // pub inline_query: Option<InlineQuery>,
+    // pub chosen_inline_result: Option<ChosenInlineResult>,
+    // pub callback_query: Option<CallbackQuery>,
 }

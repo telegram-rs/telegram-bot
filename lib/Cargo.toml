@@ -9,11 +9,11 @@ keywords = ["telegram", "bot", "chat", "api"]
 license = "MIT"
 
 [dependencies]
-serde = "0.9.8"
+serde = "1.0.1"
 tokio-core = "0.1"
 error-chain = "0.10.0"
 futures = "0.1"
-serde_json = "0.9.8"
+serde_json = "1.0.0"
 
 telegram-bot-raw = { version = "=0.5.0", path = "../raw" }
 

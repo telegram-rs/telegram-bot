@@ -45,8 +45,8 @@ pub enum ForwardFrom {
         /// Original channel.
         channel: Channel,
         /// Identifier of the original message in the channel
-        message_id: Integer
-    }
+        message_id: Integer,
+    },
 }
 
 /// Kind of the message.
@@ -161,13 +161,14 @@ pub enum MessageKind {
         data: Box<Message>,
     },
     #[doc(hidden)]
-    Unknown {
-        raw: RawMessage
-    }
+    Unknown { raw: RawMessage },
 }
 
-impl Deserialize for Message {  // TODO(knsd): Remove .clone()
-    fn deserialize<D>(deserializer: D) -> Result<Message, D::Error> where D: Deserializer {
+impl<'de> Deserialize<'de> for Message {
+    // TODO(knsd): Remove .clone()
+    fn deserialize<D>(deserializer: D) -> Result<Message, D::Error>
+        where D: Deserializer<'de>
+    {
         let raw: RawMessage = Deserialize::deserialize(deserializer)?;
 
         let id = raw.message_id;
@@ -177,17 +178,17 @@ impl Deserialize for Message {  // TODO(knsd): Remove .clone()
         let reply_to_message = raw.reply_to_message.clone();
         let edit_date = raw.edit_date;
 
-        let forward = match (raw.forward_date, &raw.forward_from,
-                             &raw.forward_from_chat, raw.forward_from_message_id) {
+        let forward = match (raw.forward_date,
+                             &raw.forward_from,
+                             &raw.forward_from_chat,
+                             raw.forward_from_message_id) {
             (None, &None, &None, None) => None,
             (Some(date), &Some(ref from), &None, None) => {
                 Some(Forward {
                     date: date,
-                    from: ForwardFrom::User {
-                        user: from.clone(),
-                    },
+                    from: ForwardFrom::User { user: from.clone() },
                 })
-            },
+            }
             (Some(date), &None, &Some(Chat::Channel(ref channel)), Some(message_id)) => {
                 Some(Forward {
                     date: date,
@@ -196,10 +197,8 @@ impl Deserialize for Message {  // TODO(knsd): Remove .clone()
                         message_id: message_id,
                     },
                 })
-            },
-            _ => {
-                return Err(D::Error::custom("invalid forward fields combination"))
             }
+            _ => return Err(D::Error::custom("invalid forward fields combination")),
         };
 
         let make_message = |kind| {
@@ -249,7 +248,7 @@ impl Deserialize for Message {  // TODO(knsd): Remove .clone()
             return make_message(MessageKind::Text {
                 data: text,
                 entities: entities,
-            })
+            });
         }
 
         maybe_field!(audio, Audio);
@@ -274,9 +273,7 @@ impl Deserialize for Message {  // TODO(knsd): Remove .clone()
         maybe_field!(migrate_from_chat_id, MigrateFromChatId);
         maybe_field!(pinned_message, PinnedMessage);
 
-        make_message(MessageKind::Unknown {
-            raw: raw,
-        })
+        make_message(MessageKind::Unknown { raw: raw })
     }
 }
 
@@ -313,7 +310,7 @@ pub struct RawMessage {
     pub audio: Option<Audio>,
     /// Message is a general file, information about the file.
     pub document: Option<Document>,
-//    pub game: Option<Game>,
+    // pub game: Option<Game>,
     /// Message is a photo, available sizes of the photo.
     pub photo: Option<Vec<PhotoSize>>,
     /// Message is a sticker, information about the sticker.
@@ -393,8 +390,10 @@ pub enum MessageEntityKind {
     Unknown(RawMessageEntity),
 }
 
-impl Deserialize for MessageEntity {
-    fn deserialize<D>(deserializer: D) -> Result<MessageEntity, D::Error> where D: Deserializer {
+impl<'de> Deserialize<'de> for MessageEntity {
+    fn deserialize<D>(deserializer: D) -> Result<MessageEntity, D::Error>
+        where D: Deserializer<'de>
+    {
         use self::MessageEntityKind::*;
 
         let raw: RawMessageEntity = Deserialize::deserialize(deserializer)?;
