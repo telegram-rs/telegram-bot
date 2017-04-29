@@ -72,14 +72,14 @@ fn main() {
 You can find a bigger example in the `examples` folder and run them like this:
 
 ```bash
-TELEGRAM_BOT_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXxx cargo run --example features
+TELEGRAM_BOT_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXxx cargo run -p telegram-bot --example features
 ```
 
 ## Usage
 This library is available via `crates.io`. In order to use it, just add this to your `Cargo.toml`:
 
 ```
-telegram-bot = "0.4"
+telegram-bot = "0.5"
 ```
 
 ## Collaboration
