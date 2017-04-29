@@ -24,49 +24,49 @@ This library will undergo a major rewrite in the next few months. Currently the 
 Here is a simple example (see [`example/simple.rs`](https://github.com/telegram-rs/telegram-bot/blob/master/examples/simple.rs)):
 
 ``` rust
+extern crate futures;
 extern crate telegram_bot;
+extern crate tokio_core;
 
+use std::env;
+
+use futures::Stream;
+use tokio_core::reactor::Core;
 use telegram_bot::*;
 
 fn main() {
-    // Create bot, test simple API call and print bot information
-    let api = Api::from_env("TELEGRAM_BOT_TOKEN").unwrap();
-    println!("getMe: {:?}", api.get_me());
-    let mut listener = api.listener(ListeningMethod::LongPoll(None));
+    let mut core = Core::new().unwrap();
+
+    let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
+    let api = Api::from_token(&core.handle(), &token).unwrap();
 
     // Fetch new updates via long poll method
-    let res = listener.listen(|u| {
-        // If the received update contains a message...
-        if let Some(m) = u.message {
-            let name = m.from.first_name;
+    let future = api.stream().for_each(|update| {
 
-            // Match message type
-            match m.msg {
-                MessageType::Text(t) => {
-                    // Print received text message to stdout
-                    println!("<{}> {}", name, t);
+        // If the received update contains a new message...
+        if let UpdateKind::Message(message) = update.kind {
 
-                    if t == "/exit" {
-                        return Ok(ListeningAction::Stop);
-                    }
+            // Get sender's first name if available.
+            let first_name = match message.from.as_ref() {
+                Some(from) => &from.first_name,
+                None => return Ok(()) // Skip a message.
+            };
 
-                    // Answer message with "Hi"
-                    try!(api.send_message(
-                        m.chat.id(),
-                        format!("Hi, {}! You just wrote '{}'", name, t),
-                        None, None, None, None));
-                },
-                _ => {}
+            if let MessageKind::Text {ref data, ..} = message.kind {
+                // Print received text message to stdout.
+                println!("<{}>: {}", first_name, data);
+
+                // Answer message with "Hi".
+                api.spawn(&message.text_reply(
+                    format!("Hi, {}! You just wrote '{}'", first_name, data)
+                ));
             }
         }
 
-        // If none of the "try!" statements returned an error: It's Ok!
-        Ok(ListeningAction::Continue)
+        Ok(())
     });
 
-    if let Err(e) = res {
-        println!("An error occured: {}", e);
-    }
+    core.run(future).unwrap();
 }
 ```
 You can find a bigger example in the `examples` folder and run them like this:
