@@ -69,11 +69,7 @@ fn main() {
     core.run(future).unwrap();
 }
 ```
-You can find a bigger example in the `examples` folder and run them like this:
-
-```bash
-TELEGRAM_BOT_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXxx cargo run -p telegram-bot --example features
-```
+You can find a bigger examples in the `examples`.
 
 ## Usage
 This library is available via `crates.io`. In order to use it, just add this to your `Cargo.toml`:
@@ -86,19 +82,3 @@ telegram-bot = "0.5"
 Yes please! Every type of contribution is welcome: Create issues, hack some code or make suggestions. If you don't know where to start, just contact me (my email is on my github profile).
 
 Please submit pull request against the `master` branch, unless all changes are just documentation fixes.
-
-## Todo
-
-- [x] "getMe"
-- [x] Methods without files
-  - [x] "getMe"
-  - [x] "sendMessage"
-  - [x] "forwardMessage"
-  - [x] "sendLocation"
-  - [x] "sendChatAction"
-  - [x] "getUserProfilePhotos"
-- [x] "getUpdates" and `long_poll`
-- [ ] "setWebhook" and `listen`
-- [x] sending files ("sendAudio", "sendDocument", ...)
-- [x] More good documentation and examples
-- [x] Maybe think about multithreading stuff
