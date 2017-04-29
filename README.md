@@ -79,6 +79,4 @@ telegram-bot = "0.5"
 ```
 
 ## Collaboration
-Yes please! Every type of contribution is welcome: Create issues, hack some code or make suggestions. If you don't know where to start, just contact me (my email is on my github profile).
-
-Please submit pull request against the `master` branch, unless all changes are just documentation fixes.
+Yes please! Every type of contribution is welcome: Create issues, hack some code or make suggestions. Don't know where to start? Good first issues are tagged with [up for grab](https://github.com/telegram-rs/telegram-bot/issues?q=is%3Aissue+is%3Aopen+label%3A%22up+for+grab%22).
