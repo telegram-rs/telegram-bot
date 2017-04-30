@@ -28,7 +28,7 @@ impl<C> HyperConnector<C> {
 }
 
 impl<C: Connect> Connector for HyperConnector<C> {
-    fn post(&self, uri: &str, data: Vec<u8>) -> TelegramFuture<Vec<u8>> {
+    fn post_json(&self, uri: &str, data: Vec<u8>) -> TelegramFuture<Vec<u8>> {
         let uri = result(Uri::from_str(uri)).map_err(From::from);
         let body = Body::from(data);
 

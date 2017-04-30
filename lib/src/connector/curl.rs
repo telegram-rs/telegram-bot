@@ -46,7 +46,7 @@ impl CurlConnector {
 }
 
 impl Connector for CurlConnector {
-    fn post(&self, uri: &str, data: Vec<u8>) -> TelegramFuture<Vec<u8>> {
+    fn post_json(&self, uri: &str, data: Vec<u8>) -> TelegramFuture<Vec<u8>> {
         let request = result(self.create_request(uri, data));
 
         let session = self.inner.clone();

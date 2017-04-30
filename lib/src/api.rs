@@ -73,7 +73,7 @@ impl Api {
 
         let api = self.clone();
         let response = encoded.and_then(move |data| {
-            api.inner.connector.post(&url, data)
+            api.inner.connector.post_json(&url, data)
         });
 
         let future = response.and_then(|bytes| {
