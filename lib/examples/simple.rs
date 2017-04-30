@@ -31,7 +31,7 @@ fn main() {
                 println!("<{}>: {}", first_name, data);
 
                 // Answer message with "Hi".
-                api.spawn(&message.text_reply(
+                api.spawn(message.text_reply(
                     format!("Hi, {}! You just wrote '{}'", first_name, data)
                 ));
             }

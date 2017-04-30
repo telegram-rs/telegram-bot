@@ -12,7 +12,7 @@ fn main() {
     let mut core = Core::new().unwrap();
 
     let api = Api::from_token(&core.handle(), &token).unwrap();
-    let future = api.send(&GetMe);
+    let future = api.send(GetMe);
 
     println!("{:?}", core.run(future))
 }
