@@ -148,6 +148,23 @@ fn test_get_chat_member(api: Api, message: Message, handle: &Handle) {
 
 }
 
+fn test_get_user_profile_photos(api: Api, message: Message, handle: &Handle) {
+    let user = match message.from {
+        Some(ref user) => user.clone(),
+        None => return,
+    };
+
+    let photos = api.send(&user.get_user_profile_photos());
+
+    let future = photos.and_then(move |photos| {
+        api.send(&message.text_reply(format!("Found photos: {}", photos.total_count)))
+    });
+
+    handle.spawn({
+        future.map_err(|_| ()).map(|_| ())
+    })
+}
+
 fn test_leave(api: Api, message: Message, _handle: &Handle) {
     api.spawn(&message.chat.leave_chat())
 }
@@ -166,6 +183,7 @@ fn test(api: Api, message: Message, handle: &Handle) {
                 "/get_chat_administrators" => test_get_chat_administrators,
                 "/get_chat_members_count" => test_get_chat_members_count,
                 "/get_chat_member" => test_get_chat_member,
+                "/get_user_profile_photos" => test_get_user_profile_photos,
                 "/leave" => test_leave,
                 _ => return,
             }
