@@ -65,6 +65,12 @@ impl<'a> Serialize for ChatId<'a> {
     }
 }
 
+impl<'a, 'b> From<&'b Integer> for ChatId<'a> {
+    fn from(value: &'b Integer) -> ChatId<'a> {
+        ChatId::from_id(*value)
+    }
+}
+
 impl<'a> From<Integer> for ChatId<'a> {
     fn from(value: Integer) -> ChatId<'a> {
         ChatId::from_id(value)
@@ -115,6 +121,12 @@ impl<'a> Serialize for UserId {
     }
 }
 
+impl<'a> From<&'a Integer> for UserId {
+    fn from(value: &'a Integer) -> UserId {
+        UserId { inner: *value }
+    }
+}
+
 impl From<Integer> for UserId {
     fn from(value: Integer) -> UserId {
         UserId { inner: value }
@@ -152,6 +164,12 @@ impl Serialize for MessageId {
         where S: Serializer
     {
         serializer.serialize_i64(self.0)
+    }
+}
+
+impl<'a> From<&'a Integer> for MessageId {
+    fn from(value: &'a Integer) -> Self {
+        MessageId(*value)
     }
 }
 
