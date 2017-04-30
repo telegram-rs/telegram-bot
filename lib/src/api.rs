@@ -65,15 +65,15 @@ impl Api {
         UpdatesStream::new(self)
     }
 
-    pub fn spawn<Req>(&self, request: &Req)
-        where Req: Request + 'static, <Req as Request>::Response: ::std::marker::Send + 'static {
+    pub fn spawn<Req>(&self, request: Req)
+        where Req: Request, <Req as Request>::Response: ::std::marker::Send + 'static {
 
         self.inner.handle.spawn(self.send(request).then(|_| Ok(())))
     }
 
     pub fn send_timeout<Req>(
-        &self, request: &Req, duration: Duration) -> TelegramFuture<Option<Req::Response>>
-        where Req: Request + 'static, <Req as Request>::Response: ::std::marker::Send + 'static {
+        &self, request: Req, duration: Duration) -> TelegramFuture<Option<Req::Response>>
+        where Req: Request, <Req as Request>::Response: ::std::marker::Send + 'static {
 
         let timeout_future = result(Timeout::new(duration, &self.inner.handle))
             .flatten().map_err(From::from).map(|()| None);
@@ -88,8 +88,8 @@ impl Api {
         }
     }
 
-    pub fn send<Req>(&self, request: &Req) -> TelegramFuture<Req::Response>
-        where Req: Request + 'static, <Req as Request>::Response: ::std::marker::Send + 'static {
+    pub fn send<Req>(&self, request: Req) -> TelegramFuture<Req::Response>
+        where Req: Request, <Req as Request>::Response: ::std::marker::Send + 'static {
 
         let name = Req::name();
         let encoded = serde_json::to_vec(&request);
