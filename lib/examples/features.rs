@@ -11,13 +11,13 @@ use telegram_bot::{Api, Message, ParseMode, MessageKind, UpdateKind};
 use telegram_bot::prelude::*;
 
 fn test_message(api: Api, message: Message, handle: &Handle) {
-    let simple = api.send(&message.text_reply("Simple message"));
+    let simple = api.send(message.text_reply("Simple message"));
 
-    let markdown = api.send(&message.text_reply("`Markdown message`")
+    let markdown = api.send(message.text_reply("`Markdown message`")
         .parse_mode(ParseMode::Markdown)
     );
 
-    let html = api.send(&message.text_reply("<b>Bold HTML message</b>")
+    let html = api.send(message.text_reply("<b>Bold HTML message</b>")
         .parse_mode(ParseMode::Html)
     );
 
@@ -31,9 +31,9 @@ fn test_message(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_preview(api: Api, message: Message, handle: &Handle) {
-    let preview = api.send(&message.text_reply("Message with preview https://telegram.org"));
+    let preview = api.send(message.text_reply("Message with preview https://telegram.org"));
 
-    let no_preview = api.send(&message.text_reply("Message without preview https://telegram.org")
+    let no_preview = api.send(message.text_reply("Message without preview https://telegram.org")
         .disable_web_page_preview()
     );
 
@@ -45,11 +45,11 @@ fn test_preview(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_reply(api: Api, message: Message, handle: &Handle) {
-    let msg = api.send(&message.text_reply("Reply to message"));
-    let chat = api.send(&message.chat.text("Text to message chat"));
+    let msg = api.send(message.text_reply("Reply to message"));
+    let chat = api.send(message.chat.text("Text to message chat"));
 
     let private = message.from.as_ref().map(|from| {
-        api.send(&from.text("Private text"))
+        api.send(from.text("Private text"))
     });
 
     handle.spawn({
@@ -60,15 +60,15 @@ fn test_reply(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_forward(api: Api, message: Message, _handle: &Handle) {
-    api.spawn(&message.forward(&message.chat));
+    api.spawn(message.forward(&message.chat));
 
     if let Some(ref from) = message.from {
-        api.spawn(&message.forward(from))
+        api.spawn(message.forward(from))
     }
 }
 
 fn test_edit_message(api: Api, message: Message, handle: &Handle) {
-    let round_1 = api.send(&message.text_reply("Round 1"));
+    let round_1 = api.send(message.text_reply("Round 1"));
 
     let duration_1 = Duration::from_secs(2);
 
@@ -77,7 +77,7 @@ fn test_edit_message(api: Api, message: Message, handle: &Handle) {
 
     let round_2_api = api.clone();
     let round_2 = round_1.join(sleep_1).and_then(move |(message, _)| {
-        round_2_api.send(&message.edit_text("Round 2"))
+        round_2_api.send(message.edit_text("Round 2"))
     });
 
     let duration_2 = Duration::from_secs(4);
@@ -85,7 +85,7 @@ fn test_edit_message(api: Api, message: Message, handle: &Handle) {
         .unwrap().map_err(From::from);
 
     let round_3 = round_2.join(sleep_2).map_err(|_| ()).and_then(move |(message, _)| {
-        api.spawn(&message.edit_text("Round 3"));
+        api.spawn(message.edit_text("Round 3"));
         Ok(())
     });
 
@@ -93,9 +93,9 @@ fn test_edit_message(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_get_chat(api: Api, message: Message, handle: &Handle) {
-    let chat = api.send(&message.chat.get_chat());
+    let chat = api.send(message.chat.get_chat());
     let future = chat.and_then(move |chat| {
-        api.send(&chat.text(format!("Chat id {}", chat.id())))
+        api.send(chat.text(format!("Chat id {}", chat.id())))
     });
 
     handle.spawn({
@@ -104,13 +104,13 @@ fn test_get_chat(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_get_chat_administrators(api: Api, message: Message, handle: &Handle) {
-    let administrators = api.send(&message.chat.get_chat_administrators());
+    let administrators = api.send(message.chat.get_chat_administrators());
     let future = administrators.and_then(move |administrators| {
         let mut response = Vec::new();
         for member in administrators {
             response.push(member.user.first_name.clone())
         }
-        api.send(&message.text_reply(format!("Administrators: {}", response.join(", "))))
+        api.send(message.text_reply(format!("Administrators: {}", response.join(", "))))
     });
 
     handle.spawn({
@@ -119,9 +119,9 @@ fn test_get_chat_administrators(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_get_chat_members_count(api: Api, message: Message, handle: &Handle) {
-    let count = api.send(&message.chat.get_chat_members_count());
+    let count = api.send(message.chat.get_chat_members_count());
     let future = count.and_then(move |count| {
-        api.send(&message.text_reply(format!("Members count: {}", count)))
+        api.send(message.text_reply(format!("Members count: {}", count)))
     });
 
     handle.spawn({
@@ -135,11 +135,11 @@ fn test_get_chat_member(api: Api, message: Message, handle: &Handle) {
         None => return,
     };
 
-    let member = api.send(&message.chat.get_chat_member(&user));
+    let member = api.send(message.chat.get_chat_member(&user));
     let future = member.and_then(move |member| {
         let first_name = member.user.first_name.clone();
         let status = member.status;
-        api.send(&message.text_reply(format!("Member {}, status {:?}", first_name, status)))
+        api.send(message.text_reply(format!("Member {}, status {:?}", first_name, status)))
     });
 
     handle.spawn({
@@ -154,10 +154,10 @@ fn test_get_user_profile_photos(api: Api, message: Message, handle: &Handle) {
         None => return,
     };
 
-    let photos = api.send(&user.get_user_profile_photos());
+    let photos = api.send(user.get_user_profile_photos());
 
     let future = photos.and_then(move |photos| {
-        api.send(&message.text_reply(format!("Found photos: {}", photos.total_count)))
+        api.send(message.text_reply(format!("Found photos: {}", photos.total_count)))
     });
 
     handle.spawn({
@@ -166,7 +166,7 @@ fn test_get_user_profile_photos(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_leave(api: Api, message: Message, _handle: &Handle) {
-    api.spawn(&message.chat.leave_chat())
+    api.spawn(message.chat.leave_chat())
 }
 
 fn test(api: Api, message: Message, handle: &Handle) {

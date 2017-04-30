@@ -21,6 +21,19 @@ pub trait Request: Serialize {
     fn name() -> &'static str;
 }
 
+impl<'a, Req: Request> Request for &'a Req {
+    type Response = Req::Response;
+    type RawResponse = Req::RawResponse;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        Req::map(raw)
+    }
+
+    fn name() -> &'static str {
+        Req::name()
+    }
+}
+
 /// Unique identifier for the target chat or username of the
 /// target channel (in the format @channelusername)
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
