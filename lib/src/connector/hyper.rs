@@ -13,9 +13,7 @@ use tokio_core::reactor::Handle;
 use errors::Error;
 use future::TelegramFuture;
 
-pub trait Connector {
-    fn post(&self, uri: &str, data: Vec<u8>) -> TelegramFuture<Vec<u8>>;
-}
+use super::_base::Connector;
 
 pub struct HyperConnector<C> {
     inner: Rc<Client<C>>
@@ -59,6 +57,5 @@ impl<C: Connect> Connector for HyperConnector<C> {
 pub fn default_connector(handle: &Handle) -> Box<Connector> {
     let connector = HttpsConnector::new(1, handle);
     let config = Client::configure().connector(connector);
-
     Box::new(HyperConnector::new(config.build(handle)))
 }
