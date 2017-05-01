@@ -6,8 +6,9 @@ use futures::{Future, Stream, Poll, Async};
 
 use telegram_bot_raw::{GetUpdates, Update, Integer};
 
-use api::{Api, TelegramFuture};
-use errors::{Error};
+use api::Api;
+use errors::Error;
+use future::TelegramFuture;
 
 const TELEGRAM_LONG_POLL_TIMEOUT: u64 = 5;
 
