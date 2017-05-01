@@ -21,7 +21,7 @@ A library for writing your own [Telegram](https://telegram.org/) bots. More info
 This library will undergo a major rewrite in the next few months. Currently the **development is stalled** and many new API parts are not supported right now! If you need to write a production ready application, either wait or use another (non-Rust) library. We're sorry :(
 
 ## Example
-Here is a simple example (see [`example/simple.rs`](https://github.com/telegram-rs/telegram-bot/blob/master/examples/simple.rs)):
+Here is a simple example (see [`example/simple.rs`](https://github.com/telegram-rs/telegram-bot/blob/master/lib/examples/simple.rs)):
 
 ``` rust
 extern crate futures;
