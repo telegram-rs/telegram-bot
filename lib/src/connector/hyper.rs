@@ -11,7 +11,7 @@ use hyper_tls::HttpsConnector;
 use tokio_core::reactor::Handle;
 
 use errors::Error;
-use future::TelegramFuture;
+use future::{TelegramFuture, NewTelegramFuture};
 
 use super::_base::Connector;
 
@@ -48,9 +48,7 @@ impl<C: Connect> Connector for HyperConnector<C> {
             })
         });
 
-        TelegramFuture {
-            inner: Box::new(future)
-        }
+        TelegramFuture::new(Box::new(future))
     }
 }
 

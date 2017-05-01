@@ -10,7 +10,7 @@ use telegram_bot_raw::{Request, Response};
 
 use connector::{Connector, default_connector};
 use errors::{Result, ErrorKind};
-use future::TelegramFuture;
+use future::{TelegramFuture, NewTelegramFuture};
 use stream::UpdatesStream;
 
 const TELEGRAM_URL: &'static str = "https://api.telegram.org/";
@@ -59,9 +59,7 @@ impl Api {
             .map(|(item, _next)| item)
             .map_err(|(item, _next)| item);
 
-        TelegramFuture {
-            inner: Box::new(future)
-        }
+        TelegramFuture::new(Box::new(future))
     }
 
     pub fn send<Req>(&self, request: Req) -> TelegramFuture<Req::Response>
@@ -90,9 +88,7 @@ impl Api {
             }))
         });
 
-        TelegramFuture {
-            inner: Box::new(future)
-        }
+        TelegramFuture::new(Box::new(future))
     }
 }
 

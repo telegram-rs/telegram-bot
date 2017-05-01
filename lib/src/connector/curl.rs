@@ -8,7 +8,7 @@ use tokio_core::reactor::Handle;
 use tokio_curl::Session;
 
 use errors::Error;
-use future::TelegramFuture;
+use future::{TelegramFuture, NewTelegramFuture};
 
 use super::_base::Connector;
 
@@ -62,9 +62,7 @@ impl Connector for CurlConnector {
             Ok(swap)
         });
 
-        TelegramFuture {
-            inner: Box::new(future)
-        }
+        TelegramFuture::new(Box::new(future))
     }
 }
 
