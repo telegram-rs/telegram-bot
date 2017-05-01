@@ -49,7 +49,9 @@ impl<'c, 'p, 'f, 'l> SendContact<'c, 'p, 'f, 'l> {
         }
     }
 
-    pub fn last_name<F>(mut self, last_name: F) -> Self where F: Into<Cow<'l, str>> {
+    pub fn last_name<F>(mut self, last_name: F) -> Self
+        where F: Into<Cow<'l, str>>
+    {
         self.last_name = Some(last_name.into());
         self
     }
@@ -59,13 +61,57 @@ impl<'c, 'p, 'f, 'l> SendContact<'c, 'p, 'f, 'l> {
         self
     }
 
-    pub fn reply_to<R>(mut self, to: R) -> Self where R: Into<MessageId> {
+    pub fn reply_to<R>(mut self, to: R) -> Self
+        where R: Into<MessageId>
+    {
         self.reply_to_message_id = Some(to.into().0);
         self
     }
 
-    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self where R: Into<ReplyMarkup> {
+    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self
+        where R: Into<ReplyMarkup>
+    {
         self.reply_markup = Some(reply_markup.into());
         self
+    }
+}
+
+pub trait CanSendContact<'bc, 'c, 'p, 'f, 'l> {
+    fn contact<P, F>(&'bc self, phone_number: P, first_name: F) -> SendContact<'c, 'p, 'f, 'l>
+        where P: Into<Cow<'p, str>>,
+              F: Into<Cow<'f, str>>;
+}
+
+impl<'bc, 'c, 'p, 'f, 'l, C: 'bc> CanSendContact<'bc, 'c, 'p, 'f, 'l> for C
+    where &'bc C: Into<ChatId<'c>>
+{
+    fn contact<P, F>(&'bc self, phone_number: P, first_name: F) -> SendContact<'c, 'p, 'f, 'l>
+        where P: Into<Cow<'p, str>>,
+              F: Into<Cow<'f, str>>
+    {
+        SendContact::new(self, phone_number, first_name)
+    }
+}
+
+pub trait CanReplySendContact {
+    fn contact_reply<'c, 'p, 'f, 'l, P: 'p, F: 'f>(&self,
+                                                   phone_number: P,
+                                                   first_name: F)
+                                                   -> SendContact<'c, 'p, 'f, 'l>
+        where P: Into<Cow<'p, str>>,
+              F: Into<Cow<'f, str>>;
+}
+
+impl CanReplySendContact for Message {
+    fn contact_reply<'c, 'p, 'f, 'l, P: 'p, F: 'f>(&self,
+                                                   phone_number: P,
+                                                   first_name: F)
+                                                   -> SendContact<'c, 'p, 'f, 'l>
+        where P: Into<Cow<'p, str>>,
+              F: Into<Cow<'f, str>>
+    {
+        self.chat
+            .contact(phone_number, first_name)
+            .reply_to(self)
     }
 }
