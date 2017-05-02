@@ -1,5 +1,5 @@
-pub use telegram_bot_raw::{GetFile, GetMe, GetUpdates, GetUserProfilePhotos, ForwardMessage};
-pub use telegram_bot_raw::{SendLocation, SendMessage, SendVenue};
+pub use telegram_bot_raw::{GetFile, GetMe, GetUpdates,  GetUserProfilePhotos, ForwardMessage};
+pub use telegram_bot_raw::{SendLocation, SendMessage, SendContact, SendVenue};
 pub use telegram_bot_raw::{GetChat, LeaveChat};
 pub use telegram_bot_raw::SendChatAction;
 pub use telegram_bot_raw::{GetChatAdministrators, GetChatMember, GetChatMembersCount};
