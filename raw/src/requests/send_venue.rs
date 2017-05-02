@@ -4,6 +4,7 @@ use std::borrow::Cow;
 use types::*;
 use requests::*;
 
+/// Use this method to send information about a venue.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendVenue<'c, 't, 'a, 'f> {
     chat_id: ChatId<'c>,

@@ -4,6 +4,7 @@ use std::borrow::Cow;
 use types::*;
 use requests::*;
 
+/// Use this method to send phone contacts.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendContact<'c, 'p, 'f, 'l> {
     chat_id: ChatId<'c>,
