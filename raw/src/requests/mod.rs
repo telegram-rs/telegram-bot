@@ -17,6 +17,7 @@ pub mod send_chat_action;
 pub mod send_contact;
 pub mod send_location;
 pub mod send_message;
+pub mod send_venue;
 pub mod unban_chat_member;
 
 pub use self::_base::*;
@@ -38,4 +39,5 @@ pub use self::send_chat_action::*;
 pub use self::send_contact::*;
 pub use self::send_location::*;
 pub use self::send_message::*;
+pub use self::send_venue::*;
 pub use self::unban_chat_member::*;
