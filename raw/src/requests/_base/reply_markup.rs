@@ -161,29 +161,3 @@ pub struct ForceReply {
     #[serde(skip_serializing_if = "Not::not")]
     pub selective: bool,
 }
-
-#[macro_export]
-macro_rules! reply_keyboard {
-    () => {
-        {
-            use $crate::requests::_base::reply_markup::ReplyKeyboardMarkup;
-            ReplyKeyboardMarkup::new()
-        }
-    };
-    ($( $( $x: expr ),*);*) => {
-        {
-            use $crate::requests::_base::reply_markup::ReplyKeyboardMarkup;
-            let mut keyboard = ReplyKeyboardMarkup::new();
-            let data_as_nested_array = [ $( [ $(KeyboardButton::from($x)),* ] ),* ];
-
-            let mut vec = Vec::new();
-            for row in data_as_nested_array.iter() {
-                let row = row.iter().cloned().collect();
-                vec.push(row)
-            }
-
-            keyboard.keyboard = vec;
-            keyboard
-        }
-    }
-}
