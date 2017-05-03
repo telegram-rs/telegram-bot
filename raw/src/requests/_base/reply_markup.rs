@@ -71,20 +71,36 @@ impl ReplyKeyboardMarkup {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct KeyboardButton {
-    pub text: String,
+    text: String,
     #[serde(skip_serializing_if = "Not::not")]
-    pub request_contact: bool,
+    request_contact: bool,
     #[serde(skip_serializing_if = "Not::not")]
-    pub request_location: bool,
+    request_location: bool,
+}
+
+impl KeyboardButton {
+    pub fn new(text: &str) -> Self {
+        Self {
+            text: text.to_string(),
+            request_contact: false,
+            request_location: false,
+        }
+    }
+
+    pub fn request_contact(mut self) -> Self {
+        self.request_contact = true;
+        self
+    }
+
+    pub fn request_location(mut self) -> Self {
+        self.request_location = true;
+        self
+    }
 }
 
 impl<'a> From<&'a str> for KeyboardButton {
     fn from(value: &'a str) -> KeyboardButton {
-        KeyboardButton {
-            text: value.to_string(),
-            request_contact: false,
-            request_location: false,
-        }
+        KeyboardButton::new(value)
     }
 }
 
