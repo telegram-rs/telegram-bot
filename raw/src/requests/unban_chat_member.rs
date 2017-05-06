@@ -6,7 +6,7 @@ use requests::*;
 /// join via link, etc. The bot must be an administrator in the group for this to work.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct UnbanChatMember<'c> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     user_id: UserId,
 }
 
@@ -24,30 +24,30 @@ impl<'c> Request for UnbanChatMember<'c> {
 }
 
 impl<'c> UnbanChatMember<'c> {
-    pub fn new<C, U>(chat: C, user: U) -> Self where C: Into<ChatId<'c>>, U: Into<UserId> {
+    pub fn new<C, U>(chat: C, user: U) -> Self where C: ToChatRef<'c>, U: ToUserId {
         UnbanChatMember {
-            chat_id: chat.into(),
-            user_id: user.into(),
+            chat_id: chat.to_chat_ref(),
+            user_id: user.to_user_id(),
         }
     }
 }
 
-pub trait CanUnbanChatMemberForChat<'sc, 'c> {
-    fn unban_chat_member<O>(&'sc self, other: O) -> UnbanChatMember<'c> where O: Into<UserId>;
+pub trait CanUnbanChatMemberForChat<'c> {
+    fn unban_chat_member<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId;
 }
 
-impl<'c, 'sc, C: 'sc> CanUnbanChatMemberForChat<'sc, 'c> for C where &'sc C: Into<ChatId<'c>> {
-    fn unban_chat_member<O>(&'sc self, other: O) -> UnbanChatMember<'c> where O: Into<UserId> {
+impl<'c, C> CanUnbanChatMemberForChat<'c> for C where C: ToChatRef<'c> {
+    fn unban_chat_member<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId {
         UnbanChatMember::new(self, other)
     }
 }
 
-pub trait CanUnbanChatMemberForUser<'sc, 'c> {
-    fn unban_chat_member<O>(&'sc self, other: O) -> UnbanChatMember<'c> where O: Into<ChatId<'c>>;
+pub trait CanUnbanChatMemberForUser<'c> {
+    fn unban_chat_member<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c>;
 }
 
-impl<'c, 'sc, U: 'sc> CanUnbanChatMemberForUser<'sc, 'c> for U where &'sc U: Into<UserId> {
-    fn unban_chat_member<O>(&'sc self, other: O) -> UnbanChatMember<'c> where O: Into<ChatId<'c>> {
+impl<'c, U> CanUnbanChatMemberForUser<'c> for U where U: ToUserId {
+    fn unban_chat_member<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c> {
         UnbanChatMember::new(other, self)
     }
 }

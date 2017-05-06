@@ -7,7 +7,7 @@ use requests::*;
 /// Use this method to send phone contacts.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendContact<'c, 'p, 'f, 'l> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     phone_number: Cow<'p, str>,
     first_name: Cow<'f, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -15,7 +15,7 @@ pub struct SendContact<'c, 'p, 'f, 'l> {
     #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    reply_to_message_id: Option<Integer>,
+    reply_to_message_id: Option<MessageId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
 }
@@ -35,12 +35,12 @@ impl<'c, 'p, 'f, 'l> Request for SendContact<'c, 'p, 'f, 'l> {
 
 impl<'c, 'p, 'f, 'l> SendContact<'c, 'p, 'f, 'l> {
     pub fn new<C, P, F>(chat: C, phone_number: P, first_name: F) -> Self
-        where C: Into<ChatId<'c>>,
+        where C: ToChatRef<'c>,
               P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>
     {
         SendContact {
-            chat_id: chat.into(),
+            chat_id: chat.to_chat_ref(),
             phone_number: phone_number.into(),
             first_name: first_name.into(),
             last_name: None,
@@ -63,9 +63,9 @@ impl<'c, 'p, 'f, 'l> SendContact<'c, 'p, 'f, 'l> {
     }
 
     pub fn reply_to<R>(mut self, to: R) -> Self
-        where R: Into<MessageId>
+        where R: ToMessageId
     {
-        self.reply_to_message_id = Some(to.into().0);
+        self.reply_to_message_id = Some(to.to_message_id());
         self
     }
 
@@ -77,16 +77,16 @@ impl<'c, 'p, 'f, 'l> SendContact<'c, 'p, 'f, 'l> {
     }
 }
 
-pub trait CanSendContact<'bc, 'c, 'p, 'f, 'l> {
-    fn contact<P, F>(&'bc self, phone_number: P, first_name: F) -> SendContact<'c, 'p, 'f, 'l>
+pub trait CanSendContact<'c, 'p, 'f, 'l> {
+    fn contact<P, F>(&self, phone_number: P, first_name: F) -> SendContact<'c, 'p, 'f, 'l>
         where P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>;
 }
 
-impl<'bc, 'c, 'p, 'f, 'l, C: 'bc> CanSendContact<'bc, 'c, 'p, 'f, 'l> for C
-    where &'bc C: Into<ChatId<'c>>
+impl<'c, 'p, 'f, 'l, C> CanSendContact<'c, 'p, 'f, 'l> for C
+    where C: ToChatRef<'c>
 {
-    fn contact<P, F>(&'bc self, phone_number: P, first_name: F) -> SendContact<'c, 'p, 'f, 'l>
+    fn contact<P, F>(&self, phone_number: P, first_name: F) -> SendContact<'c, 'p, 'f, 'l>
         where P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>
     {
@@ -111,8 +111,6 @@ impl CanReplySendContact for Message {
         where P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>
     {
-        self.chat
-            .contact(phone_number, first_name)
-            .reply_to(self)
+        self.chat.contact(phone_number, first_name).reply_to(self)
     }
 }

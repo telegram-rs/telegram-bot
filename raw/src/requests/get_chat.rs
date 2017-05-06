@@ -4,7 +4,7 @@ use requests::*;
 /// Use this method to get up to date information about the chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct GetChat<'c> {
-    chat_id: ChatId<'c>
+    chat_id: ChatRef<'c>
 }
 
 impl<'c> Request for GetChat<'c> {
@@ -21,19 +21,19 @@ impl<'c> Request for GetChat<'c> {
 }
 
 impl<'c> GetChat<'c> {
-    pub fn new<C>(chat: C) -> Self where C: Into<ChatId<'c>> {
+    pub fn new<C>(chat: C) -> Self where C: ToChatRef<'c> {
         GetChat {
-            chat_id: chat.into()
+            chat_id: chat.to_chat_ref()
         }
     }
 }
 
-pub trait CanGetChat<'bc, 'c> {
-    fn get_chat(&'bc self) -> GetChat<'c>;
+pub trait CanGetChat<'c> {
+    fn get_chat(&self) -> GetChat<'c>;
 }
 
-impl<'c, 'bc, C: 'bc> CanGetChat<'bc, 'c> for C where &'bc C: Into<ChatId<'c>> {
-    fn get_chat(&'bc self) -> GetChat<'c> {
+impl<'c, C> CanGetChat<'c> for C where C: ToChatRef<'c> {
+    fn get_chat(&self) -> GetChat<'c> {
         GetChat::new(self)
     }
 }

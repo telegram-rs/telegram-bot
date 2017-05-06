@@ -6,7 +6,7 @@ use requests::*;
 /// Use this method to edit captions of messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct EditMessageCaption<'c, 's> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     message_id: MessageId,
     caption: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -28,11 +28,11 @@ impl<'c, 's> Request for EditMessageCaption<'c, 's> {
 
 impl<'c, 's> EditMessageCaption<'c, 's> {
     pub fn new<C, M, T>(chat: C, message_id: M, caption: T) -> Self
-        where C: Into<ChatId<'c>>, M: Into<MessageId>, T: Into<Cow<'s, str>> {
+        where C: ToChatRef<'c>, M: ToMessageId, T: Into<Cow<'s, str>> {
 
         EditMessageCaption {
-            chat_id: chat.into(),
-            message_id: message_id.into(),
+            chat_id: chat.to_chat_ref(),
+            message_id: message_id.to_message_id(),
             caption: caption.into(),
             reply_markup: None,
         }

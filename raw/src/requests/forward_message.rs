@@ -6,11 +6,11 @@ use requests::*;
 /// Use this method to forward messages of any kind.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ForwardMessage<'c, 'f> {
-    chat_id: ChatId<'c>,
-    from_chat_id: ChatId<'f>,
+    chat_id: ChatRef<'c>,
+    from_chat_id: ChatRef<'f>,
     #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
-    message_id: Integer,
+    message_id: MessageId,
 }
 
 impl<'c, 'f> Request for ForwardMessage<'c, 'f> {
@@ -28,13 +28,13 @@ impl<'c, 'f> Request for ForwardMessage<'c, 'f> {
 
 impl<'c, 'f> ForwardMessage<'c, 'f> {
     pub fn new<M, F, T>(message: M, from: F, to: T) -> Self
-        where M: Into<MessageId>, F: Into<ChatId<'f>>, T: Into<ChatId<'c>> {
+        where M: ToMessageId, F: ToChatRef<'f>, T: ToChatRef<'c> {
 
         ForwardMessage {
-            chat_id: to.into(),
-            from_chat_id: from.into(),
+            chat_id: to.to_chat_ref(),
+            from_chat_id: from.to_chat_ref(),
             disable_notification: false,
-            message_id: message.into().0,
+            message_id: message.to_message_id(),
         }
     }
 
@@ -45,11 +45,11 @@ impl<'c, 'f> ForwardMessage<'c, 'f> {
 }
 
 pub trait CanForwardMessage {
-    fn forward<'c, 'f, T>(&self, to: T) -> ForwardMessage<'c, 'f> where T: Into<ChatId<'c>>;
+    fn forward<'c, 'f, T>(&self, to: T) -> ForwardMessage<'c, 'f> where T: ToChatRef<'c>;
 }
 
 impl CanForwardMessage for Message {
-    fn forward<'c, 'f, T>(&self, to: T) -> ForwardMessage<'c, 'f> where T: Into<ChatId<'c>> {
+    fn forward<'c, 'f, T>(&self, to: T) -> ForwardMessage<'c, 'f> where T: ToChatRef<'c> {
         ForwardMessage::new(self, &self.chat, to)
     }
 }

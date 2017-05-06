@@ -4,7 +4,7 @@ use requests::*;
 /// Use this method to get information about a member of a chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct GetChatMember<'c> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     user_id: UserId,
 }
 
@@ -22,30 +22,30 @@ impl<'c> Request for GetChatMember<'c> {
 }
 
 impl<'c> GetChatMember<'c> {
-    pub fn new<C, U>(chat: C, user: U) -> Self where C: Into<ChatId<'c>>, U: Into<UserId> {
+    pub fn new<C, U>(chat: C, user: U) -> Self where C: ToChatRef<'c>, U: ToUserId {
         GetChatMember {
-            chat_id: chat.into(),
-            user_id: user.into(),
+            chat_id: chat.to_chat_ref(),
+            user_id: user.to_user_id(),
         }
     }
 }
 
-pub trait CanGetChatMemberForChat<'sc, 'c> {
-    fn get_chat_member<O>(&'sc self, other: O) -> GetChatMember<'c> where O: Into<UserId>;
+pub trait CanGetChatMemberForChat<'c> {
+    fn get_chat_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToUserId;
 }
 
-impl<'c, 'sc, C: 'sc> CanGetChatMemberForChat<'sc, 'c> for C where &'sc C: Into<ChatId<'c>> {
-    fn get_chat_member<O>(&'sc self, other: O) -> GetChatMember<'c> where O: Into<UserId> {
+impl<'c, C> CanGetChatMemberForChat<'c> for C where C: ToChatRef<'c> {
+    fn get_chat_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToUserId {
         GetChatMember::new(self, other)
     }
 }
 
-pub trait CanGetChatMemberForUser<'sc, 'c> {
-    fn get_chat_member<O>(&'sc self, other: O) -> GetChatMember<'c> where O: Into<ChatId<'c>>;
+pub trait CanGetChatMemberForUser<'c> {
+    fn get_chat_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToChatRef<'c>;
 }
 
-impl<'c, 'sc, U: 'sc> CanGetChatMemberForUser<'sc, 'c> for U where &'sc U: Into<UserId> {
-    fn get_chat_member<O>(&'sc self, other: O) -> GetChatMember<'c> where O: Into<ChatId<'c>> {
+impl<'c, U> CanGetChatMemberForUser<'c> for U where U: ToUserId {
+    fn get_chat_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToChatRef<'c> {
         GetChatMember::new(other, self)
     }
 }

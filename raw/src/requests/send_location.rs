@@ -6,13 +6,13 @@ use requests::*;
 /// Use this method to send point on the map.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendLocation<'c> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     latitude: Float,
     longitude: Float,
     #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    reply_to_message_id: Option<Integer>,
+    reply_to_message_id: Option<MessageId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
 }
@@ -31,9 +31,9 @@ impl<'c> Request for SendLocation<'c> {
 }
 
 impl<'c> SendLocation<'c> {
-    pub fn new<C>(chat: C, latitude: Float, longitude: Float) -> Self where C: Into<ChatId<'c>> {
+    pub fn new<C>(chat: C, latitude: Float, longitude: Float) -> Self where C: ToChatRef<'c> {
         SendLocation {
-            chat_id: chat.into(),
+            chat_id: chat.to_chat_ref(),
             latitude: latitude,
             longitude: longitude,
             disable_notification: false,
@@ -47,8 +47,8 @@ impl<'c> SendLocation<'c> {
         self
     }
 
-    pub fn reply_to<R>(mut self, to: R) -> Self where R: Into<MessageId> {
-        self.reply_to_message_id = Some(to.into().0);
+    pub fn reply_to<R>(mut self, to: R) -> Self where R: ToMessageId {
+        self.reply_to_message_id = Some(to.to_message_id());
         self
     }
 
@@ -58,12 +58,12 @@ impl<'c> SendLocation<'c> {
     }
 }
 
-pub trait CanSendLocation<'bc, 'c> {
-    fn location(&'bc self, latitude: Float, longitude: Float) -> SendLocation<'c>;
+pub trait CanSendLocation<'c> {
+    fn location(&self, latitude: Float, longitude: Float) -> SendLocation<'c>;
 }
 
-impl<'c, 'bc, C: 'bc> CanSendLocation<'bc, 'c> for C where &'bc C: Into<ChatId<'c>> {
-    fn location(&'bc self, latitude: Float, longitude: Float) -> SendLocation<'c> {
+impl<'c, C> CanSendLocation<'c> for C where C: ToChatRef<'c> {
+    fn location(&self, latitude: Float, longitude: Float) -> SendLocation<'c> {
         SendLocation::new(self, latitude, longitude)
     }
 }

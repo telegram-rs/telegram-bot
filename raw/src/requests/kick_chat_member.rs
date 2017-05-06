@@ -7,7 +7,7 @@ use requests::*;
 /// The bot must be an administrator in the group for this to work.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct KickChatMember<'c> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     user_id: UserId,
 }
 
@@ -25,30 +25,30 @@ impl<'c> Request for KickChatMember<'c> {
 }
 
 impl<'c> KickChatMember<'c> {
-    pub fn new<C, U>(chat: C, user: U) -> Self where C: Into<ChatId<'c>>, U: Into<UserId> {
+    pub fn new<C, U>(chat: C, user: U) -> Self where C: ToChatRef<'c>, U: ToUserId {
         KickChatMember {
-            chat_id: chat.into(),
-            user_id: user.into(),
+            chat_id: chat.to_chat_ref(),
+            user_id: user.to_user_id(),
         }
     }
 }
 
-pub trait CanKickChatMemberForChat<'sc, 'c> {
-    fn kick_chat_member<O>(&'sc self, other: O) -> KickChatMember<'c> where O: Into<UserId>;
+pub trait CanKickChatMemberForChat<'c> {
+    fn kick_chat_member<O>(&self, other: O) -> KickChatMember<'c> where O: ToUserId;
 }
 
-impl<'c, 'sc, C: 'sc> CanKickChatMemberForChat<'sc, 'c> for C where &'sc C: Into<ChatId<'c>> {
-    fn kick_chat_member<O>(&'sc self, other: O) -> KickChatMember<'c> where O: Into<UserId> {
+impl<'c, C> CanKickChatMemberForChat<'c> for C where C: ToChatRef<'c> {
+    fn kick_chat_member<O>(&self, other: O) -> KickChatMember<'c> where O: ToUserId {
         KickChatMember::new(self, other)
     }
 }
 
-pub trait CanKickChatMemberForUser<'sc, 'c> {
-    fn kick_chat_member<O>(&'sc self, other: O) -> KickChatMember<'c> where O: Into<ChatId<'c>>;
+pub trait CanKickChatMemberForUser<'c> {
+    fn kick_chat_member<O>(&self, other: O) -> KickChatMember<'c> where O: ToChatRef<'c>;
 }
 
-impl<'c, 'sc, U: 'sc> CanKickChatMemberForUser<'sc, 'c> for U where &'sc U: Into<UserId> {
-    fn kick_chat_member<O>(&'sc self, other: O) -> KickChatMember<'c> where O: Into<ChatId<'c>> {
+impl<'c, U> CanKickChatMemberForUser<'c> for U where U: ToUserId {
+    fn kick_chat_member<O>(&self, other: O) -> KickChatMember<'c> where O: ToChatRef<'c> {
         KickChatMember::new(other, self)
     }
 }

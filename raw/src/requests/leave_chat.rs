@@ -4,7 +4,7 @@ use requests::*;
 /// Use this method for your bot to leave a group, supergroup or channel.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct LeaveChat<'c> {
-    chat_id: ChatId<'c>
+    chat_id: ChatRef<'c>
 }
 
 impl<'c> Request for LeaveChat<'c> {
@@ -21,19 +21,19 @@ impl<'c> Request for LeaveChat<'c> {
 }
 
 impl<'c> LeaveChat<'c> {
-    pub fn new<C>(chat: C) -> Self where C: Into<ChatId<'c>> {
+    pub fn new<C>(chat: C) -> Self where C: ToChatRef<'c> {
         LeaveChat {
-            chat_id: chat.into()
+            chat_id: chat.to_chat_ref()
         }
     }
 }
 
-pub trait CanLeaveChat<'bc, 'c> {
-    fn leave_chat(&'bc self) -> LeaveChat<'c>;
+pub trait CanLeaveChat<'c> {
+    fn leave_chat(&self) -> LeaveChat<'c>;
 }
 
-impl<'c, 'bc, C: 'bc> CanLeaveChat<'bc, 'c> for C where &'bc C: Into<ChatId<'c>> {
-    fn leave_chat(&'bc self) -> LeaveChat<'c> {
+impl<'c, C> CanLeaveChat<'c> for C where C: ToChatRef<'c> {
+    fn leave_chat(&self) -> LeaveChat<'c> {
         LeaveChat::new(self)
     }
 }

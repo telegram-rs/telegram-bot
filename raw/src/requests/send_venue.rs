@@ -7,7 +7,7 @@ use requests::*;
 /// Use this method to send information about a venue.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendVenue<'c, 't, 'a, 'f> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     latitude: Float,
     longitude: Float,
     title: Cow<'t, str>,
@@ -17,7 +17,7 @@ pub struct SendVenue<'c, 't, 'a, 'f> {
     #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    reply_to_message_id: Option<Integer>,
+    reply_to_message_id: Option<MessageId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
 }
@@ -37,12 +37,12 @@ impl<'c, 't, 'a, 'f> Request for SendVenue<'c, 't, 'a, 'f> {
 
 impl<'c, 't, 'a, 'f> SendVenue<'c, 't, 'a, 'f> {
     pub fn new<C, T, A>(chat: C, latitude: Float, longitude: Float, title: T, address: A) -> Self
-        where C: Into<ChatId<'c>>,
+        where C: ToChatRef<'c>,
               T: Into<Cow<'t, str>>,
               A: Into<Cow<'a, str>>
     {
         SendVenue {
-            chat_id: chat.into(),
+            chat_id: chat.to_chat_ref(),
             latitude: latitude,
             longitude: longitude,
             title: title.into(),
@@ -67,9 +67,9 @@ impl<'c, 't, 'a, 'f> SendVenue<'c, 't, 'a, 'f> {
     }
 
     pub fn reply_to<R>(mut self, to: R) -> Self
-        where R: Into<MessageId>
+        where R: ToMessageId
     {
-        self.reply_to_message_id = Some(to.into().0);
+        self.reply_to_message_id = Some(to.to_message_id());
         self
     }
 
@@ -81,8 +81,8 @@ impl<'c, 't, 'a, 'f> SendVenue<'c, 't, 'a, 'f> {
     }
 }
 
-pub trait CanSendVenue<'bc, 'c, 't, 'a, 'f> {
-    fn venue<T, A>(&'bc self,
+pub trait CanSendVenue<'c, 't, 'a, 'f> {
+    fn venue<T, A>(&self,
                    latitude: Float,
                    longitude: Float,
                    title: T,
@@ -92,10 +92,10 @@ pub trait CanSendVenue<'bc, 'c, 't, 'a, 'f> {
               A: Into<Cow<'a, str>>;
 }
 
-impl<'c, 't, 'a, 'f, 'bc, C: 'bc> CanSendVenue<'bc, 'c, 't, 'a, 'f> for C
-    where &'bc C: Into<ChatId<'c>>
+impl<'c, 't, 'a, 'f, C> CanSendVenue<'c, 't, 'a, 'f> for C
+    where C: ToChatRef<'c>
 {
-    fn venue<T, A>(&'bc self,
+    fn venue<T, A>(&self,
                    latitude: Float,
                    longitude: Float,
                    title: T,
@@ -129,6 +129,6 @@ impl CanReplySendVenue for Message {
         where T: Into<Cow<'t, str>>,
               A: Into<Cow<'a, str>>
     {
-        self.chat.venue(latitude, longitude, title, address).reply_to(self)
+        (&self.chat).venue(latitude, longitude, title, address).reply_to(self)
     }
 }

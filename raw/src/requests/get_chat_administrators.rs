@@ -6,7 +6,7 @@ use requests::*;
 /// only the creator will be returned.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct GetChatAdministrators<'c> {
-    chat_id: ChatId<'c>
+    chat_id: ChatRef<'c>
 }
 
 impl<'c> Request for GetChatAdministrators<'c> {
@@ -23,19 +23,19 @@ impl<'c> Request for GetChatAdministrators<'c> {
 }
 
 impl<'c> GetChatAdministrators<'c> {
-    pub fn new<C>(chat: C) -> Self where C: Into<ChatId<'c>> {
+    pub fn new<C>(chat: C) -> Self where C: ToChatRef<'c> {
         GetChatAdministrators {
-            chat_id: chat.into()
+            chat_id: chat.to_chat_ref()
         }
     }
 }
 
-pub trait CanGetChatAdministrators<'bc, 'c> {
-    fn get_chat_administrators(&'bc self) -> GetChatAdministrators<'c>;
+pub trait CanGetChatAdministrators<'c> {
+    fn get_chat_administrators(&self) -> GetChatAdministrators<'c>;
 }
 
-impl<'c, 'bc, C: 'bc> CanGetChatAdministrators<'bc, 'c> for C where &'bc C: Into<ChatId<'c>> {
-    fn get_chat_administrators(&'bc self) -> GetChatAdministrators<'c> {
+impl<'c, C> CanGetChatAdministrators<'c> for C where C: ToChatRef<'c> {
+    fn get_chat_administrators(&self) -> GetChatAdministrators<'c> {
         GetChatAdministrators::new(self)
     }
 }

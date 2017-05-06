@@ -1,3 +1,6 @@
+#[macro_use]
+mod misc;
+
 pub mod chat;
 pub mod chat_member;
 pub mod message;

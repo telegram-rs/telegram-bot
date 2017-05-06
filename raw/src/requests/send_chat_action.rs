@@ -28,7 +28,7 @@ pub enum ChatAction {
 /// Telegram clients clear its typing status).
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendChatAction<'c> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     action: ChatAction,
 }
 
@@ -46,20 +46,20 @@ impl<'c> Request for SendChatAction<'c> {
 }
 
 impl<'c> SendChatAction<'c> {
-    pub fn new<C>(chat: C, action: ChatAction) -> Self where C: Into<ChatId<'c>> {
+    pub fn new<C>(chat: C, action: ChatAction) -> Self where C: ToChatRef<'c> {
         SendChatAction {
-            chat_id: chat.into(),
+            chat_id: chat.to_chat_ref(),
             action: action,
         }
     }
 }
 
-pub trait CanSendChatAction<'bc, 'c> {
-    fn chat_action(&'bc self, action: ChatAction) -> SendChatAction<'c>;
+pub trait CanSendChatAction<'c> {
+    fn chat_action(&self, action: ChatAction) -> SendChatAction<'c>;
 }
 
-impl<'c, 'bc, C: 'bc> CanSendChatAction<'bc, 'c> for C where &'bc C: Into<ChatId<'c>> {
-    fn chat_action(&'bc self, action: ChatAction) -> SendChatAction<'c> {
+impl<'c, C> CanSendChatAction<'c> for C where C: ToChatRef<'c> {
+    fn chat_action(&self, action: ChatAction) -> SendChatAction<'c> {
         SendChatAction::new(self, action)
     }
 }

@@ -7,7 +7,7 @@ use requests::*;
 /// Use this method to send text messages.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct SendMessage<'c, 's> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     text: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     parse_mode: Option<ParseMode>,
@@ -16,7 +16,7 @@ pub struct SendMessage<'c, 's> {
     #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    reply_to_message_id: Option<Integer>,
+    reply_to_message_id: Option<MessageId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
 }
@@ -35,9 +35,9 @@ impl<'c, 's> Request for SendMessage<'c, 's> {
 }
 
 impl<'c, 's> SendMessage<'c, 's> {
-    pub fn new<C, T>(chat: C, text: T) -> Self where C: Into<ChatId<'c>>, T: Into<Cow<'s, str>> {
+    pub fn new<C, T>(chat: C, text: T) -> Self where C: ToChatRef<'c>, T: Into<Cow<'s, str>> {
         SendMessage {
-            chat_id: chat.into(),
+            chat_id: chat.to_chat_ref(),
             text: text.into(),
             parse_mode: None,
             disable_web_page_preview: false,
@@ -62,8 +62,8 @@ impl<'c, 's> SendMessage<'c, 's> {
         self
     }
 
-    pub fn reply_to<R>(mut self, to: R) -> Self where R: Into<MessageId> {
-        self.reply_to_message_id = Some(to.into().0);
+    pub fn reply_to<R>(mut self, to: R) -> Self where R: ToMessageId {
+        self.reply_to_message_id = Some(to.to_message_id());
         self
     }
 
@@ -73,13 +73,13 @@ impl<'c, 's> SendMessage<'c, 's> {
     }
 }
 
-pub trait CanSendMessage<'bc, 'c> {
-    fn text<'s, T>(&'bc self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
+pub trait CanSendMessage<'c> {
+    fn text<'s, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
 }
 
-impl<'c, 'bc, C: 'bc> CanSendMessage<'bc, 'c> for C where &'bc C: Into<ChatId<'c>> {
-    fn text<'s, T>(&'bc self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
-        SendMessage::new(self.into(), text)
+impl<'c, C> CanSendMessage<'c> for C where C: ToChatRef<'c> {
+    fn text<'s, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
+        SendMessage::new(self, text)
     }
 }
 

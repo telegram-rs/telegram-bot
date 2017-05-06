@@ -7,7 +7,7 @@ use requests::*;
 /// Use this method to edit text and game messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct EditMessageText<'c, 's> {
-    chat_id: ChatId<'c>,
+    chat_id: ChatRef<'c>,
     message_id: MessageId,
     text: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -33,11 +33,11 @@ impl<'c, 's> Request for EditMessageText<'c, 's> {
 
 impl<'c, 's> EditMessageText<'c, 's> {
     pub fn new<C, M, T>(chat: C, message_id: M, text: T) -> Self
-        where C: Into<ChatId<'c>>, M: Into<MessageId>, T: Into<Cow<'s, str>> {
+        where C: ToChatRef<'c>, M: ToMessageId, T: Into<Cow<'s, str>> {
 
         EditMessageText {
-            chat_id: chat.into(),
-            message_id: message_id.into(),
+            chat_id: chat.to_chat_ref(),
+            message_id: message_id.to_message_id(),
             text: text.into(),
             parse_mode: None,
             disable_web_page_preview: false,
