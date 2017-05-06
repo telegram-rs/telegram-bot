@@ -111,6 +111,15 @@ pub struct ReplyKeyboardRemove {
     pub selective: bool,
 }
 
+impl ReplyKeyboardRemove {
+    pub fn new() -> Self {
+        Self {
+            remove_keyboard: True,
+            selective: false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct InlineKeyboardMarkup {
     pub inline_keyboard: Vec<Vec<InlineKeyboardButton>>
