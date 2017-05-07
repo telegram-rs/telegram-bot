@@ -43,6 +43,12 @@ impl<'a> ToChatRef<'a> for User {
     }
 }
 
+impl<'a> ToChatRef<'a> for ChatMember {
+    fn to_chat_ref(&self) -> ChatRef<'a> {
+        self.user.to_chat_ref()
+    }
+}
+
 impl<'a> Serialize for ChatRef<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
