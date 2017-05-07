@@ -114,3 +114,27 @@ impl CanReplySendContact for Message {
         self.chat.contact(phone_number, first_name).reply_to(self)
     }
 }
+
+impl<'b, 'c> ToRequest<'b, 'c> for Contact {
+    type Request = SendContact<'c, 'b, 'b, 'b>;
+
+    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c> {
+        let mut rq = chat.contact(self.phone_number.as_str(), self.first_name.as_str());
+        if let Some(ref last_name) = self.last_name {
+            rq = rq.last_name(last_name.as_str())
+        }
+        rq
+    }
+}
+
+impl<'b, 'c> ToReplyRequest<'b, 'c> for Contact {
+    type Request = SendContact<'c, 'b, 'b, 'b>;
+
+    fn to_reply_request(&'b self, message: &Message) -> Self::Request {
+        let mut rq = message.contact_reply(self.phone_number.as_str(), self.first_name.as_str());
+        if let Some(ref last_name) = self.last_name {
+            rq = rq.last_name(last_name.as_str())
+        }
+        rq
+    }
+}

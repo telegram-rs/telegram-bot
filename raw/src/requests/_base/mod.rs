@@ -4,6 +4,8 @@ pub mod reply_markup;
 use serde::de::DeserializeOwned;
 use serde::ser::Serialize;
 
+use types::*;
+
 pub use self::reply_markup::*;
 
 /// Request corresponds to the specific Telegram API method.
@@ -30,6 +32,16 @@ impl<'a, Req: Request> Request for &'a Req {
     fn name() -> &'static str {
         Req::name()
     }
+}
+
+pub trait ToRequest<'b, 'c> {
+    type Request: Request;
+    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c>;
+}
+
+pub trait ToReplyRequest<'b, 'c> {
+    type Request: Request;
+    fn to_reply_request(&'b self, message: &Message) -> Self::Request;
 }
 
 /// Strongly typed ParseMode.

@@ -132,3 +132,29 @@ impl CanReplySendVenue for Message {
         (&self.chat).venue(latitude, longitude, title, address).reply_to(self)
     }
 }
+
+impl<'b, 'c> ToRequest<'b, 'c> for Venue {
+    type Request = SendVenue<'c, 'b, 'b, 'b>;
+
+    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c> {
+        let mut rq = chat.venue(self.location.latitude, self.location.longitude,
+                                self.title.as_str(), self.address.as_str());
+        if let Some(ref foursquare_id) = self.foursquare_id {
+            rq = rq.foursquare_id(foursquare_id.as_str())
+        }
+        rq
+    }
+}
+
+impl<'b, 'c> ToReplyRequest<'b, 'c> for Venue {
+    type Request = SendVenue<'c, 'b, 'b, 'b>;
+
+    fn to_reply_request(&'b self, message: &Message) -> Self::Request {
+        let mut rq = message.venue_reply(self.location.latitude, self.location.longitude,
+                                         self.title.as_str(), self.address.as_str());
+        if let Some(ref foursquare_id) = self.foursquare_id {
+            rq = rq.foursquare_id(foursquare_id.as_str())
+        }
+        rq
+    }
+}

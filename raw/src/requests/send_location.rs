@@ -77,3 +77,19 @@ impl CanReplySendLocation for Message {
         self.chat.location(latitude, longitude).reply_to(self)
     }
 }
+
+impl<'b, 'c> ToRequest<'b, 'c> for Location {
+    type Request = SendLocation<'c>;
+
+    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c> {
+        chat.location(self.latitude, self.longitude)
+    }
+}
+
+impl<'b, 'c> ToReplyRequest<'b, 'c> for Location {
+    type Request = SendLocation<'c>;
+
+    fn to_reply_request(&'b self, message: &Message) -> Self::Request {
+        message.location_reply(self.latitude, self.longitude)
+    }
+}
