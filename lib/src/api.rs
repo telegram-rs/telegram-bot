@@ -26,6 +26,16 @@ struct ApiInner {
     handle: Handle,
 }
 
+pub trait HasHandle {
+    fn handle(&self) -> &Handle;
+}
+
+impl HasHandle for Api {
+    fn handle(&self) -> &Handle {
+        &self.inner.handle
+    }
+}
+
 impl Api {
     pub fn from_token(handle: &Handle, token: &str) -> Result<Self> {
         Ok(Api {

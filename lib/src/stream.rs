@@ -3,22 +3,26 @@ use std::collections::VecDeque;
 use std::time::Duration;
 
 use futures::{Future, Stream, Poll, Async};
+use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{GetUpdates, Update, Integer};
 
-use api::Api;
+use api::{Api, HasHandle};
 use errors::Error;
-use future::TelegramFuture;
+use future::{TelegramFuture, NewTelegramFuture};
 
 const TELEGRAM_LONG_POLL_TIMEOUT_SECONDS: u64 = 5;
+const TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS: u64 = 500;
 
 #[must_use = "streams do nothing unless polled"]
 pub struct UpdatesStream {
     api: Api,
+    handle: Handle,
     last_update: Integer,
     buffer: VecDeque<Update>,
     current_request: Option<TelegramFuture<Option<Vec<Update>>>>,
     timeout: Duration,
+    error_delay: Duration
 }
 
 impl Stream for UpdatesStream {
@@ -54,7 +58,10 @@ impl Stream for UpdatesStream {
 
         match result {
             Err(err) => {
-                self.current_request = None;
+                let timeout_future = Timeout::new(self.error_delay, &self.handle).unwrap()
+                    .map_err(From::from).map(|()| None);
+
+                self.current_request = Some(TelegramFuture::new(Box::new(timeout_future)));
                 return Err(err)
             }
             Ok(None) => {
@@ -83,15 +90,22 @@ impl UpdatesStream {
     pub fn new(api: &Api) -> Self {
         UpdatesStream {
             api: api.clone(),
+            handle: api.handle().clone(),
             last_update: 0,
             buffer: VecDeque::new(),
             current_request: None,
             timeout: Duration::from_secs(TELEGRAM_LONG_POLL_TIMEOUT_SECONDS),
+            error_delay: Duration::from_millis(TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS)
         }
     }
 
     pub fn timeout(&mut self, timeout: &Duration) -> &mut Self {
         self.timeout = timeout.clone();
+        self
+    }
+
+    pub fn error_delay(&mut self, delay: &Duration) -> &mut Self {
+        self.error_delay = delay.clone();
         self
     }
 }
