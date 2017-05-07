@@ -10,7 +10,7 @@ use api::Api;
 use errors::Error;
 use future::TelegramFuture;
 
-const TELEGRAM_LONG_POLL_TIMEOUT: u64 = 5;
+const TELEGRAM_LONG_POLL_TIMEOUT_SECONDS: u64 = 5;
 
 #[must_use = "streams do nothing unless polled"]
 pub struct UpdatesStream {
@@ -18,7 +18,7 @@ pub struct UpdatesStream {
     last_update: Integer,
     buffer: VecDeque<Update>,
     current_request: Option<TelegramFuture<Option<Vec<Update>>>>,
-    timeout: u64,
+    timeout: Duration,
 }
 
 impl Stream for UpdatesStream {
@@ -58,11 +58,11 @@ impl Stream for UpdatesStream {
                 return Err(err)
             }
             Ok(None) => {
-                let timeout = Duration::from_secs(self.timeout + 1);
+                let timeout = self.timeout + Duration::from_secs(1);
 
                 let request = self.api.send_timeout(GetUpdates::new()
                     .offset(self.last_update + 1)
-                    .timeout(self.timeout as Integer)
+                    .timeout(self.timeout.as_secs() as Integer)
                 , timeout);
 
                 self.current_request = Some(request);
@@ -86,12 +86,12 @@ impl UpdatesStream {
             last_update: 0,
             buffer: VecDeque::new(),
             current_request: None,
-            timeout: TELEGRAM_LONG_POLL_TIMEOUT,
+            timeout: Duration::from_secs(TELEGRAM_LONG_POLL_TIMEOUT_SECONDS),
         }
     }
 
-    pub fn timeout(&mut self, timeout: u64) -> &mut Self {
-        self.timeout = timeout;
+    pub fn timeout(&mut self, timeout: &Duration) -> &mut Self {
+        self.timeout = timeout.clone();
         self
     }
 }
