@@ -65,8 +65,8 @@ pub trait CanEditMessageText {
     fn edit_text<'c, 's, T>(&self, text: T) -> EditMessageText<'c, 's> where T: Into<Cow<'s, str>>;
 }
 
-impl CanEditMessageText for Message {
+impl<M> CanEditMessageText for M where M: ToMessageId + ToSourceChat {
     fn edit_text<'c, 's, T>(&self, text: T) -> EditMessageText<'c, 's> where T: Into<Cow<'s, str>> {
-        EditMessageText::new(&self.chat, self, text)
+        EditMessageText::new(self.to_source_chat(), self.to_message_id(), text)
     }
 }
