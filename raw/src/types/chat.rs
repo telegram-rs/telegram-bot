@@ -37,12 +37,6 @@ impl<'a> ToChatRef<'a> for Chat {
     }
 }
 
-impl<'a> ToChatRef<'a> for User {
-    fn to_chat_ref(&self) -> ChatRef<'a> {
-        self.id.to_chat_ref()
-    }
-}
-
 impl<'a> ToChatRef<'a> for ChatMember {
     fn to_chat_ref(&self) -> ChatRef<'a> {
         self.user.to_chat_ref()
@@ -61,10 +55,10 @@ impl<'a> Serialize for ChatRef<'a> {
 }
 
 macro_rules! chat_id_impls {
-    ($name: ident) => {
-        integer_id_impls!($name);
+    ($id: ident) => {
+        integer_id_impls!($id);
 
-        impl<'a> ToChatRef<'a> for $name {
+        impl<'a> ToChatRef<'a> for $id {
             fn to_chat_ref(&self) -> ChatRef<'a> {
                 ChatRef::from_chat_id((*self).into())
             }
@@ -73,12 +67,18 @@ macro_rules! chat_id_impls {
 }
 
 macro_rules! concrete_chat_id_impls {
-    ($name: ident) => {
-        chat_id_impls!($name);
+    ($id: ident, $typ: ident) => {
+        chat_id_impls!($id);
 
-        impl From<$name> for ChatId {
-            fn from(c: $name) -> Self {
+        impl From<$id> for ChatId {
+            fn from(c: $id) -> Self {
                 ChatId::new(c.into())
+            }
+        }
+
+        impl<'a> ToChatRef<'a> for $typ {
+            fn to_chat_ref(&self) -> ChatRef<'a> {
+                self.id.to_chat_ref()
             }
         }
     };
@@ -114,19 +114,19 @@ impl ToUserId for User {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct UserId(Integer);
-concrete_chat_id_impls!(UserId);
+concrete_chat_id_impls!(UserId, User);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GroupId(Integer);
-concrete_chat_id_impls!(GroupId);
+concrete_chat_id_impls!(GroupId, Group);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SupergroupId(Integer);
-concrete_chat_id_impls!(SupergroupId);
+concrete_chat_id_impls!(SupergroupId, Supergroup);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChannelId(Integer);
-concrete_chat_id_impls!(ChannelId);
+concrete_chat_id_impls!(ChannelId, Channel);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChatId(Integer);
