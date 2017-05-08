@@ -87,8 +87,8 @@ pub trait CanReplySendMessage {
     fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
 }
 
-impl CanReplySendMessage for Message {
+impl<M> CanReplySendMessage for M where M: ToMessageId + ToSourceChat {
     fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
-        self.chat.text(text).reply_to(self)
+        self.to_source_chat().text(text).reply_to(self.to_message_id())
     }
 }
