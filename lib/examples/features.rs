@@ -135,7 +135,7 @@ fn test_get_chat_member(api: Api, message: Message, handle: &Handle) {
         None => return,
     };
 
-    let member = api.send(message.chat.get_chat_member(&user));
+    let member = api.send(message.chat.get_member(&user));
     let future = member.and_then(move |member| {
         let first_name = member.user.first_name.clone();
         let status = member.status;

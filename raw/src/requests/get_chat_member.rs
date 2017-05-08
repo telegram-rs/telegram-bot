@@ -31,21 +31,21 @@ impl<'c> GetChatMember<'c> {
 }
 
 pub trait CanGetChatMemberForChat<'c> {
-    fn get_chat_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToUserId;
+    fn get_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToUserId;
 }
 
 impl<'c, C> CanGetChatMemberForChat<'c> for C where C: ToChatRef<'c> {
-    fn get_chat_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToUserId {
+    fn get_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToUserId {
         GetChatMember::new(self, other)
     }
 }
 
 pub trait CanGetChatMemberForUser<'c> {
-    fn get_chat_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToChatRef<'c>;
+    fn get_member_from<O>(&self, other: O) -> GetChatMember<'c> where O: ToChatRef<'c>;
 }
 
 impl<'c, U> CanGetChatMemberForUser<'c> for U where U: ToUserId {
-    fn get_chat_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToChatRef<'c> {
+    fn get_member_from<O>(&self, other: O) -> GetChatMember<'c> where O: ToChatRef<'c> {
         GetChatMember::new(other, self)
     }
 }
