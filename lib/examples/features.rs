@@ -166,7 +166,7 @@ fn test_get_user_profile_photos(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_leave(api: Api, message: Message, _handle: &Handle) {
-    api.spawn(message.chat.leave_chat())
+    api.spawn(message.chat.leave())
 }
 
 fn test(api: Api, message: Message, handle: &Handle) {

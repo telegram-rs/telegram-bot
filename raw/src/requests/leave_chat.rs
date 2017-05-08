@@ -29,11 +29,11 @@ impl<'c> LeaveChat<'c> {
 }
 
 pub trait CanLeaveChat<'c> {
-    fn leave_chat(&self) -> LeaveChat<'c>;
+    fn leave(&self) -> LeaveChat<'c>;
 }
 
 impl<'c, C> CanLeaveChat<'c> for C where C: ToChatRef<'c> {
-    fn leave_chat(&self) -> LeaveChat<'c> {
+    fn leave(&self) -> LeaveChat<'c> {
         LeaveChat::new(self)
     }
 }
