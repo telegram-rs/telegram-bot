@@ -119,7 +119,7 @@ pub trait CanReplySendVenue {
               A: Into<Cow<'a, str>>;
 }
 
-impl CanReplySendVenue for Message {
+impl<M> CanReplySendVenue for M where M: ToMessageId + ToSourceChat {
     fn venue_reply<'c, 't, 'a, 'f, T, A>(&self,
                                          latitude: Float,
                                          longitude: Float,
@@ -129,7 +129,7 @@ impl CanReplySendVenue for Message {
         where T: Into<Cow<'t, str>>,
               A: Into<Cow<'a, str>>
     {
-        (&self.chat).venue(latitude, longitude, title, address).reply_to(self)
+        self.to_source_chat().venue(latitude, longitude, title, address).reply_to(self.to_message_id())
     }
 }
 
