@@ -9,7 +9,7 @@ pub use telegram_bot_raw::{Message, MessageId, MessageKind, Forward, ForwardFrom
 pub use telegram_bot_raw::{MessageEntity, MessageEntityKind};
 pub use telegram_bot_raw::{Audio, Document, PhotoSize, Sticker, Video, Voice};
 pub use telegram_bot_raw::{Contact, Location, Venue, File};
-pub use telegram_bot_raw::{ToChatRef, ToUserId, ToMessageId};
+pub use telegram_bot_raw::{ToChatRef, ToUserId, ToMessageId, ToSourceChat};
 
 pub use telegram_bot_raw::{ParseMode};
 pub use telegram_bot_raw::{ReplyMarkup, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton};

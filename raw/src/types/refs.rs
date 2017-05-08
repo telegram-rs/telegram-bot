@@ -50,6 +50,22 @@ macro_rules! integer_id_impls {
     };
 }
 
+pub trait ToSourceChat {
+    fn to_source_chat(&self) -> ChatId;
+}
+
+impl<S> ToSourceChat for S where S: Deref, S::Target: ToSourceChat {
+    fn to_source_chat(&self) -> ChatId {
+        self.deref().to_source_chat()
+    }
+}
+
+impl ToSourceChat for Message {
+    fn to_source_chat(&self) -> ChatId {
+        self.chat.id()
+    }
+}
+
 /// Unique identifier for the target chat or username of the
 /// target channel (in the format @channelusername)
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
