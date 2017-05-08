@@ -103,7 +103,7 @@ pub trait CanReplySendContact {
               F: Into<Cow<'f, str>>;
 }
 
-impl CanReplySendContact for Message {
+impl<M> CanReplySendContact for M where M: ToMessageId + ToSourceChat {
     fn contact_reply<'c, 'p, 'f, 'l, P: 'p, F: 'f>(&self,
                                                    phone_number: P,
                                                    first_name: F)
@@ -111,7 +111,7 @@ impl CanReplySendContact for Message {
         where P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>
     {
-        self.chat.contact(phone_number, first_name).reply_to(self)
+        self.to_source_chat().contact(phone_number, first_name).reply_to(self.to_message_id())
     }
 }
 
