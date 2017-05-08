@@ -93,6 +93,21 @@ impl<'a> ToChatRef<'a> for ChatMember {
     }
 }
 
+impl<'a> ToChatRef<'a> for ForwardFrom {
+    fn to_chat_ref(&self) -> ChatRef<'a> {
+        match *self {
+            ForwardFrom::User {ref user, ..} => user.to_chat_ref(),
+            ForwardFrom::Channel {ref channel, ..} => channel.to_chat_ref(),
+        }
+    }
+}
+
+impl<'a> ToChatRef<'a> for Forward {
+    fn to_chat_ref(&self) -> ChatRef<'a> {
+        self.from.to_chat_ref()
+    }
+}
+
 impl<'a> Serialize for ChatRef<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
