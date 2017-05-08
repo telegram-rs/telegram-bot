@@ -72,9 +72,9 @@ pub trait CanReplySendLocation {
     fn location_reply<'c>(&self, latitude: Float, longitude: Float) -> SendLocation<'c>;
 }
 
-impl CanReplySendLocation for Message {
+impl<M> CanReplySendLocation for M where M: ToMessageId + ToSourceChat {
     fn location_reply<'c>(&self, latitude: Float, longitude: Float) -> SendLocation<'c> {
-        self.chat.location(latitude, longitude).reply_to(self)
+        self.to_source_chat().location(latitude, longitude).reply_to(self.to_message_id())
     }
 }
 
