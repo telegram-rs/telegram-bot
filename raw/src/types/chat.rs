@@ -31,6 +31,12 @@ impl<'a, S> ToChatRef<'a> for S where S: Deref, S::Target: ToChatRef<'a> {
     }
 }
 
+impl<'a> ToChatRef<'a> for ChatRef<'a> {
+    fn to_chat_ref(&self) -> ChatRef<'a> {
+        self.clone()
+    }
+}
+
 impl<'a> ToChatRef<'a> for Chat {
     fn to_chat_ref(&self) -> ChatRef<'a> {
         self.id().to_chat_ref()
