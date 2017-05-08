@@ -39,8 +39,8 @@ pub trait CanEditMessageReplyMarkup {
     fn edit_reply_markup<'c, R>(&self, reply_markup: Option<R>) -> EditMessageReplyMarkup<'c> where R: Into<ReplyMarkup>;
 }
 
-impl CanEditMessageReplyMarkup for Message {
+impl<M> CanEditMessageReplyMarkup for M where M: ToMessageId + ToSourceChat {
     fn edit_reply_markup<'c, R>(&self, reply_markup: Option<R>) -> EditMessageReplyMarkup<'c> where R: Into<ReplyMarkup> {
-        EditMessageReplyMarkup::new(&self.chat, self, reply_markup)
+        EditMessageReplyMarkup::new(self.to_source_chat(), self.to_message_id(), reply_markup)
     }
 }
