@@ -48,8 +48,8 @@ pub trait CanForwardMessage {
     fn forward<'c, 'f, T>(&self, to: T) -> ForwardMessage<'c, 'f> where T: ToChatRef<'c>;
 }
 
-impl CanForwardMessage for Message {
+impl<M> CanForwardMessage for M where M: ToMessageId + ToSourceChat {
     fn forward<'c, 'f, T>(&self, to: T) -> ForwardMessage<'c, 'f> where T: ToChatRef<'c> {
-        ForwardMessage::new(self, &self.chat, to)
+        ForwardMessage::new(self.to_message_id(), self.to_source_chat(), to)
     }
 }
