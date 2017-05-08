@@ -34,21 +34,21 @@ impl<'c> KickChatMember<'c> {
 }
 
 pub trait CanKickChatMemberForChat<'c> {
-    fn kick_chat_member<O>(&self, other: O) -> KickChatMember<'c> where O: ToUserId;
+    fn kick<O>(&self, other: O) -> KickChatMember<'c> where O: ToUserId;
 }
 
 impl<'c, C> CanKickChatMemberForChat<'c> for C where C: ToChatRef<'c> {
-    fn kick_chat_member<O>(&self, other: O) -> KickChatMember<'c> where O: ToUserId {
+    fn kick<O>(&self, other: O) -> KickChatMember<'c> where O: ToUserId {
         KickChatMember::new(self, other)
     }
 }
 
 pub trait CanKickChatMemberForUser<'c> {
-    fn kick_chat_member<O>(&self, other: O) -> KickChatMember<'c> where O: ToChatRef<'c>;
+    fn kick_from<O>(&self, other: O) -> KickChatMember<'c> where O: ToChatRef<'c>;
 }
 
 impl<'c, U> CanKickChatMemberForUser<'c> for U where U: ToUserId {
-    fn kick_chat_member<O>(&self, other: O) -> KickChatMember<'c> where O: ToChatRef<'c> {
+    fn kick_from<O>(&self, other: O) -> KickChatMember<'c> where O: ToChatRef<'c> {
         KickChatMember::new(other, self)
     }
 }
