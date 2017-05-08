@@ -119,7 +119,7 @@ fn test_get_chat_administrators(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_get_chat_members_count(api: Api, message: Message, handle: &Handle) {
-    let count = api.send(message.chat.get_chat_members_count());
+    let count = api.send(message.chat.get_members_count());
     let future = count.and_then(move |count| {
         api.send(message.text_reply(format!("Members count: {}", count)))
     });

@@ -29,11 +29,11 @@ impl<'c> GetChatMembersCount<'c> {
 }
 
 pub trait CanGetChatMembersCount<'c> {
-    fn get_chat_members_count(&self) -> GetChatMembersCount<'c>;
+    fn get_members_count(&self) -> GetChatMembersCount<'c>;
 }
 
 impl<'c, C> CanGetChatMembersCount<'c> for C where C: ToChatRef<'c> {
-    fn get_chat_members_count(&self) -> GetChatMembersCount<'c> {
+    fn get_members_count(&self) -> GetChatMembersCount<'c> {
         GetChatMembersCount::new(self)
     }
 }
