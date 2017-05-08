@@ -31,11 +31,11 @@ impl<'c> GetChatAdministrators<'c> {
 }
 
 pub trait CanGetChatAdministrators<'c> {
-    fn get_chat_administrators(&self) -> GetChatAdministrators<'c>;
+    fn get_administrators(&self) -> GetChatAdministrators<'c>;
 }
 
 impl<'c, C> CanGetChatAdministrators<'c> for C where C: ToChatRef<'c> {
-    fn get_chat_administrators(&self) -> GetChatAdministrators<'c> {
+    fn get_administrators(&self) -> GetChatAdministrators<'c> {
         GetChatAdministrators::new(self)
     }
 }

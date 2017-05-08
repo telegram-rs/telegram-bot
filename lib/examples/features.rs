@@ -104,7 +104,7 @@ fn test_get_chat(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_get_chat_administrators(api: Api, message: Message, handle: &Handle) {
-    let administrators = api.send(message.chat.get_chat_administrators());
+    let administrators = api.send(message.chat.get_administrators());
     let future = administrators.and_then(move |administrators| {
         let mut response = Vec::new();
         for member in administrators {
