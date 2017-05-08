@@ -1,34 +1,6 @@
-use std::ops::Deref;
-
 use serde::de::{Deserialize, Deserializer, Error};
 
 use types::*;
-
-pub trait ToMessageId {
-    fn to_message_id(&self) -> MessageId;
-}
-
-impl<S> ToMessageId for S where S: Deref, S::Target: ToMessageId {
-    fn to_message_id(&self) -> MessageId {
-        self.deref().to_message_id()
-    }
-}
-
-impl ToMessageId for MessageId {
-    fn to_message_id(&self) -> MessageId {
-        *self
-    }
-}
-
-impl ToMessageId for Message {
-    fn to_message_id(&self) -> MessageId {
-        self.id
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct MessageId(Integer);
-integer_id_impls!(MessageId);
 
 /// This object represents a message.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
