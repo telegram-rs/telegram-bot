@@ -3,7 +3,7 @@ use serde::de::{Deserialize, Deserializer, Error};
 use types::*;
 
 /// All API responses are from this type. Mostly used internal.
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Response<T> {
     /// Request was successful.
     Success {
@@ -38,7 +38,7 @@ impl<'de, T: Deserialize<'de>> Deserialize<'de> for Response<T> {
 }
 
 /// Directly mapped telegram API response.
-#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Deserialize)]
 pub struct RawResponse<T> {
     /// If ‘ok’ equals true, the request was successful.
     ok: bool,
@@ -51,7 +51,7 @@ pub struct RawResponse<T> {
 }
 
 /// Contains information about why a request was unsuccessful.
-#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Deserialize)]
 pub struct ResponseParameters {
     /// The group has been migrated to a supergroup with the specified identifier.
     pub migrate_to_chat_id: Option<Integer>,

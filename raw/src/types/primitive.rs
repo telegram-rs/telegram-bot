@@ -10,7 +10,7 @@ pub type Integer = i64;
 /// The Telegram `Float`, currently f32.
 pub type Float = f32;
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct True;
 
 impl<'de> Deserialize<'de> for True {
