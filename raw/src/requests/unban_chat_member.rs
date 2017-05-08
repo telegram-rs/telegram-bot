@@ -33,21 +33,21 @@ impl<'c> UnbanChatMember<'c> {
 }
 
 pub trait CanUnbanChatMemberForChat<'c> {
-    fn unban_chat_member<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId;
+    fn unban<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId;
 }
 
 impl<'c, C> CanUnbanChatMemberForChat<'c> for C where C: ToChatRef<'c> {
-    fn unban_chat_member<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId {
+    fn unban<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId {
         UnbanChatMember::new(self, other)
     }
 }
 
 pub trait CanUnbanChatMemberForUser<'c> {
-    fn unban_chat_member<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c>;
+    fn unban_in<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c>;
 }
 
 impl<'c, U> CanUnbanChatMemberForUser<'c> for U where U: ToUserId {
-    fn unban_chat_member<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c> {
+    fn unban_in<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c> {
         UnbanChatMember::new(other, self)
     }
 }
