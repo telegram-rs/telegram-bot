@@ -66,7 +66,7 @@ macro_rules! chat_id_impls {
     };
 }
 
-macro_rules! concrete_chat_id_impls {
+macro_rules! specific_chat_id_impls {
     ($id: ident, $typ: ident) => {
         chat_id_impls!($id);
 
@@ -114,19 +114,19 @@ impl ToUserId for User {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct UserId(Integer);
-concrete_chat_id_impls!(UserId, User);
+specific_chat_id_impls!(UserId, User);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GroupId(Integer);
-concrete_chat_id_impls!(GroupId, Group);
+specific_chat_id_impls!(GroupId, Group);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SupergroupId(Integer);
-concrete_chat_id_impls!(SupergroupId, Supergroup);
+specific_chat_id_impls!(SupergroupId, Supergroup);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChannelId(Integer);
-concrete_chat_id_impls!(ChannelId, Channel);
+specific_chat_id_impls!(ChannelId, Channel);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChatId(Integer);
