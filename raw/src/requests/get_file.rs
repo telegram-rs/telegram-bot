@@ -11,12 +11,7 @@ pub struct GetFile<'s> {
 }
 
 impl<'s> Request for GetFile<'s> {
-    type Response = File;
-    type RawResponse = File;
-
-    fn map(raw: Self::RawResponse) -> Self::Response {
-        raw
-    }
+    type Response = IdResponse<File>;
 
     fn name() -> &'static str {
         "getFile"

@@ -21,12 +21,7 @@ pub struct SendContact<'c, 'p, 'f, 'l> {
 }
 
 impl<'c, 'p, 'f, 'l> Request for SendContact<'c, 'p, 'f, 'l> {
-    type Response = Message;
-    type RawResponse = Message;
-
-    fn map(raw: Self::RawResponse) -> Self::Response {
-        raw
-    }
+    type Response = IdResponse<Message>;
 
     fn name() -> &'static str {
         "sendContact"

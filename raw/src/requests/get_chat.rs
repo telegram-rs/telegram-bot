@@ -8,12 +8,7 @@ pub struct GetChat<'c> {
 }
 
 impl<'c> Request for GetChat<'c> {
-    type Response = Chat;
-    type RawResponse = Chat;
-
-    fn map(raw: Self::RawResponse) -> Self::Response {
-        raw
-    }
+    type Response = IdResponse<Chat>;
 
     fn name() -> &'static str {
         "getChat"

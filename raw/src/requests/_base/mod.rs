@@ -8,14 +8,40 @@ use types::*;
 
 pub use self::reply_markup::*;
 
+pub trait Response {
+    type Raw: DeserializeOwned;
+    type Type;
+
+    fn map(Self::Raw) -> Self::Type;
+}
+
+pub struct IdResponse<T> {
+    _phantom: ::std::marker::PhantomData<T>
+}
+
+impl<T: DeserializeOwned> Response for IdResponse<T> {
+    type Raw = T;
+    type Type = T;
+
+    fn map(value: Self::Raw) -> Self::Type {
+        value
+    }
+}
+
+pub struct TrueToUnitResponse;
+
+impl Response for TrueToUnitResponse {
+    type Raw = True;
+    type Type = ();
+
+    fn map(_: Self::Raw) -> Self::Type {
+        ()
+    }
+}
+
 /// Request corresponds to the specific Telegram API method.
 pub trait Request: Serialize {
-    type Response;
-    /// Directly mapped from Telegram API response.
-    type RawResponse: DeserializeOwned;
-
-    /// Map `RawResponse` to `Response`, `id` usually.
-    fn map(raw: Self::RawResponse) -> Self::Response;
+    type Response: Response + Send + 'static;
 
     /// Name of the method.
     fn name() -> &'static str;
@@ -23,11 +49,6 @@ pub trait Request: Serialize {
 
 impl<'a, Req: Request> Request for &'a Req {
     type Response = Req::Response;
-    type RawResponse = Req::RawResponse;
-
-    fn map(raw: Self::RawResponse) -> Self::Response {
-        Req::map(raw)
-    }
 
     fn name() -> &'static str {
         Req::name()
@@ -36,11 +57,6 @@ impl<'a, Req: Request> Request for &'a Req {
 
 impl<'a, Req: Request> Request for &'a mut Req {
     type Response = Req::Response;
-    type RawResponse = Req::RawResponse;
-
-    fn map(raw: Self::RawResponse) -> Self::Response {
-        Req::map(raw)
-    }
 
     fn name() -> &'static str {
         Req::name()

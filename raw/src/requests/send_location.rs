@@ -18,12 +18,7 @@ pub struct SendLocation<'c> {
 }
 
 impl<'c> Request for SendLocation<'c> {
-    type Response = Message;
-    type RawResponse = Message;
-
-    fn map(raw: Self::RawResponse) -> Self::Response {
-        raw
-    }
+    type Response = IdResponse<Message>;
 
     fn name() -> &'static str {
         "sendLocation"

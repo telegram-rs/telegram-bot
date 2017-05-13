@@ -7,12 +7,7 @@ use types::*;
 pub struct GetMe;
 
 impl Request for GetMe {
-    type Response = User;
-    type RawResponse = User;
-
-    fn map(raw: Self::RawResponse) -> Self::Response {
-        raw
-    }
+    type Response = IdResponse<User>;
 
     fn name() -> &'static str {
         "getMe"

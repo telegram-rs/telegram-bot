@@ -12,12 +12,7 @@ pub struct KickChatMember<'c> {
 }
 
 impl<'c> Request for KickChatMember<'c> {
-    type Response = ();
-    type RawResponse = True;
-
-    fn map(_raw: Self::RawResponse) -> Self::Response {
-        ()
-    }
+    type Response = TrueToUnitResponse;
 
     fn name() -> &'static str {
         "kickChatMember"

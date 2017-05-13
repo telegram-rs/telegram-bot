@@ -8,12 +8,7 @@ pub struct LeaveChat<'c> {
 }
 
 impl<'c> Request for LeaveChat<'c> {
-    type Response = ();
-    type RawResponse = True;
-
-    fn map(_raw: Self::RawResponse) -> Self::Response {
-        ()
-    }
+    type Response = TrueToUnitResponse;
 
     fn name() -> &'static str {
         "leaveChat"

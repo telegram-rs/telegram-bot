@@ -1,7 +1,7 @@
 pub mod requests;
 pub use requests::*;
 
-pub use telegram_bot_raw::{Integer, Float, Request};
+pub use telegram_bot_raw::{Integer, Float, Request, Response, IdResponse, TrueToUnitResponse};
 pub use telegram_bot_raw::{Update, UpdateKind};
 pub use telegram_bot_raw::{User, Group, Supergroup, Channel, Chat};
 pub use telegram_bot_raw::{UserId, GroupId, SupergroupId, ChannelId, ChatId, ChatRef};

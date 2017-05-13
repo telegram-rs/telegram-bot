@@ -10,12 +10,7 @@ pub struct GetUserProfilePhotos {
 }
 
 impl Request for GetUserProfilePhotos {
-    type Response = UserProfilePhotos;
-    type RawResponse = UserProfilePhotos;
-
-    fn map(raw: Self::RawResponse) -> Self::Response {
-        raw
-    }
+    type Response = IdResponse<UserProfilePhotos>;
 
     fn name() -> &'static str {
         "getUserProfilePhotos"

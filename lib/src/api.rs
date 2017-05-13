@@ -6,7 +6,7 @@ use futures::future::{result};
 use serde_json;
 use tokio_core::reactor::{Handle, Timeout};
 
-use telegram_bot_raw::{Request, Response};
+use telegram_bot_raw::{Request, ResponseWrapper, Response};
 
 use connector::{Connector, default_connector};
 use errors::{Result, ErrorKind};
@@ -51,15 +51,13 @@ impl Api {
         UpdatesStream::new(self)
     }
 
-    pub fn spawn<Req>(&self, request: Req)
-        where Req: Request, <Req as Request>::Response: ::std::marker::Send + 'static {
-
+    pub fn spawn<Req: Request>(&self, request: Req) {
         self.inner.handle.spawn(self.send(request).then(|_| Ok(())))
     }
 
-    pub fn send_timeout<Req>(
-        &self, request: Req, duration: Duration) -> TelegramFuture<Option<Req::Response>>
-        where Req: Request, <Req as Request>::Response: ::std::marker::Send + 'static {
+    pub fn send_timeout<Req: Request>(
+        &self, request: Req, duration: Duration)
+        -> TelegramFuture<Option<<Req::Response as Response>::Type>> {
 
         let timeout_future = result(Timeout::new(duration, &self.inner.handle))
             .flatten().map_err(From::from).map(|()| None);
@@ -72,8 +70,8 @@ impl Api {
         TelegramFuture::new(Box::new(future))
     }
 
-    pub fn send<Req>(&self, request: Req) -> TelegramFuture<Req::Response>
-        where Req: Request, <Req as Request>::Response: ::std::marker::Send + 'static {
+    pub fn send<Req: Request>(&self, request: Req)
+        -> TelegramFuture<<Req::Response as Response>::Type> {
 
         let name = Req::name();
         let encoded = result(serde_json::to_vec(&request).map_err(From::from));
@@ -87,8 +85,8 @@ impl Api {
         let future = response.and_then(|bytes| {
             result(serde_json::from_slice(&bytes).map_err(From::from).and_then(|value| {
                 match value {
-                    Response::Success {result} => Ok(Req::map(result)),
-                    Response::Error { description, parameters } => {
+                    ResponseWrapper::Success {result} => Ok(Req::Response::map(result)),
+                    ResponseWrapper::Error { description, parameters } => {
                         Err(ErrorKind::TelegramError {
                             description: description,
                             parameters: parameters

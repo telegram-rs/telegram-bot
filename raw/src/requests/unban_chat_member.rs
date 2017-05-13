@@ -11,12 +11,7 @@ pub struct UnbanChatMember<'c> {
 }
 
 impl<'c> Request for UnbanChatMember<'c> {
-    type Response = ();
-    type RawResponse = True;
-
-    fn map(_raw: Self::RawResponse) -> Self::Response {
-        ()
-    }
+    type Response = TrueToUnitResponse;
 
     fn name() -> &'static str {
         "unbanChatMember"

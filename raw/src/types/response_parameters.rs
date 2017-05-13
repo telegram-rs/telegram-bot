@@ -4,7 +4,7 @@ use types::*;
 
 /// All API responses are from this type. Mostly used internal.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
-pub enum Response<T> {
+pub enum ResponseWrapper<T> {
     /// Request was successful.
     Success {
         /// Response result.
@@ -19,19 +19,19 @@ pub enum Response<T> {
     },
 }
 
-impl<'de, T: Deserialize<'de>> Deserialize<'de> for Response<T> {
-    fn deserialize<D>(deserializer: D) -> Result<Response<T>, D::Error>
+impl<'de, T: Deserialize<'de>> Deserialize<'de> for ResponseWrapper<T> {
+    fn deserialize<D>(deserializer: D) -> Result<ResponseWrapper<T>, D::Error>
         where D: Deserializer<'de>
     {
         let raw: RawResponse<T> = Deserialize::deserialize(deserializer)?;
         match (raw.ok, raw.description, raw.result) {
             (false, Some(description), None) => {
-                Ok(Response::Error {
+                Ok(ResponseWrapper::Error {
                     description: description,
                     parameters: raw.parameters,
                 })
             }
-            (true, None, Some(result)) => Ok(Response::Success { result: result }),
+            (true, None, Some(result)) => Ok(ResponseWrapper::Success { result: result }),
             _ => Err(D::Error::custom("ambiguous response")),
         }
     }
