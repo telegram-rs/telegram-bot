@@ -3,7 +3,7 @@ pub mod reply_markup;
 
 use serde::de::DeserializeOwned;
 use serde::ser::{Serialize, Serializer, Error};
-use serde_json;
+use serde_json::{Value, to_value};
 
 use types::*;
 
@@ -50,7 +50,7 @@ pub trait Request: Serialize {
     fn detach(&self) -> DetachedRequest<Self::Response> {
         DetachedRequest {
             name: self.name(),
-            encoded: serde_json::to_vec(self).map_err(|err| format!("{}", err)),
+            encoded: to_value(self).map_err(|err| format!("{}", err)),
             phantom: ::std::marker::PhantomData,
         }
     }
@@ -74,7 +74,7 @@ impl<'a, Req: Request> Request for &'a mut Req {
 
 pub struct DetachedRequest<Resp> {
     name: &'static str,
-    encoded: Result<Vec<u8>, String>,
+    encoded: Result<Value, String>,
     phantom: ::std::marker::PhantomData<Resp>,
 }
 
@@ -90,7 +90,7 @@ impl<Resp> Serialize for DetachedRequest<Resp> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
 
         match self.encoded {
-            Ok(ref string) => serializer.serialize_bytes(string.as_ref()),
+            Ok(ref value) => value.serialize(serializer),
             Err(ref err) => Err(S::Error::custom(err)),
         }
     }
