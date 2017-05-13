@@ -34,7 +34,7 @@ fn test_preview(api: Api, message: Message, handle: &Handle) {
     let preview = api.send(message.text_reply("Message with preview https://telegram.org"));
 
     let no_preview = api.send(message.text_reply("Message without preview https://telegram.org")
-        .disable_web_page_preview()
+        .disable_preview()
     );
 
     handle.spawn({

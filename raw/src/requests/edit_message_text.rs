@@ -50,7 +50,7 @@ impl<'c, 's> EditMessageText<'c, 's> {
         self
     }
 
-    pub fn disable_web_page_preview(mut self) -> Self { // TODO(knsd): Rename to disable_preview?
+    pub fn disable_preview(mut self) -> Self {
         self.disable_web_page_preview = true;
         self
     }
