@@ -2,7 +2,8 @@
 pub mod reply_markup;
 
 use serde::de::DeserializeOwned;
-use serde::ser::Serialize;
+use serde::ser::{Serialize, Serializer, Error};
+use serde_json;
 
 use types::*;
 
@@ -45,6 +46,14 @@ pub trait Request: Serialize {
 
     /// Name of the method.
     fn name(&self) -> &'static str;
+
+    fn detach(&self) -> DetachedRequest<Self::Response> {
+        DetachedRequest {
+            name: self.name(),
+            encoded: serde_json::to_vec(self).map_err(|err| format!("{}", err)),
+            phantom: ::std::marker::PhantomData,
+        }
+    }
 }
 
 impl<'a, Req: Request> Request for &'a Req {
@@ -60,6 +69,30 @@ impl<'a, Req: Request> Request for &'a mut Req {
 
     fn name(&self) -> &'static str {
         (**self).name()
+    }
+}
+
+pub struct DetachedRequest<Resp> {
+    name: &'static str,
+    encoded: Result<Vec<u8>, String>,
+    phantom: ::std::marker::PhantomData<Resp>,
+}
+
+impl<Resp: Response + Send + 'static> Request for DetachedRequest<Resp> {
+    type Response = Resp;
+
+    fn name(&self) -> &'static str {
+        self.name
+    }
+}
+
+impl<Resp> Serialize for DetachedRequest<Resp> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+
+        match self.encoded {
+            Ok(ref string) => serializer.serialize_bytes(string.as_ref()),
+            Err(ref err) => Err(S::Error::custom(err)),
+        }
     }
 }
 
