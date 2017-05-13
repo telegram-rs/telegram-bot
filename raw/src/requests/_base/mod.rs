@@ -44,22 +44,22 @@ pub trait Request: Serialize {
     type Response: Response + Send + 'static;
 
     /// Name of the method.
-    fn name() -> &'static str;
+    fn name(&self) -> &'static str;
 }
 
 impl<'a, Req: Request> Request for &'a Req {
     type Response = Req::Response;
 
-    fn name() -> &'static str {
-        Req::name()
+    fn name(&self) -> &'static str {
+        (*self).name()
     }
 }
 
 impl<'a, Req: Request> Request for &'a mut Req {
     type Response = Req::Response;
 
-    fn name() -> &'static str {
-        Req::name()
+    fn name(&self) -> &'static str {
+        (**self).name()
     }
 }
 

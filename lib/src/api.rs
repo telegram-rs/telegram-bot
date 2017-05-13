@@ -73,7 +73,7 @@ impl Api {
     pub fn send<Req: Request>(&self, request: Req)
         -> TelegramFuture<<Req::Response as Response>::Type> {
 
-        let name = Req::name();
+        let name = request.name();
         let encoded = result(serde_json::to_vec(&request).map_err(From::from));
         let url = url(&self.inner.token, name);
 

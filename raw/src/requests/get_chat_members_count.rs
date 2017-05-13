@@ -10,7 +10,7 @@ pub struct GetChatMembersCount<'c> {
 impl<'c> Request for GetChatMembersCount<'c> {
     type Response = IdResponse<Integer>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "getChatMembersCount"
     }
 }

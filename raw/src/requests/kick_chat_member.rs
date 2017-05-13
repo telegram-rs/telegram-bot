@@ -14,7 +14,7 @@ pub struct KickChatMember<'c> {
 impl<'c> Request for KickChatMember<'c> {
     type Response = TrueToUnitResponse;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "kickChatMember"
     }
 }

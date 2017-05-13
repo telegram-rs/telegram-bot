@@ -12,7 +12,7 @@ pub struct GetChatAdministrators<'c> {
 impl<'c> Request for GetChatAdministrators<'c> {
     type Response = IdResponse<Vec<ChatMember>>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "getChatAdministrators"
     }
 }

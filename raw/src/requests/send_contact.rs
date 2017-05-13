@@ -23,7 +23,7 @@ pub struct SendContact<'c, 'p, 'f, 'l> {
 impl<'c, 'p, 'f, 'l> Request for SendContact<'c, 'p, 'f, 'l> {
     type Response = IdResponse<Message>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "sendContact"
     }
 }

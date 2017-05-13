@@ -10,7 +10,7 @@ pub struct GetChat<'c> {
 impl<'c> Request for GetChat<'c> {
     type Response = IdResponse<Chat>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "getChat"
     }
 }

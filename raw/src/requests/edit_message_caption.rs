@@ -16,7 +16,7 @@ pub struct EditMessageCaption<'c, 's> {
 impl<'c, 's> Request for EditMessageCaption<'c, 's> {
     type Response = IdResponse<Message>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "editMessageCaption"
     }
 }

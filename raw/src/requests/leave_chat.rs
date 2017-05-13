@@ -10,7 +10,7 @@ pub struct LeaveChat<'c> {
 impl<'c> Request for LeaveChat<'c> {
     type Response = TrueToUnitResponse;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "leaveChat"
     }
 }

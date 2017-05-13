@@ -16,7 +16,7 @@ pub struct ForwardMessage<'c, 'f> {
 impl<'c, 'f> Request for ForwardMessage<'c, 'f> {
     type Response = IdResponse<Message>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "forwardMessage"
     }
 }

@@ -13,7 +13,7 @@ pub struct UnbanChatMember<'c> {
 impl<'c> Request for UnbanChatMember<'c> {
     type Response = TrueToUnitResponse;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "unbanChatMember"
     }
 }

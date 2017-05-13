@@ -13,7 +13,7 @@ pub struct EditMessageReplyMarkup<'c> {
 impl<'c> Request for EditMessageReplyMarkup<'c> {
     type Response = IdResponse<Message>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "editMessageReplyMarkup"
     }
 }

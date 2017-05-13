@@ -16,7 +16,7 @@ pub struct GetUpdates {
 impl Request for GetUpdates {
     type Response = IdResponse<Vec<Update>>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "getUpdates"
     }
 }

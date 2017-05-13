@@ -12,7 +12,7 @@ pub struct GetUserProfilePhotos {
 impl Request for GetUserProfilePhotos {
     type Response = IdResponse<UserProfilePhotos>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "getUserProfilePhotos"
     }
 }

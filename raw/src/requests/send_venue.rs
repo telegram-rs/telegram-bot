@@ -25,7 +25,7 @@ pub struct SendVenue<'c, 't, 'a, 'f> {
 impl<'c, 't, 'a, 'f> Request for SendVenue<'c, 't, 'a, 'f> {
     type Response = IdResponse<Message>;
 
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "sendVenue"
     }
 }
