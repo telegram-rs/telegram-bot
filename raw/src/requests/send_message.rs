@@ -47,27 +47,27 @@ impl<'c, 's> SendMessage<'c, 's> {
         }
     }
 
-    pub fn parse_mode(mut self, parse_mode: ParseMode) -> Self {
+    pub fn parse_mode(&mut self, parse_mode: ParseMode) -> &mut Self {
         self.parse_mode = Some(parse_mode);
         self
     }
 
-    pub fn disable_preview(mut self) -> Self {
+    pub fn disable_preview(&mut self) -> &mut Self {
         self.disable_web_page_preview = true;
         self
     }
 
-    pub fn disable_notification(mut self) -> Self {
+    pub fn disable_notification(&mut self) -> &mut Self {
         self.disable_notification = true;
         self
     }
 
-    pub fn reply_to<R>(mut self, to: R) -> Self where R: ToMessageId {
+    pub fn reply_to<R>(&mut self, to: R) -> &mut Self where R: ToMessageId {
         self.reply_to_message_id = Some(to.to_message_id());
         self
     }
 
-    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
         self.reply_markup = Some(reply_markup.into());
         self
     }
@@ -89,6 +89,8 @@ pub trait CanReplySendMessage {
 
 impl<M> CanReplySendMessage for M where M: ToMessageId + ToSourceChat {
     fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
-        self.to_source_chat().text(text).reply_to(self.to_message_id())
+        let mut rq = self.to_source_chat().text(text);
+        rq.reply_to(self.to_message_id());
+        rq
     }
 }

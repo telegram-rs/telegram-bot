@@ -38,7 +38,7 @@ impl<'c, 'f> ForwardMessage<'c, 'f> {
         }
     }
 
-    pub fn disable_notification(mut self) -> Self {
+    pub fn disable_notification(&mut self) -> &mut Self {
         self.disable_notification = true;
         self
     }

@@ -50,26 +50,26 @@ impl<'c, 'p, 'f, 'l> SendContact<'c, 'p, 'f, 'l> {
         }
     }
 
-    pub fn last_name<F>(mut self, last_name: F) -> Self
+    pub fn last_name<F>(&mut self, last_name: F) -> &mut Self
         where F: Into<Cow<'l, str>>
     {
         self.last_name = Some(last_name.into());
         self
     }
 
-    pub fn disable_notification(mut self) -> Self {
+    pub fn disable_notification(&mut self) -> &mut Self {
         self.disable_notification = true;
         self
     }
 
-    pub fn reply_to<R>(mut self, to: R) -> Self
+    pub fn reply_to<R>(&mut self, to: R) -> &mut Self
         where R: ToMessageId
     {
         self.reply_to_message_id = Some(to.to_message_id());
         self
     }
 
-    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self
         where R: Into<ReplyMarkup>
     {
         self.reply_markup = Some(reply_markup.into());
@@ -111,7 +111,9 @@ impl<M> CanReplySendContact for M where M: ToMessageId + ToSourceChat {
         where P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>
     {
-        self.to_source_chat().contact(phone_number, first_name).reply_to(self.to_message_id())
+        let mut rq = self.to_source_chat().contact(phone_number, first_name);
+        rq.reply_to(self.to_message_id());
+        rq
     }
 }
 
@@ -121,7 +123,7 @@ impl<'b, 'c> ToRequest<'b, 'c> for Contact {
     fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c> {
         let mut rq = chat.contact(self.phone_number.as_str(), self.first_name.as_str());
         if let Some(ref last_name) = self.last_name {
-            rq = rq.last_name(last_name.as_str())
+            rq.last_name(last_name.as_str());
         }
         rq
     }
@@ -133,7 +135,7 @@ impl<'b, 'c> ToReplyRequest<'b, 'c> for Contact {
     fn to_reply_request(&'b self, message: &Message) -> Self::Request {
         let mut rq = message.contact_reply(self.phone_number.as_str(), self.first_name.as_str());
         if let Some(ref last_name) = self.last_name {
-            rq = rq.last_name(last_name.as_str())
+            rq.last_name(last_name.as_str());
         }
         rq
     }

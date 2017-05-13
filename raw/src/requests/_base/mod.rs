@@ -34,6 +34,19 @@ impl<'a, Req: Request> Request for &'a Req {
     }
 }
 
+impl<'a, Req: Request> Request for &'a mut Req {
+    type Response = Req::Response;
+    type RawResponse = Req::RawResponse;
+
+    fn map(raw: Self::RawResponse) -> Self::Response {
+        Req::map(raw)
+    }
+
+    fn name() -> &'static str {
+        Req::name()
+    }
+}
+
 pub trait ToRequest<'b, 'c> {
     type Request: Request;
     fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c>;

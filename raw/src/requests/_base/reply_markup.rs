@@ -87,12 +87,12 @@ impl KeyboardButton {
         }
     }
 
-    pub fn request_contact(mut self) -> Self {
+    pub fn request_contact(&mut self) -> &mut Self {
         self.request_contact = true;
         self
     }
 
-    pub fn request_location(mut self) -> Self {
+    pub fn request_location(&mut self) -> &mut Self {
         self.request_location = true;
         self
     }

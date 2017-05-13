@@ -36,22 +36,22 @@ impl GetUpdates {
         }
     }
 
-    pub fn offset(mut self, offset: Integer) -> Self {
+    pub fn offset(&mut self, offset: Integer) -> &mut Self {
         self.offset = Some(offset);
         self
     }
 
-    pub fn limit(mut self, limit: Integer) -> Self {
+    pub fn limit(&mut self, limit: Integer) -> &mut Self {
         self.limit = Some(limit);
         self
     }
 
-    pub fn timeout(mut self, timeout: Integer) -> Self {
+    pub fn timeout(&mut self, timeout: Integer) -> &mut Self {
         self.timeout = Some(timeout);
         self
     }
 
-    pub fn allowed_updates(mut self, updates: &[AllowedUpdate]) -> Self {
+    pub fn allowed_updates(&mut self, updates: &[AllowedUpdate]) -> &mut Self {
         self.allowed_updates = updates.to_vec();
         self
     }

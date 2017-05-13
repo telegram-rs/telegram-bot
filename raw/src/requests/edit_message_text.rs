@@ -45,17 +45,17 @@ impl<'c, 's> EditMessageText<'c, 's> {
         }
     }
 
-    pub fn parse_mode(mut self, parse_mode: ParseMode) -> Self {
+    pub fn parse_mode(&mut self, parse_mode: ParseMode) -> &mut Self {
         self.parse_mode = Some(parse_mode);
         self
     }
 
-    pub fn disable_preview(mut self) -> Self {
+    pub fn disable_preview(&mut self) -> &mut Self {
         self.disable_web_page_preview = true;
         self
     }
 
-    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> {
         self.reply_markup = Some(reply_markup.into());
         self
     }

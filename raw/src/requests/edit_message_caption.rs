@@ -38,7 +38,7 @@ impl<'c, 's> EditMessageCaption<'c, 's> {
         }
     }
 
-    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
         self.reply_markup = Some(reply_markup.into());
         self
     }

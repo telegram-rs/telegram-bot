@@ -54,26 +54,26 @@ impl<'c, 't, 'a, 'f> SendVenue<'c, 't, 'a, 'f> {
         }
     }
 
-    pub fn disable_notification(mut self) -> Self {
+    pub fn disable_notification(&mut self) -> &mut Self {
         self.disable_notification = true;
         self
     }
 
-    pub fn foursquare_id<F>(mut self, id: F) -> Self
+    pub fn foursquare_id<F>(&mut self, id: F) -> &mut Self
         where F: Into<Cow<'f, str>>
     {
         self.foursquare_id = Some(id.into());
         self
     }
 
-    pub fn reply_to<R>(mut self, to: R) -> Self
+    pub fn reply_to<R>(&mut self, to: R) -> &mut Self
         where R: ToMessageId
     {
         self.reply_to_message_id = Some(to.to_message_id());
         self
     }
 
-    pub fn reply_markup<R>(mut self, reply_markup: R) -> Self
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self
         where R: Into<ReplyMarkup>
     {
         self.reply_markup = Some(reply_markup.into());
@@ -129,7 +129,9 @@ impl<M> CanReplySendVenue for M where M: ToMessageId + ToSourceChat {
         where T: Into<Cow<'t, str>>,
               A: Into<Cow<'a, str>>
     {
-        self.to_source_chat().venue(latitude, longitude, title, address).reply_to(self.to_message_id())
+        let mut rq = self.to_source_chat().venue(latitude, longitude, title, address);
+        rq.reply_to(self.to_message_id());
+        rq
     }
 }
 
@@ -140,7 +142,7 @@ impl<'b, 'c> ToRequest<'b, 'c> for Venue {
         let mut rq = chat.venue(self.location.latitude, self.location.longitude,
                                 self.title.as_str(), self.address.as_str());
         if let Some(ref foursquare_id) = self.foursquare_id {
-            rq = rq.foursquare_id(foursquare_id.as_str())
+            rq.foursquare_id(foursquare_id.as_str());
         }
         rq
     }
@@ -153,7 +155,7 @@ impl<'b, 'c> ToReplyRequest<'b, 'c> for Venue {
         let mut rq = message.venue_reply(self.location.latitude, self.location.longitude,
                                          self.title.as_str(), self.address.as_str());
         if let Some(ref foursquare_id) = self.foursquare_id {
-            rq = rq.foursquare_id(foursquare_id.as_str())
+            rq.foursquare_id(foursquare_id.as_str());
         }
         rq
     }
