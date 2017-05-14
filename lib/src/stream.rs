@@ -3,6 +3,7 @@ use std::collections::VecDeque;
 use std::time::Duration;
 
 use futures::{Future, Stream, Poll, Async};
+use futures::future;
 use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{GetUpdates, Update, Integer};
@@ -60,8 +61,11 @@ impl Stream for UpdatesStream {
 
         match result {
             Err(err) => {
-                let timeout_future = Timeout::new(self.error_delay, &self.handle).unwrap()
-                    .map_err(From::from).map(|()| None);
+                let timeout_future = future::result(Timeout::new(self.error_delay, &self.handle));
+
+                let timeout_future = timeout_future.map_err(From::from).and_then(|timeout| {
+                    timeout.map_err(From::from).map(|()| None)
+                });
 
                 self.current_request = Some(TelegramFuture::new(Box::new(timeout_future)));
                 return Err(err)
