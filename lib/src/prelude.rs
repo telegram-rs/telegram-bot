@@ -1,3 +1,7 @@
+//! Telegram bot prelude.
+//!
+//! This module re-exports request builder traits from telegram-bot-raw.
+
 pub use telegram_bot_raw::{ToRequest, ToReplyRequest};
 pub use telegram_bot_raw::{CanReplySendContact, CanSendContact};
 pub use telegram_bot_raw::{CanReplySendLocation, CanSendLocation};
