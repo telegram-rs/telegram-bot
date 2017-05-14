@@ -138,7 +138,7 @@ impl Api {
     /// # }
     /// ```
     pub fn stream(&self) -> UpdatesStream {
-        UpdatesStream::new(self)
+        UpdatesStream::new(self.clone())
     }
 
     /// Send a request to the Telegram server and do not wait for a response.

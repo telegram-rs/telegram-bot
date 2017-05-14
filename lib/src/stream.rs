@@ -87,7 +87,7 @@ impl Stream for UpdatesStream {
 }
 
 impl UpdatesStream {
-    pub fn new(api: &Api) -> Self {
+    pub fn new(api: Api) -> Self {
         UpdatesStream {
             api: api.clone(),
             handle: api.handle().clone(),
@@ -99,13 +99,13 @@ impl UpdatesStream {
         }
     }
 
-    pub fn timeout(&mut self, timeout: &Duration) -> &mut Self {
-        self.timeout = timeout.clone();
+    pub fn timeout(&mut self, timeout: Duration) -> &mut Self {
+        self.timeout = timeout;
         self
     }
 
-    pub fn error_delay(&mut self, delay: &Duration) -> &mut Self {
-        self.error_delay = delay.clone();
+    pub fn error_delay(&mut self, delay: Duration) -> &mut Self {
+        self.error_delay = delay;
         self
     }
 }
