@@ -9,7 +9,7 @@ use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{Request, ResponseWrapper, Response};
 
-use connector::{Connector, ConnectorConfig, SpecifiedConnector, DefaultConnector};
+use connector::{Connector, default_connector};
 use errors::ErrorKind;
 use future::{TelegramFuture, NewTelegramFuture};
 use stream::{NewUpdatesStream, UpdatesStream};
@@ -28,19 +28,44 @@ struct ApiInner {
     handle: Handle,
 }
 
-/// Configuration for an `Api`.
 #[derive(Debug)]
-pub struct Config<Connector> {
-    token: String,
-    connector: Connector,
+pub enum ConnectorConfig {
+    Default,
+    Specified(Box<Connector>)
 }
 
-impl<C: ConnectorConfig> Config<C> {
+impl Default for ConnectorConfig {
+    fn default() -> Self {
+        ConnectorConfig::Default
+    }
+}
+
+impl ConnectorConfig {
+    pub fn new(connector: Box<Connector>) -> Self {
+        ConnectorConfig::Specified(connector)
+    }
+
+    pub fn take(self, handle: &Handle) -> Box<Connector> {
+        match self {
+            ConnectorConfig::Default => default_connector(&handle),
+            ConnectorConfig::Specified(connector) => connector
+        }
+    }
+}
+
+/// Configuration for an `Api`.
+#[derive(Debug)]
+pub struct Config {
+    token: String,
+    connector: ConnectorConfig,
+}
+
+impl Config {
     /// Set connector type for an `Api`.
-    pub fn connector(self, connector: Box<Connector>) -> Config<SpecifiedConnector> {
+    pub fn connector(self, connector: Box<Connector>) -> Config {
         Config {
             token: self.token,
-            connector: SpecifiedConnector::new(connector)
+            connector: ConnectorConfig::new(connector),
         }
     }
 
@@ -99,10 +124,10 @@ impl Api {
     /// # #[cfg(not(feature = "hyper_connector"))]
     /// # fn main() {}
     /// ```
-    pub fn configure<T: AsRef<str>>(token: T) -> Config<DefaultConnector> {
+    pub fn configure<T: AsRef<str>>(token: T) -> Config {
         Config {
             token: token.as_ref().to_string(),
-            connector: DefaultConnector,
+            connector: Default::default(),
         }
     }
 

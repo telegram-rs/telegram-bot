@@ -74,6 +74,7 @@ impl Connector for CurlConnector {
     }
 }
 
+/// Returns default curl connector.
 pub fn default_connector(handle: &Handle) -> Box<Connector> {
     let connector = CurlConnector::new(handle);
     Box::new(connector)

@@ -59,6 +59,7 @@ impl<C: Connect> Connector for HyperConnector<C> {
     }
 }
 
+/// Returns default hyper connector. Uses one resolve thread and `HttpsConnector`.
 pub fn default_connector(handle: &Handle) -> Box<Connector> {
     let connector = HttpsConnector::new(1, handle);
     let config = Client::configure().connector(connector);
