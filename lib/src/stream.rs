@@ -14,6 +14,8 @@ use future::{TelegramFuture, NewTelegramFuture};
 const TELEGRAM_LONG_POLL_TIMEOUT_SECONDS: u64 = 5;
 const TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS: u64 = 500;
 
+/// This type represents stream of Telegram API updates and uses
+/// long polling method under the hood.
 #[must_use = "streams do nothing unless polled"]
 pub struct UpdatesStream {
     api: Api,
@@ -105,11 +107,21 @@ impl NewUpdatesStream for UpdatesStream{
 }
 
 impl UpdatesStream {
+    /// Set timeout for long polling requests, this corresponds with `timeout` field
+    /// in [getUpdates](https://core.telegram.org/bots/api#getupdates) method,
+    /// also this stream sets an additional request timeout for `timeout + 1 second`
+    /// in case of invalid Telegram API server behaviour.
+    ///
+    /// Default timeout is 5 seconds.
     pub fn timeout(&mut self, timeout: Duration) -> &mut Self {
         self.timeout = timeout;
         self
     }
 
+    /// Set a delay between erroneous request and next request.
+    /// This delay prevents busy looping in some cases.
+    ///
+    /// Default delay is 500 ms.
     pub fn error_delay(&mut self, delay: Duration) -> &mut Self {
         self.error_delay = delay;
         self
