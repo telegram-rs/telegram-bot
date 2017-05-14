@@ -2,6 +2,7 @@ use futures::{Future, Poll};
 
 use errors::Error;
 
+/// Represent a future that resolves into Telegram API response.
 #[must_use = "futures do nothing unless polled"]
 pub struct TelegramFuture<T> {
     inner: Box<Future<Item=T, Error=Error>>
