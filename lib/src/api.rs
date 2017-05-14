@@ -38,6 +38,7 @@ impl HasHandle for Api {
     }
 }
 
+/// Configuration for an `Api`.
 #[derive(Debug)]
 pub struct Config<Connector> {
     token: String,
@@ -45,6 +46,7 @@ pub struct Config<Connector> {
 }
 
 impl<C: ConnectorConfig> Config<C> {
+    /// Set connector type for an `Api`.
     pub fn connector(self, connector: Box<Connector>) -> Config<SpecifiedConnector> {
         Config {
             token: self.token,
@@ -52,6 +54,7 @@ impl<C: ConnectorConfig> Config<C> {
         }
     }
 
+    /// Create new `Api` instance.
     pub fn build<H: Borrow<Handle>>(self, handle: H) -> Api {
         let handle = handle.borrow().clone();
         Api {
