@@ -1,3 +1,5 @@
+//! Connector with tokio-curl backend.
+
 use std::fmt;
 use std::sync::Arc;
 use std::rc::Rc;
@@ -14,6 +16,7 @@ use future::{TelegramFuture, NewTelegramFuture};
 
 use super::_base::Connector;
 
+/// This connector uses `tokio-curl` backend.
 pub struct CurlConnector {
     inner: Rc<Session>
 }

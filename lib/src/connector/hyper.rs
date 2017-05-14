@@ -1,3 +1,5 @@
+//! Connector with hyper backend.
+
 use std::fmt;
 use std::str::FromStr;
 use std::rc::Rc;
@@ -16,6 +18,7 @@ use future::{TelegramFuture, NewTelegramFuture};
 
 use super::_base::Connector;
 
+/// This connector uses `hyper` backend.
 pub struct HyperConnector<C> {
     inner: Rc<Client<C>>
 }
