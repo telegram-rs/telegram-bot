@@ -1,3 +1,4 @@
+use std::fmt;
 use std::str::FromStr;
 use std::rc::Rc;
 
@@ -17,6 +18,12 @@ use super::_base::Connector;
 
 pub struct HyperConnector<C> {
     inner: Rc<Client<C>>
+}
+
+impl<C> fmt::Debug for HyperConnector<C> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        "hyper connector".fmt(formatter)
+    }
 }
 
 impl<C> HyperConnector<C> {

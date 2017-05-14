@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -9,7 +10,7 @@ use tokio_core::reactor::{Handle, Timeout};
 use telegram_bot_raw::{Request, ResponseWrapper, Response};
 
 use connector::{Connector, default_connector};
-use errors::{Result, ErrorKind};
+use errors::ErrorKind;
 use future::{TelegramFuture, NewTelegramFuture};
 use stream::UpdatesStream;
 
@@ -36,15 +37,64 @@ impl HasHandle for Api {
     }
 }
 
-impl Api {
-    pub fn from_token(handle: &Handle, token: &str) -> Result<Self> {
-        Ok(Api {
+pub trait ConnectorConfig {
+    fn take(self, &Handle) -> Box<Connector>;
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct DefaultConnector;
+
+impl ConnectorConfig for DefaultConnector {
+    fn take(self, handle: &Handle) -> Box<Connector> {
+        default_connector(handle)
+    }
+}
+
+#[derive(Debug)]
+pub struct SpecifiedConnector {
+    connector: Box<Connector>,
+}
+
+impl ConnectorConfig for SpecifiedConnector {
+    fn take(self, _handle: &Handle) -> Box<Connector> {
+        self.connector
+    }
+}
+
+#[derive(Debug)]
+pub struct Config<Connector> {
+    token: String,
+    connector: Connector,
+}
+
+impl<C: ConnectorConfig> Config<C> {
+    pub fn connector(self, connector: Box<Connector>) -> Config<SpecifiedConnector> {
+        Config {
+            token: self.token,
+            connector: SpecifiedConnector {
+                connector: connector,
+            }
+        }
+    }
+
+    pub fn build<H: Borrow<Handle>>(self, handle: H) -> Api {
+        let handle = handle.borrow().clone();
+        Api {
             inner: Rc::new(ApiInner {
-                token: token.to_string(),
-                connector: default_connector(handle),
-                handle: handle.clone(),
+                token: self.token,
+                connector: self.connector.take(&handle),
+                handle: handle,
             }),
-        })
+        }
+    }
+}
+
+impl Api {
+    pub fn configure<T: AsRef<str>>(token: T) -> Config<DefaultConnector> {
+        Config {
+            token: token.as_ref().to_string(),
+            connector: DefaultConnector,
+        }
     }
 
     pub fn stream(&self) -> UpdatesStream {

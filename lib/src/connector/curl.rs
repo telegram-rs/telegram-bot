@@ -1,3 +1,4 @@
+use std::fmt;
 use std::sync::{Arc, Mutex};
 use std::rc::Rc;
 
@@ -14,6 +15,12 @@ use super::_base::Connector;
 
 pub struct CurlConnector {
     inner: Rc<Session>
+}
+
+impl fmt::Debug for CurlConnector {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        "curl connector".fmt(formatter)
+    }
 }
 
 impl CurlConnector {

@@ -12,7 +12,7 @@ fn main() {
     let mut core = Core::new().unwrap();
 
     let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
-    let api = Api::from_token(&core.handle(), &token).unwrap();
+    let api = Api::configure(token).build(core.handle());
 
     // Convert stream to the stream with errors in result
     let stream = api.stream().then(|mb_update| {
