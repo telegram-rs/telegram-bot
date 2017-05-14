@@ -3,6 +3,7 @@ use requests::*;
 
 /// Use this method to get the number of members in a chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct GetChatMembersCount<'c> {
     chat_id: ChatRef<'c>
 }

@@ -5,6 +5,7 @@ use requests::*;
 
 /// Use this method to forward messages of any kind.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct ForwardMessage<'c, 'f> {
     chat_id: ChatRef<'c>,
     from_chat_id: ChatRef<'f>,

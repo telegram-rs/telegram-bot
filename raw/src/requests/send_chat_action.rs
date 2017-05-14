@@ -4,6 +4,7 @@ use requests::*;
 /// Strongly typed ChatAction. Instead of passing a String to the
 /// `chat_action` method, this is used.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub enum ChatAction {
     #[serde(rename = "typing")]
     Typing,

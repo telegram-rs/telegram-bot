@@ -6,6 +6,7 @@ use requests::*;
 
 /// Use this method to edit text and game messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct EditMessageText<'c, 's> {
     chat_id: ChatRef<'c>,
     message_id: MessageId,

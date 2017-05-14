@@ -3,6 +3,7 @@ use types::*;
 
 /// Use this method to receive incoming updates using long polling.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct GetUpdates {
     #[serde(skip_serializing_if = "Option::is_none")]
     offset: Option<Integer>,

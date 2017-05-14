@@ -5,6 +5,7 @@ use requests::*;
 /// If the chat is a group or a supergroup and no administrators were appointed,
 /// only the creator will be returned.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct GetChatAdministrators<'c> {
     chat_id: ChatRef<'c>
 }

@@ -6,6 +6,7 @@ use requests::*;
 
 /// Use this method to send information about a venue.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct SendVenue<'c, 't, 'a, 'f> {
     chat_id: ChatRef<'c>,
     latitude: Float,

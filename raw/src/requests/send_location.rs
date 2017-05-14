@@ -5,6 +5,7 @@ use requests::*;
 
 /// Use this method to send point on the map.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct SendLocation<'c> {
     chat_id: ChatRef<'c>,
     latitude: Float,

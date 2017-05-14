@@ -3,6 +3,7 @@ use requests::*;
 
 /// Use this method to edit only the reply markup of messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct EditMessageReplyMarkup<'c> {
     chat_id: ChatRef<'c>,
     message_id: MessageId,

@@ -6,6 +6,7 @@ use requests::*;
 /// their own using invite links, etc., unless unbanned first.
 /// The bot must be an administrator in the group for this to work.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct KickChatMember<'c> {
     chat_id: ChatRef<'c>,
     user_id: UserId,

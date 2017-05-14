@@ -3,6 +3,7 @@ use requests::*;
 
 /// Use this method to get a list of profile pictures for a user.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct GetUserProfilePhotos {
     user_id: UserId,
     offset: Option<Integer>,

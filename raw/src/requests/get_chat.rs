@@ -3,6 +3,7 @@ use requests::*;
 
 /// Use this method to get up to date information about the chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct GetChat<'c> {
     chat_id: ChatRef<'c>
 }

@@ -6,6 +6,7 @@ use requests::*;
 
 /// Use this method to send text messages.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct SendMessage<'c, 's> {
     chat_id: ChatRef<'c>,
     text: Cow<'s, str>,

@@ -5,6 +5,7 @@ use requests::*;
 /// The user will not return to the group automatically, but will be able to
 /// join via link, etc. The bot must be an administrator in the group for this to work.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[must_use = "requests do nothing unless sent"]
 pub struct UnbanChatMember<'c> {
     chat_id: ChatRef<'c>,
     user_id: UserId,
