@@ -9,6 +9,7 @@ keywords = ["telegram", "bot", "chat", "api"]
 license = "MIT"
 
 [dependencies]
+antidote = "1.0"
 serde = "1.0"
 tokio-core = "0.1"
 error-chain = "0.10.0"

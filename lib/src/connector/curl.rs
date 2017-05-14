@@ -1,7 +1,8 @@
 use std::fmt;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::rc::Rc;
 
+use antidote::Mutex;
 use curl::easy::{Easy, List};
 use futures::Future;
 use futures::future::result;
@@ -44,7 +45,7 @@ impl CurlConnector {
         let write_result = result.clone();
 
         handle.write_function(move |data| {
-            write_result.lock().unwrap().extend_from_slice(data);
+            write_result.lock().extend_from_slice(data);
             Ok(data.len())
         })?;
 
@@ -63,7 +64,7 @@ impl Connector for CurlConnector {
 
         let future = request.and_then(move |(_, result)| {
             let mut swap = Vec::new();
-            let mut guard = result.lock().unwrap();
+            let mut guard = result.lock();
             let prev: &mut Vec<u8> = &mut guard;
             ::std::mem::swap(prev, &mut swap);
             Ok(swap)
