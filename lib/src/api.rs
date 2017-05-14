@@ -9,7 +9,7 @@ use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{Request, ResponseWrapper, Response};
 
-use connector::{Connector, default_connector};
+use connector::{Connector, ConnectorConfig, SpecifiedConnector, DefaultConnector};
 use errors::ErrorKind;
 use future::{TelegramFuture, NewTelegramFuture};
 use stream::UpdatesStream;
@@ -37,30 +37,6 @@ impl HasHandle for Api {
     }
 }
 
-pub trait ConnectorConfig {
-    fn take(self, &Handle) -> Box<Connector>;
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct DefaultConnector;
-
-impl ConnectorConfig for DefaultConnector {
-    fn take(self, handle: &Handle) -> Box<Connector> {
-        default_connector(handle)
-    }
-}
-
-#[derive(Debug)]
-pub struct SpecifiedConnector {
-    connector: Box<Connector>,
-}
-
-impl ConnectorConfig for SpecifiedConnector {
-    fn take(self, _handle: &Handle) -> Box<Connector> {
-        self.connector
-    }
-}
-
 #[derive(Debug)]
 pub struct Config<Connector> {
     token: String,
@@ -71,9 +47,7 @@ impl<C: ConnectorConfig> Config<C> {
     pub fn connector(self, connector: Box<Connector>) -> Config<SpecifiedConnector> {
         Config {
             token: self.token,
-            connector: SpecifiedConnector {
-                connector: connector,
-            }
+            connector: SpecifiedConnector::new(connector)
         }
     }
 

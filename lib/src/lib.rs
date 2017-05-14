@@ -24,7 +24,7 @@ pub mod connector;
 pub mod prelude;
 pub mod types;
 
-pub use self::api::{Api, Config, ConnectorConfig, DefaultConnector, SpecifiedConnector};
+pub use self::api::{Api, Config};
 pub use connector::*;
 pub use self::errors::{Error, ErrorKind};
 pub use self::future::TelegramFuture;
