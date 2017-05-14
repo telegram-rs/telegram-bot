@@ -7,7 +7,7 @@ use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{GetUpdates, Update, Integer};
 
-use api::{Api, HasHandle};
+use api::Api;
 use errors::Error;
 use future::{TelegramFuture, NewTelegramFuture};
 
@@ -86,11 +86,15 @@ impl Stream for UpdatesStream {
     }
 }
 
-impl UpdatesStream {
-    pub fn new(api: Api) -> Self {
+pub trait NewUpdatesStream {
+    fn new(api: Api, handle: Handle) -> Self;
+}
+
+impl NewUpdatesStream for UpdatesStream{
+    fn new(api: Api, handle: Handle) -> Self {
         UpdatesStream {
-            api: api.clone(),
-            handle: api.handle().clone(),
+            api: api,
+            handle: handle,
             last_update: 0,
             buffer: VecDeque::new(),
             current_request: None,
@@ -98,7 +102,9 @@ impl UpdatesStream {
             error_delay: Duration::from_millis(TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS)
         }
     }
+}
 
+impl UpdatesStream {
     pub fn timeout(&mut self, timeout: Duration) -> &mut Self {
         self.timeout = timeout;
         self

@@ -12,7 +12,7 @@ use telegram_bot_raw::{Request, ResponseWrapper, Response};
 use connector::{Connector, ConnectorConfig, SpecifiedConnector, DefaultConnector};
 use errors::ErrorKind;
 use future::{TelegramFuture, NewTelegramFuture};
-use stream::UpdatesStream;
+use stream::{NewUpdatesStream, UpdatesStream};
 
 const TELEGRAM_URL: &'static str = "https://api.telegram.org/";
 
@@ -26,16 +26,6 @@ struct ApiInner {
     token: String,
     connector: Box<Connector>,
     handle: Handle,
-}
-
-pub trait HasHandle {
-    fn handle(&self) -> &Handle;
-}
-
-impl HasHandle for Api {
-    fn handle(&self) -> &Handle {
-        &self.inner.handle
-    }
 }
 
 /// Configuration for an `Api`.
@@ -138,7 +128,7 @@ impl Api {
     /// # }
     /// ```
     pub fn stream(&self) -> UpdatesStream {
-        UpdatesStream::new(self.clone())
+        UpdatesStream::new(self.clone(), self.inner.handle.clone())
     }
 
     /// Send a request to the Telegram server and do not wait for a response.
