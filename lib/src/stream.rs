@@ -38,21 +38,18 @@ impl Stream for UpdatesStream {
         }
 
         let result = match self.current_request {
-            None => Ok(None),
+            None => Ok(false),
             Some(ref mut current_request) => {
                 let polled_update = current_request.poll();
                 match polled_update {
                     Ok(Async::NotReady) => return Ok(Async::NotReady),
-                    Ok(Async::Ready(None)) => Ok(None),
+                    Ok(Async::Ready(None)) => Ok(false),
                     Ok(Async::Ready(Some(updates))) => {
-                        if updates.is_empty() {
-                            Ok(None)
-                        } else {
-                            for update in updates.iter() {
-                                self.last_update = max(update.id, self.last_update);
-                            }
-                            Ok(Some(updates))
+                        for update in updates {
+                            self.last_update = max(update.id, self.last_update);
+                            self.buffer.push_back(update)
                         }
+                        Ok(true)
                     },
                     Err(err) => Err(err)
                 }
@@ -70,7 +67,7 @@ impl Stream for UpdatesStream {
                 self.current_request = Some(TelegramFuture::new(Box::new(timeout_future)));
                 return Err(err)
             }
-            Ok(None) => {
+            Ok(false) => {
                 let timeout = self.timeout + Duration::from_secs(1);
 
                 let request = self.api.send_timeout(GetUpdates::new()
@@ -81,12 +78,9 @@ impl Stream for UpdatesStream {
                 self.current_request = Some(request);
                 self.poll()
             },
-            Ok(Some(mut updates)) => {
+            Ok(true) => {
                 self.current_request = None;
-                // Updates are guarantied to be not empty
-                self.buffer.extend(updates.drain(1..));
-                let result = updates.pop().unwrap();
-                return Ok(Async::Ready(Some(result)))
+                self.poll()
             }
         }
     }
