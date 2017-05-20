@@ -1,8 +1,8 @@
 use types::*;
 use requests::*;
 
-/// Use this method to unban a previously kicked user in a supergroup.
-/// The user will not return to the group automatically, but will be able to
+/// Use this method to unban a previously kicked user in a supergroup or channel.
+/// The user will not return to the group or channel automatically, but will be able to
 /// join via link, etc. The bot must be an administrator in the group for this to work.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
@@ -28,7 +28,7 @@ impl<'c> UnbanChatMember<'c> {
     }
 }
 
-/// Unban a previously kicked user in a supergroup.
+/// Unban a previously kicked user in a supergroup or channel.
 pub trait CanUnbanChatMemberForChat<'c> {
     fn unban<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId;
 }
@@ -39,7 +39,7 @@ impl<'c, C> CanUnbanChatMemberForChat<'c> for C where C: ToChatRef<'c> {
     }
 }
 
-/// Unban a previously kicked user in a supergroup.
+/// Unban a previously kicked user in a supergroup or channel.
 pub trait CanUnbanChatMemberForUser<'c> {
     fn unban_in<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c>;
 }
