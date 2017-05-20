@@ -50,6 +50,7 @@ macro_rules! integer_id_impls {
     };
 }
 
+/// Get source `ChatId` from the type reference.
 pub trait ToSourceChat {
     fn to_source_chat(&self) -> ChatId;
 }
@@ -81,6 +82,7 @@ impl<'a> ChatRef<'a> {
     }
 }
 
+/// Get `ChatRef` from the type reference.
 pub trait ToChatRef<'a> {
     fn to_chat_ref(&self) -> ChatRef<'a>;
 }
@@ -165,6 +167,7 @@ macro_rules! specific_chat_id_impls {
     };
 }
 
+/// Get `UserId` from the type reference.
 pub trait ToUserId {
     fn to_user_id(&self) -> UserId;
 }
@@ -218,6 +221,7 @@ specific_chat_id_impls!(ChannelId, Channel);
 pub struct ChatId(Integer);
 chat_id_impls!(ChatId);
 
+/// Get `MessageId` from the type reference.
 pub trait ToMessageId {
     fn to_message_id(&self) -> MessageId;
 }
