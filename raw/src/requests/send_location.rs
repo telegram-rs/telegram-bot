@@ -87,7 +87,9 @@ impl<'b, 'c> ToRequest<'b, 'c> for Location {
 impl<'b, 'c> ToReplyRequest<'b, 'c> for Location {
     type Request = SendLocation<'c>;
 
-    fn to_reply_request(&'b self, message: &Message) -> Self::Request {
+    fn to_reply_request<M>(&'b self, message: M) -> Self::Request
+        where M: ToMessageId + ToSourceChat {
+
         message.location_reply(self.latitude, self.longitude)
     }
 }

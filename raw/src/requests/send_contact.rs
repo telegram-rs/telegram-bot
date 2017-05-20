@@ -128,7 +128,9 @@ impl<'b, 'c> ToRequest<'b, 'c> for Contact {
 impl<'b, 'c> ToReplyRequest<'b, 'c> for Contact {
     type Request = SendContact<'c, 'b, 'b, 'b>;
 
-    fn to_reply_request(&'b self, message: &Message) -> Self::Request {
+    fn to_reply_request<M>(&'b self, message: M) -> Self::Request
+        where M: ToMessageId + ToSourceChat {
+
         let mut rq = message.contact_reply(self.phone_number.as_str(), self.first_name.as_str());
         if let Some(ref last_name) = self.last_name {
             rq.last_name(last_name.as_str());

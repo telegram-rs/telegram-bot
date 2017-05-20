@@ -120,7 +120,8 @@ pub trait ToReplyRequest<'b, 'c> {
     type Request: Request;
 
     /// Convert type to request and reply to the message.
-    fn to_reply_request(&'b self, message: &Message) -> Self::Request;
+    fn to_reply_request<M>(&'b self, message: M) -> Self::Request
+        where M: ToMessageId + ToSourceChat;
 }
 
 /// Strongly typed ParseMode.

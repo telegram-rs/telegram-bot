@@ -147,7 +147,9 @@ impl<'b, 'c> ToRequest<'b, 'c> for Venue {
 impl<'b, 'c> ToReplyRequest<'b, 'c> for Venue {
     type Request = SendVenue<'c, 'b, 'b, 'b>;
 
-    fn to_reply_request(&'b self, message: &Message) -> Self::Request {
+    fn to_reply_request<M>(&'b self, message: M) -> Self::Request
+        where M: ToMessageId + ToSourceChat {
+
         let mut rq = message.venue_reply(self.location.latitude, self.location.longitude,
                                          self.title.as_str(), self.address.as_str());
         if let Some(ref foursquare_id) = self.foursquare_id {
