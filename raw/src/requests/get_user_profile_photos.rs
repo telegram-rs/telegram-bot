@@ -38,6 +38,7 @@ impl GetUserProfilePhotos {
     }
 }
 
+/// Get a list of profile pictures for a user.
 pub trait CanGetUserProfilePhotos {
     fn get_user_profile_photos(&self) -> GetUserProfilePhotos;
 }

@@ -26,6 +26,7 @@ impl<'c> GetChatAdministrators<'c> {
     }
 }
 
+/// Get a list of administrators in a chat.
 pub trait CanGetChatAdministrators<'c> {
     fn get_administrators(&self) -> GetChatAdministrators<'c>;
 }

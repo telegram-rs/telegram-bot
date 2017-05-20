@@ -26,6 +26,7 @@ impl<'c> GetChatMember<'c> {
     }
 }
 
+/// Get information about a member of a chat.
 pub trait CanGetChatMemberForChat<'c> {
     fn get_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToUserId;
 }
@@ -36,6 +37,7 @@ impl<'c, C> CanGetChatMemberForChat<'c> for C where C: ToChatRef<'c> {
     }
 }
 
+/// Get information about a member of a chat.
 pub trait CanGetChatMemberForUser<'c> {
     fn get_member_from<O>(&self, other: O) -> GetChatMember<'c> where O: ToChatRef<'c>;
 }

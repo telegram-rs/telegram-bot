@@ -40,6 +40,7 @@ impl<'c, 'f> ForwardMessage<'c, 'f> {
     }
 }
 
+/// Forward message.
 pub trait CanForwardMessage {
     fn forward<'c, 'f, T>(&self, to: T) -> ForwardMessage<'c, 'f> where T: ToChatRef<'c>;
 }

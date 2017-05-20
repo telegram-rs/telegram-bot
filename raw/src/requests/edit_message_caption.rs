@@ -40,6 +40,7 @@ impl<'c, 's> EditMessageCaption<'c, 's> {
     }
 }
 
+/// Edit captions of messages sent by the bot.
 pub trait CanEditMessageCaption {
     fn edit_caption<'c, 's, T>(&self, caption: T) -> EditMessageCaption<'c, 's> where T: Into<Cow<'s, str>>;
 }

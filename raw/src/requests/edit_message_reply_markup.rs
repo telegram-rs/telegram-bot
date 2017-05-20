@@ -31,6 +31,7 @@ impl<'c> EditMessageReplyMarkup<'c> {
     }
 }
 
+/// Edit reply markup of messages sent by the bot.
 pub trait CanEditMessageReplyMarkup {
     fn edit_reply_markup<'c, R>(&self, reply_markup: Option<R>) -> EditMessageReplyMarkup<'c> where R: Into<ReplyMarkup>;
 }

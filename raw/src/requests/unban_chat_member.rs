@@ -28,6 +28,7 @@ impl<'c> UnbanChatMember<'c> {
     }
 }
 
+/// Unban a previously kicked user in a supergroup.
 pub trait CanUnbanChatMemberForChat<'c> {
     fn unban<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId;
 }
@@ -38,6 +39,7 @@ impl<'c, C> CanUnbanChatMemberForChat<'c> for C where C: ToChatRef<'c> {
     }
 }
 
+/// Unban a previously kicked user in a supergroup.
 pub trait CanUnbanChatMemberForUser<'c> {
     fn unban_in<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c>;
 }

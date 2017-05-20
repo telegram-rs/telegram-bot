@@ -50,6 +50,7 @@ impl<'c> SendChatAction<'c> {
     }
 }
 
+/// Send `action` to a chat.
 pub trait CanSendChatAction<'c> {
     fn chat_action(&self, action: ChatAction) -> SendChatAction<'c>;
 }

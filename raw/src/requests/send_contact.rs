@@ -73,6 +73,7 @@ impl<'c, 'p, 'f, 'l> SendContact<'c, 'p, 'f, 'l> {
     }
 }
 
+/// Send phone contact.
 pub trait CanSendContact<'c, 'p, 'f, 'l> {
     fn contact<P, F>(&self, phone_number: P, first_name: F) -> SendContact<'c, 'p, 'f, 'l>
         where P: Into<Cow<'p, str>>,
@@ -90,6 +91,7 @@ impl<'c, 'p, 'f, 'l, C> CanSendContact<'c, 'p, 'f, 'l> for C
     }
 }
 
+/// Reply with phone contact.
 pub trait CanReplySendContact {
     fn contact_reply<'c, 'p, 'f, 'l, P: 'p, F: 'f>(&self,
                                                    phone_number: P,

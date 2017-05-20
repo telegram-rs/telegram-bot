@@ -24,6 +24,7 @@ impl<'c> GetChatMembersCount<'c> {
     }
 }
 
+/// Get the number of members in a chat.
 pub trait CanGetChatMembersCount<'c> {
     fn get_members_count(&self) -> GetChatMembersCount<'c>;
 }

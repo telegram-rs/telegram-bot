@@ -4,7 +4,7 @@ use std::borrow::Cow;
 use types::*;
 use requests::*;
 
-/// Use this method to edit text and game messages sent by the bot.
+/// Use this method to edit text messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
 pub struct EditMessageText<'c, 's> {
@@ -57,6 +57,7 @@ impl<'c, 's> EditMessageText<'c, 's> {
     }
 }
 
+/// Edit text of messages sent by the bot.
 pub trait CanEditMessageText {
     fn edit_text<'c, 's, T>(&self, text: T) -> EditMessageText<'c, 's> where T: Into<Cow<'s, str>>;
 }

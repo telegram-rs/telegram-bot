@@ -54,6 +54,7 @@ impl<'c> SendLocation<'c> {
     }
 }
 
+/// Send point on the map.
 pub trait CanSendLocation<'c> {
     fn location(&self, latitude: Float, longitude: Float) -> SendLocation<'c>;
 }
@@ -64,6 +65,7 @@ impl<'c, C> CanSendLocation<'c> for C where C: ToChatRef<'c> {
     }
 }
 
+/// Reply with point on the map.
 pub trait CanReplySendLocation {
     fn location_reply<'c>(&self, latitude: Float, longitude: Float) -> SendLocation<'c>;
 }

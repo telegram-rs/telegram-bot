@@ -77,6 +77,7 @@ impl<'c, 't, 'a, 'f> SendVenue<'c, 't, 'a, 'f> {
     }
 }
 
+/// Send information about a venue.
 pub trait CanSendVenue<'c, 't, 'a, 'f> {
     fn venue<T, A>(&self,
                    latitude: Float,
@@ -104,6 +105,7 @@ impl<'c, 't, 'a, 'f, C> CanSendVenue<'c, 't, 'a, 'f> for C
     }
 }
 
+/// Reply with information about a venue.
 pub trait CanReplySendVenue {
     fn venue_reply<'c, 't, 'a, 'f, T, A>(&self,
                                          latitude: Float,

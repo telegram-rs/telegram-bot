@@ -69,6 +69,7 @@ impl<'c, 's> SendMessage<'c, 's> {
     }
 }
 
+/// Send text message.
 pub trait CanSendMessage<'c> {
     fn text<'s, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
 }
@@ -79,6 +80,7 @@ impl<'c, C> CanSendMessage<'c> for C where C: ToChatRef<'c> {
     }
 }
 
+/// Reply with text message.
 pub trait CanReplySendMessage {
     fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
 }

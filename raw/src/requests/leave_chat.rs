@@ -24,6 +24,7 @@ impl<'c> LeaveChat<'c> {
     }
 }
 
+/// Leave a group, supergroup or channel.
 pub trait CanLeaveChat<'c> {
     fn leave(&self) -> LeaveChat<'c>;
 }

@@ -29,6 +29,7 @@ impl<'c> KickChatMember<'c> {
     }
 }
 
+/// Kick a user from a group or a supergroup.
 pub trait CanKickChatMemberForChat<'c> {
     fn kick<O>(&self, other: O) -> KickChatMember<'c> where O: ToUserId;
 }
@@ -39,6 +40,7 @@ impl<'c, C> CanKickChatMemberForChat<'c> for C where C: ToChatRef<'c> {
     }
 }
 
+/// Kick a user from a group or a supergroup.
 pub trait CanKickChatMemberForUser<'c> {
     fn kick_from<O>(&self, other: O) -> KickChatMember<'c> where O: ToChatRef<'c>;
 }

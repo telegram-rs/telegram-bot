@@ -24,6 +24,7 @@ impl<'c> GetChat<'c> {
     }
 }
 
+/// Get up to date information about the chat.
 pub trait CanGetChat<'c> {
     fn get_chat(&self) -> GetChat<'c>;
 }
