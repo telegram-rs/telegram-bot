@@ -9,15 +9,20 @@ use types::*;
 
 pub use self::reply_markup::*;
 
+/// This trait represent how to parse response from the Telegram server.
 pub trait Response {
+    /// Response from the Telegram server.
     type Raw: DeserializeOwned;
+    /// Response that should be returned.
     type Type;
 
+    /// Map `Raw` to `Type`.
     fn map(Self::Raw) -> Self::Type;
 }
 
+/// Read `T` from the Telegram server and returns the same type.
 pub struct IdResponse<T> {
-    _phantom: ::std::marker::PhantomData<T>
+    phantom: ::std::marker::PhantomData<T>
 }
 
 impl<T: DeserializeOwned> Response for IdResponse<T> {
@@ -29,6 +34,7 @@ impl<T: DeserializeOwned> Response for IdResponse<T> {
     }
 }
 
+/// Read `True` from the Telegram server and returns `()`.
 pub struct TrueToUnitResponse;
 
 impl Response for TrueToUnitResponse {
@@ -42,11 +48,13 @@ impl Response for TrueToUnitResponse {
 
 /// Request corresponds to the specific Telegram API method.
 pub trait Request: Serialize {
+    /// How to parse response from the Telegram server.
     type Response: Response + Send + 'static;
 
     /// Name of the method.
     fn name(&self) -> &'static str;
 
+    /// Detach request from lifetime bounds, so it can be transferred across thread boundaries.
     fn detach(&self) -> DetachedRequest<Self::Response> {
         DetachedRequest {
             name: self.name(),
@@ -72,6 +80,7 @@ impl<'a, Req: Request> Request for &'a mut Req {
     }
 }
 
+/// Partially serialized request.
 pub struct DetachedRequest<Resp> {
     name: &'static str,
     encoded: Result<Value, String>,
@@ -96,13 +105,21 @@ impl<Resp> Serialize for DetachedRequest<Resp> {
     }
 }
 
+/// Use this trait to convert a complex type to corresponding request and send it to the chat.
 pub trait ToRequest<'b, 'c> {
+    /// Request type.
     type Request: Request;
+
+    /// Convert type to request and send it to the chat.
     fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c>;
 }
 
+/// Use this trait to convert a complex type to corresponding request and reply to the message.
 pub trait ToReplyRequest<'b, 'c> {
+    /// Request type.
     type Request: Request;
+
+    /// Convert type to request and reply to the message.
     fn to_reply_request(&'b self, message: &Message) -> Self::Request;
 }
 
