@@ -111,10 +111,11 @@ pub enum MessageKind {
         /// Information about the venue.
         data: Venue,
     },
-    /// A new member was added to the group.
-    NewChatMember {
+    /// New members that were added to the group or supergroup and
+    /// information about them (the bot itself may be one of these members)
+    NewChatMembers {
         /// Information about user (this member may be the bot itself).
-        data: User,
+        data: Vec<User>,
     },
     /// A member was removed from the group.
     LeftChatMember {
@@ -261,7 +262,7 @@ impl<'de> Deserialize<'de> for Message {
         maybe_field!(contact, Contact);
         maybe_field!(location, Location);
         maybe_field!(venue, Venue);
-        maybe_field!(new_chat_member, NewChatMember);
+        maybe_field!(new_chat_members, NewChatMembers);
         maybe_field!(left_chat_member, LeftChatMember);
         maybe_field!(new_chat_title, NewChatTitle);
         maybe_field!(new_chat_photo, NewChatPhoto);
@@ -328,9 +329,9 @@ pub struct RawMessage {
     pub location: Option<Location>,
     /// Message is a venue, information about the venue.
     pub venue: Option<Venue>,
-    /// A new member was added to the group, information about
-    /// them (this member may be the bot itself).
-    pub new_chat_member: Option<User>,
+    /// New members that were added to the group or supergroup and information
+    /// about them (the bot itself may be one of these members)
+    pub new_chat_members: Option<Vec<User>>,
     /// A member was removed from the group, information about
     /// them (this member may be the bot itself)
     pub left_chat_member: Option<User>,
