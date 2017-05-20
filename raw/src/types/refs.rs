@@ -193,22 +193,27 @@ impl ToUserId for User {
     }
 }
 
+/// Unique user identifier.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct UserId(Integer);
 specific_chat_id_impls!(UserId, User);
 
+/// Unique group identifier.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GroupId(Integer);
 specific_chat_id_impls!(GroupId, Group);
 
+/// Unique supergroup identifier.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SupergroupId(Integer);
 specific_chat_id_impls!(SupergroupId, Supergroup);
 
+/// Unique channel identifier.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChannelId(Integer);
 specific_chat_id_impls!(ChannelId, Channel);
 
+/// Unique chat identifier.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChatId(Integer);
 chat_id_impls!(ChatId);
@@ -235,6 +240,7 @@ impl ToMessageId for Message {
     }
 }
 
+/// Unique message identifier inside a chat.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MessageId(Integer);
 integer_id_impls!(MessageId);
