@@ -96,6 +96,11 @@ pub enum MessageKind {
         /// Information about the file.
         data: Voice,
     },
+    /// Message is a video note.
+    VideoNote {
+        /// Information about the file.
+        data: VideoNote,
+    },
     /// Message is a shared contact.
     Contact {
         /// Information about the contact.
@@ -259,6 +264,7 @@ impl<'de> Deserialize<'de> for Message {
         maybe_field!(sticker, Sticker);
         maybe_field_with_caption!(video, Video);
         maybe_field!(voice, Voice);
+        maybe_field!(video_note, VideoNote);
         maybe_field!(contact, Contact);
         maybe_field!(location, Location);
         maybe_field!(venue, Venue);
@@ -321,6 +327,8 @@ pub struct RawMessage {
     pub video: Option<Video>,
     /// Message is a voice message, information about the file.
     pub voice: Option<Voice>,
+    /// Message is a video note message, information about the file.
+    pub video_note: Option<VideoNote>,
     /// Caption for the document, photo or video, 0-200 characters.
     pub caption: Option<String>,
     /// Message is a shared contact, information about the contact.
@@ -544,6 +552,20 @@ pub struct Voice {
     pub duration: Integer,
     /// MIME type of the file as defined by sender.
     pub mime_type: Option<String>,
+    /// File size.
+    pub file_size: Option<Integer>,
+}
+
+/// This object represents a video message (available in Telegram apps as of v.4.0).
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct VideoNote {
+    /// Unique identifier for this file.
+    pub file_id: String,
+    pub length: Integer,
+    /// Duration of the video in seconds as defined by sender.
+    pub duration: Integer,
+    /// Video thumbnail.
+    pub thumb: Option<PhotoSize>,
     /// File size.
     pub file_size: Option<Integer>,
 }
