@@ -24,6 +24,7 @@ pub struct Message {
     pub kind: MessageKind,
 }
 
+/// Information about the original message.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Forward {
     /// Date the original message was sent in Unix time
@@ -32,7 +33,7 @@ pub struct Forward {
     pub from: ForwardFrom,
 }
 
-/// Information about the original message.
+/// Information about the source of the original message.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum ForwardFrom {
     /// Sender of the original message.
