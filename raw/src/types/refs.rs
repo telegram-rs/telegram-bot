@@ -277,7 +277,11 @@ file_id_impls!(Video);
 file_id_impls!(Voice);
 file_id_impls!(VideoNote);
 
-file_id_impls!(File);
+impl ToFileRef for File {
+    fn to_file_ref(&self) -> FileRef {
+        self.id.clone().into()
+    }
+}
 
 /// Unique file identifier reference.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

@@ -18,7 +18,7 @@ pub trait Response {
     type Type;
 
     /// Map `Raw` to `Type`.
-    fn map(raw: Self::Raw) -> Self::Type;
+    fn map(raw: Self::Raw, token: &str) -> Self::Type;
 }
 
 /// Read `T` from the Telegram server and returns the same type.
@@ -30,7 +30,7 @@ impl<T: DeserializeOwned> Response for IdResponse<T> {
     type Raw = T;
     type Type = T;
 
-    fn map(raw: Self::Raw) -> Self::Type {
+    fn map(raw: Self::Raw, _: &str) -> Self::Type {
         raw
     }
 }
@@ -42,8 +42,28 @@ impl Response for TrueToUnitResponse {
     type Raw = True;
     type Type = ();
 
-    fn map(_: Self::Raw) -> Self::Type {
+    fn map(_: Self::Raw, _: &str) -> Self::Type {
         ()
+    }
+}
+
+/// Read `True` from the Telegram server and returns `()`.
+pub struct FileResponse;
+
+impl Response for FileResponse {
+    type Raw = RawFile;
+    type Type = File;
+
+    fn map(file: Self::Raw, token: &str) -> Self::Type {
+        let url = file.file_path.as_ref()
+            .map(|path| format!("{}file/bot{}/{}", TELEGRAM_URL, token, path));
+
+        File {
+            id: file.file_id,
+            size: file.file_size,
+            path: file.file_path,
+            url: url,
+        }
     }
 }
 
