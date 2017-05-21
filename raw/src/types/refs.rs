@@ -248,3 +248,64 @@ impl ToMessageId for Message {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MessageId(Integer);
 integer_id_impls!(MessageId);
+
+/// Get `FileRef` from the type reference.
+pub trait ToFileRef {
+    fn to_file_ref(&self) -> FileRef;
+}
+
+impl<S> ToFileRef for S where S: Deref, S::Target: ToFileRef {
+    fn to_file_ref(&self) -> FileRef {
+        self.deref().to_file_ref()
+    }
+}
+
+macro_rules! file_id_impls {
+    ($name: ident) => {
+        impl ToFileRef for $name {
+            fn to_file_ref(&self) -> FileRef {
+                self.file_id.clone().into()
+            }
+        }
+    }
+}
+
+file_id_impls!(PhotoSize);
+file_id_impls!(Audio);
+file_id_impls!(Document);
+file_id_impls!(Sticker);
+file_id_impls!(Video);
+file_id_impls!(Voice);
+file_id_impls!(VideoNote);
+
+file_id_impls!(File);
+
+/// Unique file identifier reference.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct FileRef {
+    inner: String
+}
+
+impl<'a> From<&'a str> for FileRef {
+    fn from(s: &'a str) -> Self {
+        FileRef {
+            inner: s.to_string()
+        }
+    }
+}
+
+impl<'a> From<String> for FileRef {
+    fn from(s: String) -> Self {
+        FileRef {
+            inner: s.clone()
+        }
+    }
+}
+
+impl Serialize for FileRef {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        serializer.serialize_str(&self.inner)
+    }
+}
