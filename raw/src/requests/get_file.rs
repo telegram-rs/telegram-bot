@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use requests::*;
 use types::*;
 
@@ -7,11 +5,11 @@ use types::*;
 /// For the moment, bots can download files of up to 20MB in size.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct GetFile<'s> {
-    file_id: Cow<'s, str>,
+pub struct GetFile {
+    file_id: FileRef,
 }
 
-impl<'s> Request for GetFile<'s> {
+impl<'s> Request for GetFile {
     type Response = IdResponse<File>;
 
     fn name(&self) -> &'static str {
@@ -19,10 +17,21 @@ impl<'s> Request for GetFile<'s> {
     }
 }
 
-impl<'s> GetFile<'s> {
-    pub fn new<F>(file_id: F) -> Self where F: Into<Cow<'s, str>> {
+impl GetFile {
+    pub fn new<F>(file: F) -> Self where F: ToFileRef {
         Self {
-            file_id: file_id.into()
+            file_id: file.to_file_ref()
         }
+    }
+}
+
+/// Get basic info about a file and prepare it for downloading.
+pub trait CanGetFile {
+    fn get_file(&self) -> GetFile;
+}
+
+impl<F> CanGetFile for F where F: ToFileRef {
+    fn get_file(&self) -> GetFile {
+        GetFile::new(self)
     }
 }
