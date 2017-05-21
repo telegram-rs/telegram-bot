@@ -17,7 +17,7 @@ pub trait Response {
     type Type;
 
     /// Map `Raw` to `Type`.
-    fn map(Self::Raw) -> Self::Type;
+    fn map(raw: Self::Raw) -> Self::Type;
 }
 
 /// Read `T` from the Telegram server and returns the same type.
@@ -29,8 +29,8 @@ impl<T: DeserializeOwned> Response for IdResponse<T> {
     type Raw = T;
     type Type = T;
 
-    fn map(value: Self::Raw) -> Self::Type {
-        value
+    fn map(raw: Self::Raw) -> Self::Type {
+        raw
     }
 }
 
