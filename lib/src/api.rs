@@ -14,8 +14,6 @@ use errors::ErrorKind;
 use future::{TelegramFuture, NewTelegramFuture};
 use stream::{NewUpdatesStream, UpdatesStream};
 
-const TELEGRAM_URL: &'static str = "https://api.telegram.org/";
-
 /// Main type for sending requests to the Telegram bot API.
 #[derive(Clone)]
 pub struct Api {
@@ -247,9 +245,8 @@ impl Api {
     pub fn send<Req: Request>(&self, request: Req)
         -> TelegramFuture<<Req::Response as Response>::Type> {
 
-        let name = request.name();
         let encoded = result(serde_json::to_vec(&request).map_err(From::from));
-        let url = url(&self.inner.token, name);
+        let url = request.get_url(&self.inner.token);
 
         let api = self.clone();
         let response = encoded.and_then(move |data| {
@@ -274,6 +271,3 @@ impl Api {
     }
 }
 
-fn url(token: &str, method: &str) -> String {
-    format!("{}bot{}/{}", TELEGRAM_URL, token, method)
-}

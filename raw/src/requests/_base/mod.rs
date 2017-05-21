@@ -6,6 +6,7 @@ use serde::ser::{Serialize, Serializer, Error};
 use serde_json::{Value, to_value};
 
 use types::*;
+use url::*;
 
 pub use self::reply_markup::*;
 
@@ -61,6 +62,10 @@ pub trait Request: Serialize {
             encoded: to_value(self).map_err(|err| format!("{}", err)),
             phantom: ::std::marker::PhantomData,
         }
+    }
+
+    fn get_url(&self, token: &str) -> String {
+        format!("{}bot{}/{}", TELEGRAM_URL, token, self.name())
     }
 }
 
