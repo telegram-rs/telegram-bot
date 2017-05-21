@@ -4,11 +4,11 @@ use requests::*;
 /// Use this method to get the number of members in a chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct GetChatMembersCount<'c> {
-    chat_id: ChatRef<'c>
+pub struct GetChatMembersCount {
+    chat_id: ChatRef
 }
 
-impl<'c> Request for GetChatMembersCount<'c> {
+impl Request for GetChatMembersCount {
     type Response = IdResponse<Integer>;
 
     fn name(&self) -> &'static str {
@@ -16,8 +16,8 @@ impl<'c> Request for GetChatMembersCount<'c> {
     }
 }
 
-impl<'c> GetChatMembersCount<'c> {
-    pub fn new<C>(chat: C) -> Self where C: ToChatRef<'c> {
+impl GetChatMembersCount {
+    pub fn new<C>(chat: C) -> Self where C: ToChatRef {
         GetChatMembersCount {
             chat_id: chat.to_chat_ref()
         }
@@ -25,12 +25,12 @@ impl<'c> GetChatMembersCount<'c> {
 }
 
 /// Get the number of members in a chat.
-pub trait CanGetChatMembersCount<'c> {
-    fn get_members_count(&self) -> GetChatMembersCount<'c>;
+pub trait CanGetChatMembersCount {
+    fn get_members_count(&self) -> GetChatMembersCount;
 }
 
-impl<'c, C> CanGetChatMembersCount<'c> for C where C: ToChatRef<'c> {
-    fn get_members_count(&self) -> GetChatMembersCount<'c> {
+impl<C> CanGetChatMembersCount for C where C: ToChatRef {
+    fn get_members_count(&self) -> GetChatMembersCount {
         GetChatMembersCount::new(self)
     }
 }

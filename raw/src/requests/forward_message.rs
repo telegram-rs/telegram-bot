@@ -6,15 +6,15 @@ use requests::*;
 /// Use this method to forward messages of any kind.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct ForwardMessage<'c, 'f> {
-    chat_id: ChatRef<'c>,
-    from_chat_id: ChatRef<'f>,
+pub struct ForwardMessage {
+    chat_id: ChatRef,
+    from_chat_id: ChatRef,
     #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
     message_id: MessageId,
 }
 
-impl<'c, 'f> Request for ForwardMessage<'c, 'f> {
+impl Request for ForwardMessage {
     type Response = IdResponse<Message>;
 
     fn name(&self) -> &'static str {
@@ -22,9 +22,9 @@ impl<'c, 'f> Request for ForwardMessage<'c, 'f> {
     }
 }
 
-impl<'c, 'f> ForwardMessage<'c, 'f> {
+impl ForwardMessage {
     pub fn new<M, F, T>(message: M, from: F, to: T) -> Self
-        where M: ToMessageId, F: ToChatRef<'f>, T: ToChatRef<'c> {
+        where M: ToMessageId, F: ToChatRef, T: ToChatRef {
 
         ForwardMessage {
             chat_id: to.to_chat_ref(),
@@ -42,11 +42,11 @@ impl<'c, 'f> ForwardMessage<'c, 'f> {
 
 /// Forward message.
 pub trait CanForwardMessage {
-    fn forward<'c, 'f, T>(&self, to: T) -> ForwardMessage<'c, 'f> where T: ToChatRef<'c>;
+    fn forward<T>(&self, to: T) -> ForwardMessage where T: ToChatRef;
 }
 
 impl<M> CanForwardMessage for M where M: ToMessageId + ToSourceChat {
-    fn forward<'c, 'f, T>(&self, to: T) -> ForwardMessage<'c, 'f> where T: ToChatRef<'c> {
+    fn forward<T>(&self, to: T) -> ForwardMessage where T: ToChatRef {
         ForwardMessage::new(self.to_message_id(), self.to_source_chat(), to)
     }
 }

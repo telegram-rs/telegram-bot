@@ -7,8 +7,8 @@ use requests::*;
 /// Use this method to send information about a venue.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendVenue<'c, 't, 'a, 'f> {
-    chat_id: ChatRef<'c>,
+pub struct SendVenue<'t, 'a, 'f> {
+    chat_id: ChatRef,
     latitude: Float,
     longitude: Float,
     title: Cow<'t, str>,
@@ -23,7 +23,7 @@ pub struct SendVenue<'c, 't, 'a, 'f> {
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'c, 't, 'a, 'f> Request for SendVenue<'c, 't, 'a, 'f> {
+impl<'t, 'a, 'f> Request for SendVenue<'t, 'a, 'f> {
     type Response = IdResponse<Message>;
 
     fn name(&self) -> &'static str {
@@ -31,9 +31,9 @@ impl<'c, 't, 'a, 'f> Request for SendVenue<'c, 't, 'a, 'f> {
     }
 }
 
-impl<'c, 't, 'a, 'f> SendVenue<'c, 't, 'a, 'f> {
+impl<'t, 'a, 'f> SendVenue<'t, 'a, 'f> {
     pub fn new<C, T, A>(chat: C, latitude: Float, longitude: Float, title: T, address: A) -> Self
-        where C: ToChatRef<'c>,
+        where C: ToChatRef,
               T: Into<Cow<'t, str>>,
               A: Into<Cow<'a, str>>
     {
@@ -78,26 +78,26 @@ impl<'c, 't, 'a, 'f> SendVenue<'c, 't, 'a, 'f> {
 }
 
 /// Send information about a venue.
-pub trait CanSendVenue<'c, 't, 'a, 'f> {
+pub trait CanSendVenue<'t, 'a, 'f> {
     fn venue<T, A>(&self,
                    latitude: Float,
                    longitude: Float,
                    title: T,
                    address: A)
-                   -> SendVenue<'c, 't, 'a, 'f>
+                   -> SendVenue<'t, 'a, 'f>
         where T: Into<Cow<'t, str>>,
               A: Into<Cow<'a, str>>;
 }
 
-impl<'c, 't, 'a, 'f, C> CanSendVenue<'c, 't, 'a, 'f> for C
-    where C: ToChatRef<'c>
+impl<'t, 'a, 'f, C> CanSendVenue<'t, 'a, 'f> for C
+    where C: ToChatRef
 {
     fn venue<T, A>(&self,
                    latitude: Float,
                    longitude: Float,
                    title: T,
                    address: A)
-                   -> SendVenue<'c, 't, 'a, 'f>
+                   -> SendVenue<'t, 'a, 'f>
         where T: Into<Cow<'t, str>>,
               A: Into<Cow<'a, str>>
     {
@@ -107,23 +107,23 @@ impl<'c, 't, 'a, 'f, C> CanSendVenue<'c, 't, 'a, 'f> for C
 
 /// Reply with information about a venue.
 pub trait CanReplySendVenue {
-    fn venue_reply<'c, 't, 'a, 'f, T, A>(&self,
+    fn venue_reply<'t, 'a, 'f, T, A>(&self,
                                          latitude: Float,
                                          longitude: Float,
                                          title: T,
                                          address: A)
-                                         -> SendVenue<'c, 't, 'a, 'f>
+                                         -> SendVenue<'t, 'a, 'f>
         where T: Into<Cow<'t, str>>,
               A: Into<Cow<'a, str>>;
 }
 
 impl<M> CanReplySendVenue for M where M: ToMessageId + ToSourceChat {
-    fn venue_reply<'c, 't, 'a, 'f, T, A>(&self,
+    fn venue_reply<'t, 'a, 'f, T, A>(&self,
                                          latitude: Float,
                                          longitude: Float,
                                          title: T,
                                          address: A)
-                                         -> SendVenue<'c, 't, 'a, 'f>
+                                         -> SendVenue<'t, 'a, 'f>
         where T: Into<Cow<'t, str>>,
               A: Into<Cow<'a, str>>
     {
@@ -133,10 +133,10 @@ impl<M> CanReplySendVenue for M where M: ToMessageId + ToSourceChat {
     }
 }
 
-impl<'b, 'c> ToRequest<'b, 'c> for Venue {
-    type Request = SendVenue<'c, 'b, 'b, 'b>;
+impl<'b> ToRequest<'b> for Venue {
+    type Request = SendVenue<'b, 'b, 'b>;
 
-    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c> {
+    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef {
         let mut rq = chat.venue(self.location.latitude, self.location.longitude,
                                 self.title.as_str(), self.address.as_str());
         if let Some(ref foursquare_id) = self.foursquare_id {
@@ -146,8 +146,8 @@ impl<'b, 'c> ToRequest<'b, 'c> for Venue {
     }
 }
 
-impl<'b, 'c> ToReplyRequest<'b, 'c> for Venue {
-    type Request = SendVenue<'c, 'b, 'b, 'b>;
+impl<'b> ToReplyRequest<'b> for Venue {
+    type Request = SendVenue<'b, 'b, 'b>;
 
     fn to_reply_request<M>(&'b self, message: M) -> Self::Request
         where M: ToMessageId + ToSourceChat {

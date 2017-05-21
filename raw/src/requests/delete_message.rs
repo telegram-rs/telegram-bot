@@ -11,12 +11,12 @@ use requests::*;
 // In channels, bots can only remove their own messages.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct DeleteMessage<'c> {
-    chat_id: ChatRef<'c>,
+pub struct DeleteMessage {
+    chat_id: ChatRef,
     message_id: MessageId,
 }
 
-impl<'c> Request for DeleteMessage<'c> {
+impl Request for DeleteMessage {
     type Response = TrueToUnitResponse;
 
     fn name(&self) -> &'static str {
@@ -24,9 +24,9 @@ impl<'c> Request for DeleteMessage<'c> {
     }
 }
 
-impl<'c> DeleteMessage<'c> {
+impl DeleteMessage {
     pub fn new<C, M>(chat: C, message_id: M) -> Self
-        where C: ToChatRef<'c>, M: ToMessageId {
+        where C: ToChatRef, M: ToMessageId {
 
         DeleteMessage {
             chat_id: chat.to_chat_ref(),
@@ -37,11 +37,11 @@ impl<'c> DeleteMessage<'c> {
 
 /// Delete messages..
 pub trait CanDeleteMessage {
-    fn delete<'c>(&self) -> DeleteMessage<'c>;
+    fn delete(&self) -> DeleteMessage;
 }
 
 impl<M> CanDeleteMessage for M where M: ToMessageId + ToSourceChat {
-    fn delete<'c>(&self) -> DeleteMessage<'c> {
+    fn delete(&self) -> DeleteMessage {
         DeleteMessage::new(self.to_source_chat(), self.to_message_id())
     }
 }

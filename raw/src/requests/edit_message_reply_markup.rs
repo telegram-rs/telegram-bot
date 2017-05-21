@@ -4,14 +4,14 @@ use requests::*;
 /// Use this method to edit only the reply markup of messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct EditMessageReplyMarkup<'c> {
-    chat_id: ChatRef<'c>,
+pub struct EditMessageReplyMarkup {
+    chat_id: ChatRef,
     message_id: MessageId,
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'c> Request for EditMessageReplyMarkup<'c> {
+impl Request for EditMessageReplyMarkup {
     type Response = IdResponse<Message>;
 
     fn name(&self) -> &'static str {
@@ -19,9 +19,9 @@ impl<'c> Request for EditMessageReplyMarkup<'c> {
     }
 }
 
-impl<'c> EditMessageReplyMarkup<'c> {
+impl EditMessageReplyMarkup {
     pub fn new<C, M, R>(chat: C, message_id: M, reply_markup: Option<R>) -> Self
-        where C: ToChatRef<'c>, M: ToMessageId, R: Into<ReplyMarkup> {
+        where C: ToChatRef, M: ToMessageId, R: Into<ReplyMarkup> {
 
         EditMessageReplyMarkup {
             chat_id: chat.to_chat_ref(),
@@ -33,11 +33,11 @@ impl<'c> EditMessageReplyMarkup<'c> {
 
 /// Edit reply markup of messages sent by the bot.
 pub trait CanEditMessageReplyMarkup {
-    fn edit_reply_markup<'c, R>(&self, reply_markup: Option<R>) -> EditMessageReplyMarkup<'c> where R: Into<ReplyMarkup>;
+    fn edit_reply_markup<R>(&self, reply_markup: Option<R>) -> EditMessageReplyMarkup where R: Into<ReplyMarkup>;
 }
 
 impl<M> CanEditMessageReplyMarkup for M where M: ToMessageId + ToSourceChat {
-    fn edit_reply_markup<'c, R>(&self, reply_markup: Option<R>) -> EditMessageReplyMarkup<'c> where R: Into<ReplyMarkup> {
+    fn edit_reply_markup<R>(&self, reply_markup: Option<R>) -> EditMessageReplyMarkup where R: Into<ReplyMarkup> {
         EditMessageReplyMarkup::new(self.to_source_chat(), self.to_message_id(), reply_markup)
     }
 }

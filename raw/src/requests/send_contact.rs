@@ -7,8 +7,8 @@ use requests::*;
 /// Use this method to send phone contacts.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendContact<'c, 'p, 'f, 'l> {
-    chat_id: ChatRef<'c>,
+pub struct SendContact<'p, 'f, 'l> {
+    chat_id: ChatRef,
     phone_number: Cow<'p, str>,
     first_name: Cow<'f, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -21,7 +21,7 @@ pub struct SendContact<'c, 'p, 'f, 'l> {
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'c, 'p, 'f, 'l> Request for SendContact<'c, 'p, 'f, 'l> {
+impl<'p, 'f, 'l> Request for SendContact<'p, 'f, 'l> {
     type Response = IdResponse<Message>;
 
     fn name(&self) -> &'static str {
@@ -29,9 +29,9 @@ impl<'c, 'p, 'f, 'l> Request for SendContact<'c, 'p, 'f, 'l> {
     }
 }
 
-impl<'c, 'p, 'f, 'l> SendContact<'c, 'p, 'f, 'l> {
+impl<'p, 'f, 'l> SendContact<'p, 'f, 'l> {
     pub fn new<C, P, F>(chat: C, phone_number: P, first_name: F) -> Self
-        where C: ToChatRef<'c>,
+        where C: ToChatRef,
               P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>
     {
@@ -74,16 +74,16 @@ impl<'c, 'p, 'f, 'l> SendContact<'c, 'p, 'f, 'l> {
 }
 
 /// Send phone contact.
-pub trait CanSendContact<'c, 'p, 'f, 'l> {
-    fn contact<P, F>(&self, phone_number: P, first_name: F) -> SendContact<'c, 'p, 'f, 'l>
+pub trait CanSendContact<'p, 'f, 'l> {
+    fn contact<P, F>(&self, phone_number: P, first_name: F) -> SendContact<'p, 'f, 'l>
         where P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>;
 }
 
-impl<'c, 'p, 'f, 'l, C> CanSendContact<'c, 'p, 'f, 'l> for C
-    where C: ToChatRef<'c>
+impl<'p, 'f, 'l, C> CanSendContact<'p, 'f, 'l> for C
+    where C: ToChatRef
 {
-    fn contact<P, F>(&self, phone_number: P, first_name: F) -> SendContact<'c, 'p, 'f, 'l>
+    fn contact<P, F>(&self, phone_number: P, first_name: F) -> SendContact<'p, 'f, 'l>
         where P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>
     {
@@ -93,19 +93,19 @@ impl<'c, 'p, 'f, 'l, C> CanSendContact<'c, 'p, 'f, 'l> for C
 
 /// Reply with phone contact.
 pub trait CanReplySendContact {
-    fn contact_reply<'c, 'p, 'f, 'l, P: 'p, F: 'f>(&self,
+    fn contact_reply<'p, 'f, 'l, P: 'p, F: 'f>(&self,
                                                    phone_number: P,
                                                    first_name: F)
-                                                   -> SendContact<'c, 'p, 'f, 'l>
+                                                   -> SendContact<'p, 'f, 'l>
         where P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>;
 }
 
 impl<M> CanReplySendContact for M where M: ToMessageId + ToSourceChat {
-    fn contact_reply<'c, 'p, 'f, 'l, P: 'p, F: 'f>(&self,
+    fn contact_reply<'p, 'f, 'l, P: 'p, F: 'f>(&self,
                                                    phone_number: P,
                                                    first_name: F)
-                                                   -> SendContact<'c, 'p, 'f, 'l>
+                                                   -> SendContact<'p, 'f, 'l>
         where P: Into<Cow<'p, str>>,
               F: Into<Cow<'f, str>>
     {
@@ -115,10 +115,10 @@ impl<M> CanReplySendContact for M where M: ToMessageId + ToSourceChat {
     }
 }
 
-impl<'b, 'c> ToRequest<'b, 'c> for Contact {
-    type Request = SendContact<'c, 'b, 'b, 'b>;
+impl<'b> ToRequest<'b> for Contact {
+    type Request = SendContact<'b, 'b, 'b>;
 
-    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c> {
+    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef {
         let mut rq = chat.contact(self.phone_number.as_str(), self.first_name.as_str());
         if let Some(ref last_name) = self.last_name {
             rq.last_name(last_name.as_str());
@@ -127,8 +127,8 @@ impl<'b, 'c> ToRequest<'b, 'c> for Contact {
     }
 }
 
-impl<'b, 'c> ToReplyRequest<'b, 'c> for Contact {
-    type Request = SendContact<'c, 'b, 'b, 'b>;
+impl<'b> ToReplyRequest<'b> for Contact {
+    type Request = SendContact<'b, 'b, 'b>;
 
     fn to_reply_request<M>(&'b self, message: M) -> Self::Request
         where M: ToMessageId + ToSourceChat {

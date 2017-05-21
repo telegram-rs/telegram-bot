@@ -7,8 +7,8 @@ use requests::*;
 /// Use this method to send text messages.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendMessage<'c, 's> {
-    chat_id: ChatRef<'c>,
+pub struct SendMessage<'s> {
+    chat_id: ChatRef,
     text: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     parse_mode: Option<ParseMode>,
@@ -22,7 +22,7 @@ pub struct SendMessage<'c, 's> {
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'c, 's> Request for SendMessage<'c, 's> {
+impl<'c, 's> Request for SendMessage<'s> {
     type Response = IdResponse<Message>;
 
     fn name(&self) -> &'static str {
@@ -30,8 +30,8 @@ impl<'c, 's> Request for SendMessage<'c, 's> {
     }
 }
 
-impl<'c, 's> SendMessage<'c, 's> {
-    pub fn new<C, T>(chat: C, text: T) -> Self where C: ToChatRef<'c>, T: Into<Cow<'s, str>> {
+impl<'s> SendMessage<'s> {
+    pub fn new<C, T>(chat: C, text: T) -> Self where C: ToChatRef, T: Into<Cow<'s, str>> {
         SendMessage {
             chat_id: chat.to_chat_ref(),
             text: text.into(),
@@ -70,23 +70,23 @@ impl<'c, 's> SendMessage<'c, 's> {
 }
 
 /// Send text message.
-pub trait CanSendMessage<'c> {
-    fn text<'s, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
+pub trait CanSendMessage {
+    fn text<'s, T>(&self, text: T) -> SendMessage<'s> where T: Into<Cow<'s, str>>;
 }
 
-impl<'c, C> CanSendMessage<'c> for C where C: ToChatRef<'c> {
-    fn text<'s, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
+impl<C> CanSendMessage for C where C: ToChatRef {
+    fn text<'s, T>(&self, text: T) -> SendMessage<'s> where T: Into<Cow<'s, str>> {
         SendMessage::new(self, text)
     }
 }
 
 /// Reply with text message.
 pub trait CanReplySendMessage {
-    fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>>;
+    fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'s> where T: Into<Cow<'s, str>>;
 }
 
 impl<M> CanReplySendMessage for M where M: ToMessageId + ToSourceChat {
-    fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'c, 's> where T: Into<Cow<'s, str>> {
+    fn text_reply<'c, 's, T>(&self, text: T) -> SendMessage<'s> where T: Into<Cow<'s, str>> {
         let mut rq = self.to_source_chat().text(text);
         rq.reply_to(self.to_message_id());
         rq

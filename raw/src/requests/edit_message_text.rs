@@ -7,8 +7,8 @@ use requests::*;
 /// Use this method to edit text messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct EditMessageText<'c, 's> {
-    chat_id: ChatRef<'c>,
+pub struct EditMessageText<'s> {
+    chat_id: ChatRef,
     message_id: MessageId,
     text: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -19,7 +19,7 @@ pub struct EditMessageText<'c, 's> {
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'c, 's> Request for EditMessageText<'c, 's> {
+impl<'s> Request for EditMessageText<'s> {
     type Response = IdResponse<Message>;
 
     fn name(&self) -> &'static str {
@@ -27,9 +27,9 @@ impl<'c, 's> Request for EditMessageText<'c, 's> {
     }
 }
 
-impl<'c, 's> EditMessageText<'c, 's> {
+impl<'s> EditMessageText<'s> {
     pub fn new<C, M, T>(chat: C, message_id: M, text: T) -> Self
-        where C: ToChatRef<'c>, M: ToMessageId, T: Into<Cow<'s, str>> {
+        where C: ToChatRef, M: ToMessageId, T: Into<Cow<'s, str>> {
 
         EditMessageText {
             chat_id: chat.to_chat_ref(),
@@ -59,11 +59,11 @@ impl<'c, 's> EditMessageText<'c, 's> {
 
 /// Edit text of messages sent by the bot.
 pub trait CanEditMessageText {
-    fn edit_text<'c, 's, T>(&self, text: T) -> EditMessageText<'c, 's> where T: Into<Cow<'s, str>>;
+    fn edit_text<'s, T>(&self, text: T) -> EditMessageText<'s> where T: Into<Cow<'s, str>>;
 }
 
 impl<M> CanEditMessageText for M where M: ToMessageId + ToSourceChat {
-    fn edit_text<'c, 's, T>(&self, text: T) -> EditMessageText<'c, 's> where T: Into<Cow<'s, str>> {
+    fn edit_text<'s, T>(&self, text: T) -> EditMessageText<'s> where T: Into<Cow<'s, str>> {
         EditMessageText::new(self.to_source_chat(), self.to_message_id(), text)
     }
 }

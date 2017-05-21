@@ -4,12 +4,12 @@ use requests::*;
 /// Use this method to get information about a member of a chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct GetChatMember<'c> {
-    chat_id: ChatRef<'c>,
+pub struct GetChatMember {
+    chat_id: ChatRef,
     user_id: UserId,
 }
 
-impl<'c> Request for GetChatMember<'c> {
+impl Request for GetChatMember {
     type Response = IdResponse<ChatMember>;
 
     fn name(&self) -> &'static str {
@@ -17,8 +17,8 @@ impl<'c> Request for GetChatMember<'c> {
     }
 }
 
-impl<'c> GetChatMember<'c> {
-    pub fn new<C, U>(chat: C, user: U) -> Self where C: ToChatRef<'c>, U: ToUserId {
+impl GetChatMember {
+    pub fn new<C, U>(chat: C, user: U) -> Self where C: ToChatRef, U: ToUserId {
         GetChatMember {
             chat_id: chat.to_chat_ref(),
             user_id: user.to_user_id(),
@@ -27,23 +27,23 @@ impl<'c> GetChatMember<'c> {
 }
 
 /// Get information about a member of a chat.
-pub trait CanGetChatMemberForChat<'c> {
-    fn get_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToUserId;
+pub trait CanGetChatMemberForChat {
+    fn get_member<O>(&self, other: O) -> GetChatMember where O: ToUserId;
 }
 
-impl<'c, C> CanGetChatMemberForChat<'c> for C where C: ToChatRef<'c> {
-    fn get_member<O>(&self, other: O) -> GetChatMember<'c> where O: ToUserId {
+impl<C> CanGetChatMemberForChat for C where C: ToChatRef {
+    fn get_member<O>(&self, other: O) -> GetChatMember where O: ToUserId {
         GetChatMember::new(self, other)
     }
 }
 
 /// Get information about a member of a chat.
-pub trait CanGetChatMemberForUser<'c> {
-    fn get_member_from<O>(&self, other: O) -> GetChatMember<'c> where O: ToChatRef<'c>;
+pub trait CanGetChatMemberForUser {
+    fn get_member_from<O>(&self, other: O) -> GetChatMember where O: ToChatRef;
 }
 
-impl<'c, U> CanGetChatMemberForUser<'c> for U where U: ToUserId {
-    fn get_member_from<O>(&self, other: O) -> GetChatMember<'c> where O: ToChatRef<'c> {
+impl<U> CanGetChatMemberForUser for U where U: ToUserId {
+    fn get_member_from<O>(&self, other: O) -> GetChatMember where O: ToChatRef {
         GetChatMember::new(other, self)
     }
 }

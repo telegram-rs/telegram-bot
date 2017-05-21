@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::ops::Deref;
 
 use serde::ser::{Serialize, Serializer};
@@ -70,49 +69,49 @@ impl ToSourceChat for Message {
 /// Unique identifier for the target chat or username of the
 /// target channel (in the format @channelusername)
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum ChatRef<'a> {
+pub enum ChatRef {
     Id(ChatId),
     #[doc(hidden)]
-    ChannelUsername(Cow<'a, str>,),
+    ChannelUsername(String),
 }
 
-impl<'a> ChatRef<'a> {
-    pub fn from_chat_id(chat_id: ChatId) -> ChatRef<'a> {
+impl ChatRef {
+    pub fn from_chat_id(chat_id: ChatId) -> ChatRef {
         ChatRef::Id(chat_id)
     }
 }
 
 /// Get `ChatRef` from the type reference.
-pub trait ToChatRef<'a> {
-    fn to_chat_ref(&self) -> ChatRef<'a>;
+pub trait ToChatRef {
+    fn to_chat_ref(&self) -> ChatRef;
 }
 
-impl<'a, S> ToChatRef<'a> for S where S: Deref, S::Target: ToChatRef<'a> {
-    fn to_chat_ref(&self) -> ChatRef<'a> {
+impl<S> ToChatRef for S where S: Deref, S::Target: ToChatRef {
+    fn to_chat_ref(&self) -> ChatRef {
         self.deref().to_chat_ref()
     }
 }
 
-impl<'a> ToChatRef<'a> for ChatRef<'a> {
-    fn to_chat_ref(&self) -> ChatRef<'a> {
+impl ToChatRef for ChatRef {
+    fn to_chat_ref(&self) -> ChatRef {
         self.clone()
     }
 }
 
-impl<'a> ToChatRef<'a> for Chat {
-    fn to_chat_ref(&self) -> ChatRef<'a> {
+impl ToChatRef for Chat {
+    fn to_chat_ref(&self) -> ChatRef {
         self.id().to_chat_ref()
     }
 }
 
-impl<'a> ToChatRef<'a> for ChatMember {
-    fn to_chat_ref(&self) -> ChatRef<'a> {
+impl ToChatRef for ChatMember {
+    fn to_chat_ref(&self) -> ChatRef {
         self.user.to_chat_ref()
     }
 }
 
-impl<'a> ToChatRef<'a> for ForwardFrom {
-    fn to_chat_ref(&self) -> ChatRef<'a> {
+impl ToChatRef for ForwardFrom {
+    fn to_chat_ref(&self) -> ChatRef {
         match *self {
             ForwardFrom::User {ref user, ..} => user.to_chat_ref(),
             ForwardFrom::Channel {ref channel, ..} => channel.to_chat_ref(),
@@ -120,13 +119,13 @@ impl<'a> ToChatRef<'a> for ForwardFrom {
     }
 }
 
-impl<'a> ToChatRef<'a> for Forward {
-    fn to_chat_ref(&self) -> ChatRef<'a> {
+impl ToChatRef for Forward {
+    fn to_chat_ref(&self) -> ChatRef {
         self.from.to_chat_ref()
     }
 }
 
-impl<'a> Serialize for ChatRef<'a> {
+impl Serialize for ChatRef {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
@@ -141,8 +140,8 @@ macro_rules! chat_id_impls {
     ($id: ident) => {
         integer_id_impls!($id);
 
-        impl<'a> ToChatRef<'a> for $id {
-            fn to_chat_ref(&self) -> ChatRef<'a> {
+        impl ToChatRef for $id {
+            fn to_chat_ref(&self) -> ChatRef {
                 ChatRef::from_chat_id((*self).into())
             }
         }
@@ -159,8 +158,8 @@ macro_rules! specific_chat_id_impls {
             }
         }
 
-        impl<'a> ToChatRef<'a> for $typ {
-            fn to_chat_ref(&self) -> ChatRef<'a> {
+        impl ToChatRef for $typ {
+            fn to_chat_ref(&self) -> ChatRef {
                 self.id.to_chat_ref()
             }
         }

@@ -6,12 +6,12 @@ use requests::*;
 /// join via link, etc. The bot must be an administrator in the group for this to work.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct UnbanChatMember<'c> {
-    chat_id: ChatRef<'c>,
+pub struct UnbanChatMember {
+    chat_id: ChatRef,
     user_id: UserId,
 }
 
-impl<'c> Request for UnbanChatMember<'c> {
+impl Request for UnbanChatMember {
     type Response = TrueToUnitResponse;
 
     fn name(&self) -> &'static str {
@@ -19,8 +19,8 @@ impl<'c> Request for UnbanChatMember<'c> {
     }
 }
 
-impl<'c> UnbanChatMember<'c> {
-    pub fn new<C, U>(chat: C, user: U) -> Self where C: ToChatRef<'c>, U: ToUserId {
+impl UnbanChatMember {
+    pub fn new<C, U>(chat: C, user: U) -> Self where C: ToChatRef, U: ToUserId {
         UnbanChatMember {
             chat_id: chat.to_chat_ref(),
             user_id: user.to_user_id(),
@@ -29,23 +29,23 @@ impl<'c> UnbanChatMember<'c> {
 }
 
 /// Unban a previously kicked user in a supergroup or channel.
-pub trait CanUnbanChatMemberForChat<'c> {
-    fn unban<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId;
+pub trait CanUnbanChatMemberForChat {
+    fn unban<O>(&self, other: O) -> UnbanChatMember where O: ToUserId;
 }
 
-impl<'c, C> CanUnbanChatMemberForChat<'c> for C where C: ToChatRef<'c> {
-    fn unban<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToUserId {
+impl<C> CanUnbanChatMemberForChat for C where C: ToChatRef {
+    fn unban<O>(&self, other: O) -> UnbanChatMember where O: ToUserId {
         UnbanChatMember::new(self, other)
     }
 }
 
 /// Unban a previously kicked user in a supergroup or channel.
-pub trait CanUnbanChatMemberForUser<'c> {
-    fn unban_in<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c>;
+pub trait CanUnbanChatMemberForUser {
+    fn unban_in<O>(&self, other: O) -> UnbanChatMember where O: ToChatRef;
 }
 
-impl<'c, U> CanUnbanChatMemberForUser<'c> for U where U: ToUserId {
-    fn unban_in<O>(&self, other: O) -> UnbanChatMember<'c> where O: ToChatRef<'c> {
+impl<U> CanUnbanChatMemberForUser for U where U: ToUserId {
+    fn unban_in<O>(&self, other: O) -> UnbanChatMember where O: ToChatRef {
         UnbanChatMember::new(other, self)
     }
 }

@@ -6,11 +6,11 @@ use requests::*;
 /// only the creator will be returned.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct GetChatAdministrators<'c> {
-    chat_id: ChatRef<'c>
+pub struct GetChatAdministrators {
+    chat_id: ChatRef
 }
 
-impl<'c> Request for GetChatAdministrators<'c> {
+impl Request for GetChatAdministrators {
     type Response = IdResponse<Vec<ChatMember>>;
 
     fn name(&self) -> &'static str {
@@ -18,8 +18,8 @@ impl<'c> Request for GetChatAdministrators<'c> {
     }
 }
 
-impl<'c> GetChatAdministrators<'c> {
-    pub fn new<C>(chat: C) -> Self where C: ToChatRef<'c> {
+impl GetChatAdministrators {
+    pub fn new<C>(chat: C) -> Self where C: ToChatRef {
         GetChatAdministrators {
             chat_id: chat.to_chat_ref()
         }
@@ -27,12 +27,12 @@ impl<'c> GetChatAdministrators<'c> {
 }
 
 /// Get a list of administrators in a chat.
-pub trait CanGetChatAdministrators<'c> {
-    fn get_administrators(&self) -> GetChatAdministrators<'c>;
+pub trait CanGetChatAdministrators {
+    fn get_administrators(&self) -> GetChatAdministrators;
 }
 
-impl<'c, C> CanGetChatAdministrators<'c> for C where C: ToChatRef<'c> {
-    fn get_administrators(&self) -> GetChatAdministrators<'c> {
+impl<C> CanGetChatAdministrators for C where C: ToChatRef {
+    fn get_administrators(&self) -> GetChatAdministrators {
         GetChatAdministrators::new(self)
     }
 }

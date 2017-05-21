@@ -106,16 +106,16 @@ impl<Resp> Serialize for DetachedRequest<Resp> {
 }
 
 /// Use this trait to convert a complex type to corresponding request and send it to the chat.
-pub trait ToRequest<'b, 'c> {
+pub trait ToRequest<'b> {
     /// Request type.
     type Request: Request;
 
     /// Convert type to request and send it to the chat.
-    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c>;
+    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef;
 }
 
 /// Use this trait to convert a complex type to corresponding request and reply to the message.
-pub trait ToReplyRequest<'b, 'c> {
+pub trait ToReplyRequest<'b> {
     /// Request type.
     type Request: Request;
 

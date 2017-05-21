@@ -28,12 +28,12 @@ pub enum ChatAction {
 /// The status is set for 5 seconds or less (when a message arrives from your bot,
 /// Telegram clients clear its typing status).
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
-pub struct SendChatAction<'c> {
-    chat_id: ChatRef<'c>,
+pub struct SendChatAction {
+    chat_id: ChatRef,
     action: ChatAction,
 }
 
-impl<'c> Request for SendChatAction<'c> {
+impl Request for SendChatAction {
     type Response = TrueToUnitResponse;
 
     fn name(&self) -> &'static str {
@@ -41,8 +41,8 @@ impl<'c> Request for SendChatAction<'c> {
     }
 }
 
-impl<'c> SendChatAction<'c> {
-    pub fn new<C>(chat: C, action: ChatAction) -> Self where C: ToChatRef<'c> {
+impl SendChatAction {
+    pub fn new<C>(chat: C, action: ChatAction) -> Self where C: ToChatRef {
         SendChatAction {
             chat_id: chat.to_chat_ref(),
             action: action,
@@ -51,12 +51,12 @@ impl<'c> SendChatAction<'c> {
 }
 
 /// Send `action` to a chat.
-pub trait CanSendChatAction<'c> {
-    fn chat_action(&self, action: ChatAction) -> SendChatAction<'c>;
+pub trait CanSendChatAction {
+    fn chat_action(&self, action: ChatAction) -> SendChatAction;
 }
 
-impl<'c, C> CanSendChatAction<'c> for C where C: ToChatRef<'c> {
-    fn chat_action(&self, action: ChatAction) -> SendChatAction<'c> {
+impl<C> CanSendChatAction for C where C: ToChatRef {
+    fn chat_action(&self, action: ChatAction) -> SendChatAction {
         SendChatAction::new(self, action)
     }
 }

@@ -6,15 +6,15 @@ use requests::*;
 /// Use this method to edit captions of messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct EditMessageCaption<'c, 's> {
-    chat_id: ChatRef<'c>,
+pub struct EditMessageCaption<'s> {
+    chat_id: ChatRef,
     message_id: MessageId,
     caption: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'c, 's> Request for EditMessageCaption<'c, 's> {
+impl<'s> Request for EditMessageCaption<'s> {
     type Response = IdResponse<Message>;
 
     fn name(&self) -> &'static str {
@@ -22,9 +22,9 @@ impl<'c, 's> Request for EditMessageCaption<'c, 's> {
     }
 }
 
-impl<'c, 's> EditMessageCaption<'c, 's> {
+impl<'s> EditMessageCaption<'s> {
     pub fn new<C, M, T>(chat: C, message_id: M, caption: T) -> Self
-        where C: ToChatRef<'c>, M: ToMessageId, T: Into<Cow<'s, str>> {
+        where C: ToChatRef, M: ToMessageId, T: Into<Cow<'s, str>> {
 
         EditMessageCaption {
             chat_id: chat.to_chat_ref(),
@@ -42,11 +42,11 @@ impl<'c, 's> EditMessageCaption<'c, 's> {
 
 /// Edit captions of messages sent by the bot.
 pub trait CanEditMessageCaption {
-    fn edit_caption<'c, 's, T>(&self, caption: T) -> EditMessageCaption<'c, 's> where T: Into<Cow<'s, str>>;
+    fn edit_caption<'s, T>(&self, caption: T) -> EditMessageCaption<'s> where T: Into<Cow<'s, str>>;
 }
 
 impl<M> CanEditMessageCaption for M where M: ToMessageId + ToSourceChat {
-    fn edit_caption<'c, 's, T>(&self, caption: T) -> EditMessageCaption<'c, 's> where T: Into<Cow<'s, str>> {
+    fn edit_caption<'s, T>(&self, caption: T) -> EditMessageCaption<'s> where T: Into<Cow<'s, str>> {
         EditMessageCaption::new(self.to_source_chat(), self.to_message_id(), caption)
     }
 }

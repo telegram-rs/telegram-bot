@@ -6,8 +6,8 @@ use requests::*;
 /// Use this method to send point on the map.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendLocation<'c> {
-    chat_id: ChatRef<'c>,
+pub struct SendLocation {
+    chat_id: ChatRef,
     latitude: Float,
     longitude: Float,
     #[serde(skip_serializing_if = "Not::not")]
@@ -18,7 +18,7 @@ pub struct SendLocation<'c> {
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'c> Request for SendLocation<'c> {
+impl Request for SendLocation {
     type Response = IdResponse<Message>;
 
     fn name(&self) -> &'static str {
@@ -26,8 +26,8 @@ impl<'c> Request for SendLocation<'c> {
     }
 }
 
-impl<'c> SendLocation<'c> {
-    pub fn new<C>(chat: C, latitude: Float, longitude: Float) -> Self where C: ToChatRef<'c> {
+impl SendLocation {
+    pub fn new<C>(chat: C, latitude: Float, longitude: Float) -> Self where C: ToChatRef {
         SendLocation {
             chat_id: chat.to_chat_ref(),
             latitude: latitude,
@@ -55,39 +55,39 @@ impl<'c> SendLocation<'c> {
 }
 
 /// Send point on the map.
-pub trait CanSendLocation<'c> {
-    fn location(&self, latitude: Float, longitude: Float) -> SendLocation<'c>;
+pub trait CanSendLocation {
+    fn location(&self, latitude: Float, longitude: Float) -> SendLocation;
 }
 
-impl<'c, C> CanSendLocation<'c> for C where C: ToChatRef<'c> {
-    fn location(&self, latitude: Float, longitude: Float) -> SendLocation<'c> {
+impl<C> CanSendLocation for C where C: ToChatRef {
+    fn location(&self, latitude: Float, longitude: Float) -> SendLocation {
         SendLocation::new(self, latitude, longitude)
     }
 }
 
 /// Reply with point on the map.
 pub trait CanReplySendLocation {
-    fn location_reply<'c>(&self, latitude: Float, longitude: Float) -> SendLocation<'c>;
+    fn location_reply(&self, latitude: Float, longitude: Float) -> SendLocation;
 }
 
 impl<M> CanReplySendLocation for M where M: ToMessageId + ToSourceChat {
-    fn location_reply<'c>(&self, latitude: Float, longitude: Float) -> SendLocation<'c> {
+    fn location_reply(&self, latitude: Float, longitude: Float) -> SendLocation {
         let mut rq = self.to_source_chat().location(latitude, longitude);
         rq.reply_to(self.to_message_id());
         rq
     }
 }
 
-impl<'b, 'c> ToRequest<'b, 'c> for Location {
-    type Request = SendLocation<'c>;
+impl<'b> ToRequest<'b> for Location {
+    type Request = SendLocation;
 
-    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef<'c> {
+    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef {
         chat.location(self.latitude, self.longitude)
     }
 }
 
-impl<'b, 'c> ToReplyRequest<'b, 'c> for Location {
-    type Request = SendLocation<'c>;
+impl<'b> ToReplyRequest<'b> for Location {
+    type Request = SendLocation;
 
     fn to_reply_request<M>(&'b self, message: M) -> Self::Request
         where M: ToMessageId + ToSourceChat {
