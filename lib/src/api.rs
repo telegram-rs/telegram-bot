@@ -253,12 +253,11 @@ impl Api {
             api.inner.connector.post_json(&url, data)
         });
 
-        let api = self.clone();
         let future = response.and_then(move |bytes| {
             result(serde_json::from_slice(&bytes).map_err(From::from).and_then(|value| {
                 match value {
                     ResponseWrapper::Success {result} => {
-                        Ok(Req::Response::map(result, &api.inner.token))
+                        Ok(Req::Response::map(result))
                     },
                     ResponseWrapper::Error { description, parameters } => {
                         Err(ErrorKind::TelegramError {

@@ -10,7 +10,7 @@ pub struct GetFile {
 }
 
 impl<'s> Request for GetFile {
-    type Response = FileResponse;
+    type Response = IdResponse<File>;
 
     fn name(&self) -> &'static str {
         "getFile"

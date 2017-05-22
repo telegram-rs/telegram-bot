@@ -1,6 +1,7 @@
 use serde::de::{Deserialize, Deserializer, Error};
 
 use types::*;
+use url::*;
 
 /// This object represents a message.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -618,7 +619,7 @@ pub struct UserProfilePhotos {
 /// The file can be downloaded via the link `https://api.telegram.org/file/bot<token>/<file_path>`.
 /// It is guaranteed that the link will be valid for at least 1 hour.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
-pub struct RawFile {
+pub struct File {
     /// Unique identifier for this file.
     pub file_id: String,
     /// File size, if known.
@@ -627,16 +628,8 @@ pub struct RawFile {
     pub file_path: Option<String>,
 }
 
-/// This object represents a file ready to be downloaded.
-/// It is guaranteed that the link will be valid for at least 1 hour.
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct File {
-    /// Unique identifier for this file.
-    pub id: String,
-    /// File size, if known.
-    pub size: Option<Integer>,
-    /// File path.
-    pub path: Option<String>,
-    /// File can be downloaded via that link.
-    pub url: Option<String>,
+impl File {
+    pub fn get_url(&self, token: &str) -> Option<String> {
+        self.file_path.as_ref().map(|path| format!("{}file/bot{}/{}", TELEGRAM_URL, token, path))
+    }
 }
