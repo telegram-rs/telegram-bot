@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 0.5.0 - 2016-10-21
+
+### Fixed
+- Update dependencies.
+- Handle unknown messages.
+
 ## 0.4.1 - 2016-02-25
 
 ### Fixed
