@@ -633,3 +633,14 @@ impl File {
         self.file_path.as_ref().map(|path| format!("{}file/bot{}/{}", TELEGRAM_URL, token, path))
     }
 }
+
+/// Strongly typed ParseMode.
+/// See [documentation](https://core.telegram.org/bots/api#formatting-options) for details.
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize)]
+pub enum ParseMode {
+    /// Use markdown formatting.
+    Markdown,
+    /// Use HTML formatting.
+    #[serde(rename = "HTML")]
+    Html,
+}

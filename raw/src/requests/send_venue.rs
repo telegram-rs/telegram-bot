@@ -24,10 +24,11 @@ pub struct SendVenue<'t, 'a, 'f> {
 }
 
 impl<'t, 'a, 'f> Request for SendVenue<'t, 'a, 'f> {
-    type Response = IdResponse<Message>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<Message>;
 
-    fn name(&self) -> &'static str {
-        "sendVenue"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("sendVenue"), self)
     }
 }
 

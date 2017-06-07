@@ -11,10 +11,11 @@ pub struct GetUserProfilePhotos {
 }
 
 impl Request for GetUserProfilePhotos {
-    type Response = IdResponse<UserProfilePhotos>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<UserProfilePhotos>;
 
-    fn name(&self) -> &'static str {
-        "getUserProfilePhotos"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("getUserProfilePhotos"), self)
     }
 }
 

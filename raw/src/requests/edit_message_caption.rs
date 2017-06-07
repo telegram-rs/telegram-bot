@@ -15,10 +15,11 @@ pub struct EditMessageCaption<'s> {
 }
 
 impl<'s> Request for EditMessageCaption<'s> {
-    type Response = IdResponse<Message>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<Message>;
 
-    fn name(&self) -> &'static str {
-        "editMessageCaption"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("editMessageCaption"), self)
     }
 }
 

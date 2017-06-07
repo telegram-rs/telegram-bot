@@ -15,10 +15,11 @@ pub struct ForwardMessage {
 }
 
 impl Request for ForwardMessage {
-    type Response = IdResponse<Message>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<Message>;
 
-    fn name(&self) -> &'static str {
-        "forwardMessage"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("forwardMessage"), self)
     }
 }
 

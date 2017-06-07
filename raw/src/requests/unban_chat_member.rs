@@ -12,10 +12,11 @@ pub struct UnbanChatMember {
 }
 
 impl Request for UnbanChatMember {
-    type Response = TrueToUnitResponse;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonTrueToUnitResponse;
 
-    fn name(&self) -> &'static str {
-        "unbanChatMember"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("unbanChatMember"), self)
     }
 }
 

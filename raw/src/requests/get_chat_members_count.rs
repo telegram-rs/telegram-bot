@@ -9,10 +9,11 @@ pub struct GetChatMembersCount {
 }
 
 impl Request for GetChatMembersCount {
-    type Response = IdResponse<Integer>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<Integer>;
 
-    fn name(&self) -> &'static str {
-        "getChatMembersCount"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("getChatMembersCount"), self)
     }
 }
 

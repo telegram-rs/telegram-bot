@@ -14,6 +14,8 @@ use tokio_curl::Session;
 use errors::Error;
 use future::{TelegramFuture, NewTelegramFuture};
 
+use telegram_bot_raw::{HttpRequest, HttpResponse, Method, Body};
+
 use super::_base::Connector;
 
 /// This connector uses `tokio-curl` backend.
@@ -34,15 +36,28 @@ impl CurlConnector {
         }
     }
 
-    fn create_request(&self, uri: &str, data: Vec<u8>) -> Result<(Easy, Arc<Mutex<Vec<u8>>>), Error> {
-        let mut header = List::new();
-        header.append("Content-Type: application/json")?;
-
+    fn create_request(&self, token: &str, request: HttpRequest) -> Result<(Easy, Arc<Mutex<Vec<u8>>>), Error> {
         let mut handle = Easy::new();
-        handle.url(uri)?;
-        handle.post(true)?;
-        handle.post_fields_copy(&data)?;
-        handle.http_headers(header)?;
+
+        let url = request.url.url(token);
+        handle.url(&url)?;
+
+        match request.method {
+            Method::Get => handle.get(true)?,
+            Method::Post => handle.post(true)?,
+        }
+
+        match request.body {
+            Body::Empty => (),
+            Body::Json(body) => {
+                handle.post_fields_copy(&body)?;
+
+                let mut headers = List::new();
+                headers.append(&format!("Content-Type: application/json"))?;
+                handle.http_headers(headers)?;
+            }
+            body => panic!("Unknown body type {:?}", body)
+        }
 
         let result = Arc::new(Mutex::new(Vec::new()));
         let write_result = result.clone();
@@ -57,8 +72,8 @@ impl CurlConnector {
 }
 
 impl Connector for CurlConnector {
-    fn post_json(&self, uri: &str, data: Vec<u8>) -> TelegramFuture<Vec<u8>> {
-        let request = result(self.create_request(uri, data));
+    fn request(&self, token: &str, req: HttpRequest) -> TelegramFuture<HttpResponse> {
+        let request = result(self.create_request(token, req));
 
         let session = self.inner.clone();
         let request = request.and_then(move |(handle, result)| {
@@ -70,7 +85,9 @@ impl Connector for CurlConnector {
             let mut guard = result.lock();
             let prev: &mut Vec<u8> = &mut guard;
             ::std::mem::swap(prev, &mut swap);
-            Ok(swap)
+            Ok(HttpResponse {
+                body: Some(swap)
+            })
         });
 
         TelegramFuture::new(Box::new(future))

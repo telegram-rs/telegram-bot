@@ -11,10 +11,11 @@ pub struct GetChatAdministrators {
 }
 
 impl Request for GetChatAdministrators {
-    type Response = IdResponse<Vec<ChatMember>>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<Vec<ChatMember>>;
 
-    fn name(&self) -> &'static str {
-        "getChatAdministrators"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("getChatAdministrators"), self)
     }
 }
 

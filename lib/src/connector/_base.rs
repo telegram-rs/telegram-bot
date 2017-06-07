@@ -2,8 +2,9 @@ use std::fmt::Debug;
 
 use future::TelegramFuture;
 
+use telegram_bot_raw::{HttpRequest, HttpResponse};
+
 /// Connector provides basic IO with Telegram Bot API server.
 pub trait Connector: Debug {
-    /// Make POST request with `application/json` content type.
-    fn post_json(&self, uri: &str, data: Vec<u8>) -> TelegramFuture<Vec<u8>>;
+    fn request(&self, token: &str, req: HttpRequest) -> TelegramFuture<HttpResponse>;
 }

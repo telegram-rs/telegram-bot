@@ -7,11 +7,13 @@ use std::rc::Rc;
 use futures::{Future, Stream};
 use futures::future::result;
 use hyper;
-use hyper::{Body, Method, Uri};
+use hyper::{Method, Uri};
 use hyper::client::{Client, Connect};
 use hyper::header::ContentType;
 use hyper_tls::HttpsConnector;
 use tokio_core::reactor::Handle;
+
+use telegram_bot_raw::{HttpRequest, HttpResponse, Method as TelegramMethod, Body as TelegramBody};
 
 use errors::Error;
 use future::{TelegramFuture, NewTelegramFuture};
@@ -38,15 +40,26 @@ impl<C> HyperConnector<C> {
 }
 
 impl<C: Connect> Connector for HyperConnector<C> {
-    fn post_json(&self, uri: &str, data: Vec<u8>) -> TelegramFuture<Vec<u8>> {
-        let uri = result(Uri::from_str(uri)).map_err(From::from);
-        let body = Body::from(data);
+    fn request(&self, token: &str, req: HttpRequest) -> TelegramFuture<HttpResponse> {
+        let uri = result(Uri::from_str(&req.url.url(token))).map_err(From::from);
 
         let client = self.inner.clone();
         let request = uri.and_then(move |uri| {
-            let mut http_request = hyper::client::Request::new(Method::Post, uri);
-            http_request.set_body(body);
-            http_request.headers_mut().set(ContentType::json());
+            let method = match req.method {
+                TelegramMethod::Get => Method::Get,
+                TelegramMethod::Post => Method::Post,
+            };
+            let mut http_request = hyper::client::Request::new(method, uri);
+
+            match req.body {
+                TelegramBody::Empty => (),
+                TelegramBody::Json(body) => {
+                    http_request.set_body(body);
+                    http_request.headers_mut().set(ContentType::json());
+                }
+                body => panic!("Unknown body type {:?}", body)
+            }
+
             client.request(http_request).map_err(From::from)
         });
 
@@ -55,6 +68,12 @@ impl<C: Connect> Connector for HyperConnector<C> {
                 .fold(vec![], |mut result, chunk| -> Result<Vec<u8>, Error> {
                     result.extend_from_slice(&chunk);
                     Ok(result)
+            })
+        });
+
+        let future = future.and_then(|body| {
+            Ok(HttpResponse {
+                body: Some(body),
             })
         });
 

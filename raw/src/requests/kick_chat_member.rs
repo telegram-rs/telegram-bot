@@ -13,10 +13,11 @@ pub struct KickChatMember {
 }
 
 impl Request for KickChatMember {
-    type Response = TrueToUnitResponse;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonTrueToUnitResponse;
 
-    fn name(&self) -> &'static str {
-        "kickChatMember"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("kickChatMember"), self)
     }
 }
 
