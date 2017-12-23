@@ -2,7 +2,6 @@ extern crate antidote;
 #[macro_use]
 extern crate error_chain;
 extern crate futures;
-extern crate serde_json;
 extern crate tokio_core;
 extern crate telegram_bot_raw;
 

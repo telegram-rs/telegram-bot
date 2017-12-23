@@ -4,13 +4,11 @@ use std::time::Duration;
 
 use futures::{Future};
 use futures::future::{result};
-use serde_json;
 use tokio_core::reactor::{Handle, Timeout};
 
-use telegram_bot_raw::{Request, ResponseWrapper, Response};
+use telegram_bot_raw::{Request, ResponseType};
 
 use connector::{Connector, default_connector};
-use errors::ErrorKind;
 use future::{TelegramFuture, NewTelegramFuture};
 use stream::{NewUpdatesStream, UpdatesStream};
 
@@ -207,7 +205,7 @@ impl Api {
     /// ```
     pub fn send_timeout<Req: Request>(
         &self, request: Req, duration: Duration)
-        -> TelegramFuture<Option<<Req::Response as Response>::Type>> {
+        -> TelegramFuture<Option<<Req::Response as ResponseType>::Type>> {
 
         let timeout_future = result(Timeout::new(duration, &self.inner.handle))
             .flatten().map_err(From::from).map(|()| None);
@@ -243,33 +241,23 @@ impl Api {
     /// # }
     /// ```
     pub fn send<Req: Request>(&self, request: Req)
-        -> TelegramFuture<<Req::Response as Response>::Type> {
+        -> TelegramFuture<<Req::Response as ResponseType>::Type> {
 
-        let encoded = result(serde_json::to_vec(&request).map_err(From::from));
-        let url = request.get_url(&self.inner.token);
+        let request = request.serialize()
+            .map_err(From::from);
+
+        let request = result(request);
 
         let api = self.clone();
-        let response = encoded.and_then(move |data| {
-            api.inner.connector.post_json(&url, data)
+        let response = request.and_then(move |request| {
+            let ref token = api.inner.token;
+            api.inner.connector.request(token, request)
         });
 
-        let future = response.and_then(move |bytes| {
-            result(serde_json::from_slice(&bytes).map_err(From::from).and_then(|value| {
-                match value {
-                    ResponseWrapper::Success {result} => {
-                        Ok(Req::Response::map(result))
-                    },
-                    ResponseWrapper::Error { description, parameters } => {
-                        Err(ErrorKind::TelegramError {
-                            description: description,
-                            parameters: parameters
-                        }.into())
-                    },
-                }
-            }))
+        let future = response.and_then(move |response| {
+            Req::Response::deserialize(response).map_err(From::from)
         });
 
         TelegramFuture::new(Box::new(future))
     }
 }
-

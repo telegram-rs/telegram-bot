@@ -15,10 +15,11 @@ pub struct GetUpdates {
 }
 
 impl Request for GetUpdates {
-    type Response = IdResponse<Vec<Update>>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<Vec<Update>>;
 
-    fn name(&self) -> &'static str {
-        "getUpdates"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("getUpdates"), self)
     }
 }
 

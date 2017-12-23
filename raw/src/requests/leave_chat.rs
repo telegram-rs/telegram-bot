@@ -9,10 +9,11 @@ pub struct LeaveChat {
 }
 
 impl Request for LeaveChat {
-    type Response = TrueToUnitResponse;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonTrueToUnitResponse;
 
-    fn name(&self) -> &'static str {
-        "leaveChat"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("leaveChat"), self)
     }
 }
 

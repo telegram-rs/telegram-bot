@@ -34,10 +34,11 @@ pub struct SendChatAction {
 }
 
 impl Request for SendChatAction {
-    type Response = TrueToUnitResponse;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonTrueToUnitResponse;
 
-    fn name(&self) -> &'static str {
-        "sendChatAction"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("sendChatAction"), self)
     }
 }
 

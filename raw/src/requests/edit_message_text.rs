@@ -20,10 +20,11 @@ pub struct EditMessageText<'s> {
 }
 
 impl<'s> Request for EditMessageText<'s> {
-    type Response = IdResponse<Message>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<Message>;
 
-    fn name(&self) -> &'static str {
-        "editMessageText"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("editMessageText"), self)
     }
 }
 

@@ -1,4 +1,4 @@
-use telegram_bot_raw::ResponseParameters;
+use telegram_bot_raw;
 
 error_chain! {
     foreign_links {
@@ -6,14 +6,10 @@ error_chain! {
         Hyper(::hyper::Error) #[cfg(feature = "hyper_connector")];
         Curl(::curl::Error) #[cfg(feature = "curl_connector")];
         CurlPerformError(::tokio_curl::PerformError) #[cfg(feature = "curl_connector")];
-        Json(::serde_json::Error);
         Io(::std::io::Error);
     }
 
-    errors {
-        TelegramError {
-            description: String,
-            parameters: Option<ResponseParameters>
-        }
+    links {
+        Raw(telegram_bot_raw::Error, telegram_bot_raw::ErrorKind);
     }
 }

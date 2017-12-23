@@ -10,10 +10,11 @@ pub struct GetFile {
 }
 
 impl<'s> Request for GetFile {
-    type Response = IdResponse<File>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<File>;
 
-    fn name(&self) -> &'static str {
-        "getFile"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("getFile"), self)
     }
 }
 

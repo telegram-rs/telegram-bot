@@ -8,9 +8,10 @@ use types::*;
 pub struct GetMe;
 
 impl Request for GetMe {
-    type Response = IdResponse<User>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<User>;
 
-    fn name(&self) -> &'static str {
-        "getMe"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("getMe"), self)
     }
 }

@@ -17,10 +17,11 @@ pub struct DeleteMessage {
 }
 
 impl Request for DeleteMessage {
-    type Response = TrueToUnitResponse;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonTrueToUnitResponse;
 
-    fn name(&self) -> &'static str {
-        "deleteMessage"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("deleteMessage"), self)
     }
 }
 

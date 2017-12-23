@@ -22,10 +22,11 @@ pub struct SendContact<'p, 'f, 'l> {
 }
 
 impl<'p, 'f, 'l> Request for SendContact<'p, 'f, 'l> {
-    type Response = IdResponse<Message>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<Message>;
 
-    fn name(&self) -> &'static str {
-        "sendContact"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("sendContact"), self)
     }
 }
 

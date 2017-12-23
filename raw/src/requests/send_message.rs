@@ -23,10 +23,11 @@ pub struct SendMessage<'s> {
 }
 
 impl<'c, 's> Request for SendMessage<'s> {
-    type Response = IdResponse<Message>;
+    type Type = JsonRequestType<Self>;
+    type Response = JsonIdResponse<Message>;
 
-    fn name(&self) -> &'static str {
-        "sendMessage"
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("sendMessage"), self)
     }
 }
 
