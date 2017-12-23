@@ -20,11 +20,11 @@ tokio-curl = {version = "0.1.9", optional = true}
 telegram-bot-raw = { version = "=0.5.0", path = "../raw" }
 
 [dependencies.hyper]
-git = "https://github.com/hyperium/hyper.git"
+version = "0.11"
 optional = true
 
 [dependencies.hyper-tls]
-git = "https://github.com/hyperium/hyper-tls.git"
+version = "0.1"
 optional = true
 
 [features]

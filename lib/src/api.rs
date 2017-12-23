@@ -9,6 +9,7 @@ use tokio_core::reactor::{Handle, Timeout};
 use telegram_bot_raw::{Request, ResponseType};
 
 use connector::{Connector, default_connector};
+use errors::Error;
 use future::{TelegramFuture, NewTelegramFuture};
 use stream::{NewUpdatesStream, UpdatesStream};
 
@@ -41,10 +42,10 @@ impl ConnectorConfig {
         ConnectorConfig::Specified(connector)
     }
 
-    pub fn take(self, handle: &Handle) -> Box<Connector> {
+    pub fn take(self, handle: &Handle) -> Result<Box<Connector>, Error> {
         match self {
             ConnectorConfig::Default => default_connector(&handle),
-            ConnectorConfig::Specified(connector) => connector
+            ConnectorConfig::Specified(connector) => Ok(connector)
         }
     }
 }
@@ -66,15 +67,15 @@ impl Config {
     }
 
     /// Create new `Api` instance.
-    pub fn build<H: Borrow<Handle>>(self, handle: H) -> Api {
+    pub fn build<H: Borrow<Handle>>(self, handle: H) -> Result<Api, Error> {
         let handle = handle.borrow().clone();
-        Api {
+        Ok(Api {
             inner: Rc::new(ApiInner {
                 token: self.token,
-                connector: self.connector.take(&handle),
+                connector: self.connector.take(&handle)?,
                 handle: handle,
             }),
-        }
+        })
     }
 }
 

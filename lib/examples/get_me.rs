@@ -11,7 +11,7 @@ fn main() {
 
     let mut core = Core::new().unwrap();
 
-    let api = Api::configure(token).build(core.handle());
+    let api = Api::configure(token).build(core.handle()).unwrap();
     let future = api.send(GetMe);
 
     println!("{:?}", core.run(future))
