@@ -28,7 +28,7 @@ version = "0.1"
 optional = true
 
 [features]
-default = ["curl_connector"]
+default = ["hyper_connector"]
 
 curl_connector = ["curl", "tokio-curl"]
 hyper_connector = ["hyper", "hyper-tls"]
