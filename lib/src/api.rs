@@ -95,7 +95,7 @@ impl Api {
     /// # fn main() {
     /// let core = Core::new().unwrap();
     /// # let telegram_token = "token";
-    /// let api = Api::configure(telegram_token).build(core.handle());
+    /// let api = Api::configure(telegram_token).build(core.handle()).unwrap();
     /// # }
     /// ```
     ///
@@ -114,8 +114,8 @@ impl Api {
     /// let core = Core::new().unwrap();
     /// # let telegram_token = "token";
     /// let api = Api::configure(telegram_token)
-    ///     .connector(hyper::default_connector(&core.handle()))
-    ///     .build(core.handle());
+    ///     .connector(hyper::default_connector(&core.handle()).unwrap())
+    ///     .build(core.handle()).unwrap();
     /// # }
     ///
     /// # #[cfg(not(feature = "hyper_connector"))]
@@ -140,7 +140,7 @@ impl Api {
     /// # use tokio_core::reactor::Core;
     /// # fn main() {
     /// # let core = Core::new().unwrap();
-    /// # let api: Api = Api::configure("token").build(core.handle());
+    /// # let api: Api = Api::configure("token").build(core.handle()).unwrap();
     /// use futures::Stream;
     ///
     /// let future = api.stream().for_each(|update| {
@@ -169,7 +169,7 @@ impl Api {
     /// # fn main() {
     /// # let core = Core::new().unwrap();
     /// # let telegram_token = "token";
-    /// # let api = Api::configure(telegram_token).build(core.handle());
+    /// # let api = Api::configure(telegram_token).build(core.handle()).unwrap();
     /// # if false {
     /// let chat = ChatId::new(61031);
     /// api.spawn(chat.text("Message"))
@@ -195,7 +195,7 @@ impl Api {
     /// # fn main() {
     /// # let core = Core::new().unwrap();
     /// # let telegram_token = "token";
-    /// # let api = Api::configure(telegram_token).build(core.handle());
+    /// # let api = Api::configure(telegram_token).build(core.handle()).unwrap();
     /// # if false {
     /// use std::time::Duration;
     ///
@@ -234,7 +234,7 @@ impl Api {
     /// # fn main() {
     /// # let core = Core::new().unwrap();
     /// # let telegram_token = "token";
-    /// # let api = Api::configure(telegram_token).build(core.handle());
+    /// # let api = Api::configure(telegram_token).build(core.handle()).unwrap();
     /// # if false {
     /// let future = api.send(GetMe);
     /// future.and_then(|me| Ok(println!("{:?}", me)));
