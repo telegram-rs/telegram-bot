@@ -24,7 +24,7 @@ use errors::Error;
 /// See module level documentation for details.
 #[cfg(feature = "curl_connector")]
 pub fn default_connector(handle: &Handle) -> Result<Box<Connector>, Error> {
-    Ok(curl::default_connector(handle))
+    curl::default_connector(handle)
 }
 
 /// Returns default connector.
