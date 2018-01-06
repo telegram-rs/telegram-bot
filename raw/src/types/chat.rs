@@ -48,6 +48,27 @@ pub struct Channel {
     pub username: Option<String>,
 }
 
+/// This object represents a private, group or supergroup.
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+pub enum MessageChat {
+    Private(User),
+    Group(Group),
+    Supergroup(Supergroup),
+    #[doc(hidden)]
+    Unknown(RawChat),
+}
+
+impl MessageChat {
+    pub fn id(&self) -> ChatId {
+        match *self {
+            MessageChat::Private(ref x) => x.id.into(),
+            MessageChat::Group(ref x) => x.id.into(),
+            MessageChat::Supergroup(ref x) => x.id.into(),
+            MessageChat::Unknown(ref x) => x.id.into(),
+        }
+    }
+}
+
 /// This object represents a chat.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Chat {

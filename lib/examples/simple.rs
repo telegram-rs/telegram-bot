@@ -20,19 +20,13 @@ fn main() {
         // If the received update contains a new message...
         if let UpdateKind::Message(message) = update.kind {
 
-            // Get sender's first name if available.
-            let first_name = match message.from.as_ref() {
-                Some(from) => &from.first_name,
-                None => return Ok(()) // Skip a message.
-            };
-
             if let MessageKind::Text {ref data, ..} = message.kind {
                 // Print received text message to stdout.
-                println!("<{}>: {}", first_name, data);
+                println!("<{}>: {}", &message.from.first_name, data);
 
                 // Answer message with "Hi".
                 api.spawn(message.text_reply(
-                    format!("Hi, {}! You just wrote '{}'", first_name, data)
+                    format!("Hi, {}! You just wrote '{}'", &message.from.first_name, data)
                 ));
             }
         }

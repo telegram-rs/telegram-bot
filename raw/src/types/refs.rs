@@ -66,6 +66,21 @@ impl ToSourceChat for Message {
     }
 }
 
+impl ToSourceChat for ChannelPost {
+    fn to_source_chat(&self) -> ChatId {
+        self.chat.id.into()
+    }
+}
+
+impl ToSourceChat for MessageOrChannelPost {
+    fn to_source_chat(&self) -> ChatId {
+        match self {
+            &MessageOrChannelPost::Message(ref message) => message.to_source_chat(),
+            &MessageOrChannelPost::ChannelPost(ref channel_post) => channel_post.to_source_chat(),
+        }
+    }
+}
+
 /// Unique identifier for the target chat or username of the
 /// target channel (in the format @channelusername)
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -99,6 +114,12 @@ impl ToChatRef for ChatRef {
 }
 
 impl ToChatRef for Chat {
+    fn to_chat_ref(&self) -> ChatRef {
+        self.id().to_chat_ref()
+    }
+}
+
+impl ToChatRef for MessageChat {
     fn to_chat_ref(&self) -> ChatRef {
         self.id().to_chat_ref()
     }
@@ -240,6 +261,21 @@ impl ToMessageId for MessageId {
 impl ToMessageId for Message {
     fn to_message_id(&self) -> MessageId {
         self.id
+    }
+}
+
+impl ToMessageId for ChannelPost {
+    fn to_message_id(&self) -> MessageId {
+        self.id
+    }
+}
+
+impl ToMessageId for MessageOrChannelPost {
+    fn to_message_id(&self) -> MessageId {
+        match self {
+            &MessageOrChannelPost::Message(ref message) => message.to_message_id(),
+            &MessageOrChannelPost::ChannelPost(ref channel_post) => channel_post.to_message_id(),
+        }
     }
 }
 

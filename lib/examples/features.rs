@@ -48,9 +48,7 @@ fn test_reply(api: Api, message: Message, handle: &Handle) {
     let msg = api.send(message.text_reply("Reply to message"));
     let chat = api.send(message.chat.text("Text to message chat"));
 
-    let private = message.from.as_ref().map(|from| {
-        api.send(from.text("Private text"))
-    });
+    let private = api.send(message.from.text("Private text"));
 
     handle.spawn({
         let future = msg.and_then(|_| chat).and_then(|_| private);
@@ -62,9 +60,7 @@ fn test_reply(api: Api, message: Message, handle: &Handle) {
 fn test_forward(api: Api, message: Message, _handle: &Handle) {
     api.spawn(message.forward(&message.chat));
 
-    if let Some(ref from) = message.from {
-        api.spawn(message.forward(from))
-    }
+    api.spawn(message.forward(&message.from))
 }
 
 fn test_edit_message(api: Api, message: Message, handle: &Handle) {
@@ -130,12 +126,7 @@ fn test_get_chat_members_count(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_get_chat_member(api: Api, message: Message, handle: &Handle) {
-    let user = match message.from {
-        Some(ref user) => user.clone(),
-        None => return,
-    };
-
-    let member = api.send(message.chat.get_member(&user));
+    let member = api.send(message.chat.get_member(&message.from));
     let future = member.and_then(move |member| {
         let first_name = member.user.first_name.clone();
         let status = member.status;
@@ -149,12 +140,7 @@ fn test_get_chat_member(api: Api, message: Message, handle: &Handle) {
 }
 
 fn test_get_user_profile_photos(api: Api, message: Message, handle: &Handle) {
-    let user = match message.from {
-        Some(ref user) => user.clone(),
-        None => return,
-    };
-
-    let photos = api.send(user.get_user_profile_photos());
+    let photos = api.send(message.from.get_user_profile_photos());
 
     let future = photos.and_then(move |photos| {
         api.send(message.text_reply(format!("Found photos: {}", photos.total_count)))

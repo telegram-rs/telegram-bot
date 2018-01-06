@@ -20,9 +20,9 @@ pub enum UpdateKind {
     /// New version of a message that is known to the bot and was edited
     EditedMessage(Message),
     /// New incoming channel post of any kind — text, photo, sticker, etc.
-    ChannelPost(Message),
+    ChannelPost(ChannelPost),
     /// New version of a channel post that is known to the bot and was edited
-    EditedChannelPost(Message),
+    EditedChannelPost(ChannelPost),
     // InlineQuery(InlineQuery),
     // ChosenInlineResult(ChosenInlineResult),
     // CallbackQuery(OptionCallbackQuery),
@@ -72,9 +72,9 @@ pub struct RawUpdate {
     /// New version of a message that is known to the bot and was edited
     pub edited_message: Option<Message>,
     /// New incoming channel post of any kind — text, photo, sticker, etc.
-    pub channel_post: Option<Message>,
+    pub channel_post: Option<ChannelPost>,
     /// New version of a channel post that is known to the bot and was edited
-    pub edited_channel_post: Option<Message>, 
+    pub edited_channel_post: Option<ChannelPost>,
     // pub inline_query: Option<InlineQuery>,
     // pub chosen_inline_result: Option<ChosenInlineResult>,
     // pub callback_query: Option<CallbackQuery>,

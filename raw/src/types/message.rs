@@ -3,22 +3,49 @@ use serde::de::{Deserialize, Deserializer, Error};
 use types::*;
 use url::*;
 
-/// This object represents a message.
+/// This object represents a chat message or a channel post.
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub enum MessageOrChannelPost {
+    Message(Message),
+    ChannelPost(ChannelPost),
+}
+
+/// This object represents a chat message.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Message {
     /// Unique message identifier inside this chat.
     pub id: MessageId,
     /// Sender, can be empty for messages sent to channels.
-    pub from: Option<User>,
+    pub from: User,
     /// Date the message was sent in Unix time.
     pub date: Integer,
     /// Conversation the message belongs to.
-    pub chat: Chat,
+    pub chat: MessageChat,
     /// Information about the original message.
     pub forward: Option<Forward>,
     /// For replies, the original message. Note that the Message object in this field will not
     /// contain further reply_to_message fields even if it itself is a reply.
-    pub reply_to_message: Option<Box<Message>>,
+    pub reply_to_message: Option<Box<MessageOrChannelPost>>,
+    /// Date the message was last edited in Unix time.
+    pub edit_date: Option<Integer>,
+    /// Kind of the message.
+    pub kind: MessageKind,
+}
+
+/// This object represents a channel message.
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct ChannelPost {
+    /// Unique message identifier inside this chat.
+    pub id: MessageId,
+    /// Date the message was sent in Unix time.
+    pub date: Integer,
+    /// Conversation the message belongs to.
+    pub chat: Channel,
+    /// Information about the original message.
+    pub forward: Option<Forward>,
+    /// For replies, the original message. Note that the Message object in this field will not
+    /// contain further reply_to_message fields even if it itself is a reply.
+    pub reply_to_message: Option<Box<MessageOrChannelPost>>,
     /// Date the message was last edited in Unix time.
     pub edit_date: Option<Integer>,
     /// Kind of the message.
@@ -166,23 +193,28 @@ pub enum MessageKind {
     PinnedMessage {
         // Specified message was pinned. Note that the Message object in this field will not
         // contain further reply_to_message fields even if it is itself a reply.
-        data: Box<Message>,
+        data: Box<MessageOrChannelPost>,
     },
     #[doc(hidden)]
     Unknown { raw: RawMessage },
 }
 
-impl<'de> Deserialize<'de> for Message {
-    // TODO(knsd): Remove .clone()
-    fn deserialize<D>(deserializer: D) -> Result<Message, D::Error>
-        where D: Deserializer<'de>
-    {
-        let raw: RawMessage = Deserialize::deserialize(deserializer)?;
-
+impl Message {
+    fn from_raw_message(raw: RawMessage) -> Result<Self, String> {
         let id = raw.message_id;
-        let from = raw.from.clone();
+        let from = match raw.from.clone() {
+            Some(from) => from,
+            None => return Err(format!("Missing `from` field for Message"))
+        };
         let date = raw.date;
-        let chat = raw.chat.clone();
+        let chat = match raw.chat.clone() {
+            Chat::Private(x) => MessageChat::Private(x),
+            Chat::Group(x) => MessageChat::Group(x),
+            Chat::Supergroup(x) => MessageChat::Supergroup(x),
+            Chat::Unknown(x) => MessageChat::Unknown(x),
+            Chat::Channel(_) => return Err(format!("Channel chat in Message"))
+        };
+
         let reply_to_message = raw.reply_to_message.clone();
         let edit_date = raw.edit_date;
 
@@ -206,7 +238,7 @@ impl<'de> Deserialize<'de> for Message {
                     },
                 })
             }
-            _ => return Err(D::Error::custom("invalid forward fields combination")),
+            _ => return Err(format!("invalid forward fields combination")),
         };
 
         let make_message = |kind| {
@@ -286,6 +318,158 @@ impl<'de> Deserialize<'de> for Message {
     }
 }
 
+impl<'de> Deserialize<'de> for Message {
+    fn deserialize<D>(deserializer: D) -> Result<Message, D::Error>
+        where D: Deserializer<'de>
+    {
+        let raw: RawMessage = Deserialize::deserialize(deserializer)?;
+
+        Self::from_raw_message(raw).map_err(|err| D::Error::custom(err))
+    }
+}
+
+impl ChannelPost {
+    fn from_raw_message(raw: RawMessage) -> Result<Self, String> {
+        let id = raw.message_id;
+        let date = raw.date;
+        let chat = match raw.chat.clone() {
+            Chat::Channel(channel) => channel,
+            _ => return Err(format!("Expected channel chat type for ChannelMessage"))
+        };
+        let reply_to_message = raw.reply_to_message.clone();
+        let edit_date = raw.edit_date;
+
+        let forward = match (raw.forward_date,
+                             &raw.forward_from,
+                             &raw.forward_from_chat,
+                             raw.forward_from_message_id) {
+            (None, &None, &None, None) => None,
+            (Some(date), &Some(ref from), &None, None) => {
+                Some(Forward {
+                    date: date,
+                    from: ForwardFrom::User { user: from.clone() },
+                })
+            }
+            (Some(date), &None, &Some(Chat::Channel(ref channel)), Some(message_id)) => {
+                Some(Forward {
+                    date: date,
+                    from: ForwardFrom::Channel {
+                        channel: channel.clone(),
+                        message_id: message_id,
+                    },
+                })
+            }
+            _ => return Err(format!("invalid forward fields combination")),
+        };
+
+        let make_message = |kind| {
+            Ok(ChannelPost {
+                id: id.into(),
+                date: date,
+                chat: chat,
+                forward: forward,
+                reply_to_message: reply_to_message,
+                edit_date: edit_date,
+                kind: kind,
+            })
+        };
+
+        macro_rules! maybe_field {
+            ($name:ident, $variant:ident) => {{
+                if let Some(val) = raw.$name {
+                    return make_message(MessageKind::$variant {
+                        data: val
+                    })
+                }
+            }}
+        }
+
+        macro_rules! maybe_field_with_caption {
+            ($name:ident, $variant:ident) => {{
+                if let Some(val) = raw.$name {
+                    return make_message(MessageKind::$variant {
+                        data: val,
+                        caption: raw.caption,
+                    })
+                }
+            }}
+        }
+
+        macro_rules! maybe_true_field {
+            ($name:ident, $variant:ident) => {{
+                if let Some(True) = raw.$name {
+                    return make_message(MessageKind::$variant)
+                }
+            }}
+        }
+
+        if let Some(text) = raw.text {
+            let entities = raw.entities.unwrap_or_else(Vec::new);
+            return make_message(MessageKind::Text {
+                data: text,
+                entities: entities,
+            });
+        }
+
+        maybe_field!(audio, Audio);
+        maybe_field_with_caption!(document, Document);
+        maybe_field_with_caption!(photo, Photo);
+        maybe_field!(sticker, Sticker);
+        maybe_field_with_caption!(video, Video);
+        maybe_field!(voice, Voice);
+        maybe_field!(video_note, VideoNote);
+        maybe_field!(contact, Contact);
+        maybe_field!(location, Location);
+        maybe_field!(venue, Venue);
+        maybe_field!(new_chat_members, NewChatMembers);
+        maybe_field!(left_chat_member, LeftChatMember);
+        maybe_field!(new_chat_title, NewChatTitle);
+        maybe_field!(new_chat_photo, NewChatPhoto);
+        maybe_true_field!(delete_chat_photo, DeleteChatPhoto);
+        maybe_true_field!(delete_chat_photo, DeleteChatPhoto);
+        maybe_true_field!(group_chat_created, GroupChatCreated);
+        maybe_true_field!(supergroup_chat_created, SupergroupChatCreated);
+        maybe_true_field!(channel_chat_created, ChannelChatCreated);
+        maybe_field!(migrate_to_chat_id, MigrateToChatId);
+        maybe_field!(migrate_from_chat_id, MigrateFromChatId);
+        maybe_field!(pinned_message, PinnedMessage);
+
+        make_message(MessageKind::Unknown { raw: raw })
+    }
+}
+
+impl<'de> Deserialize<'de> for ChannelPost {
+    // TODO(knsd): Remove .clone()
+    fn deserialize<D>(deserializer: D) -> Result<ChannelPost, D::Error>
+        where D: Deserializer<'de>
+    {
+        let raw: RawMessage = Deserialize::deserialize(deserializer)?;
+
+        Self::from_raw_message(raw).map_err(|err| D::Error::custom(err))
+    }
+}
+
+impl<'de> Deserialize<'de> for MessageOrChannelPost {
+    // TODO(knsd): Remove .clone()
+    fn deserialize<D>(deserializer: D) -> Result<MessageOrChannelPost, D::Error>
+        where D: Deserializer<'de>
+    {
+        let raw: RawMessage = Deserialize::deserialize(deserializer)?;
+        let is_channel = match raw.chat {
+            Chat::Channel(_) => true,
+            _ => false,
+        };
+
+        let res = if is_channel {
+            ChannelPost::from_raw_message(raw).map(MessageOrChannelPost::ChannelPost)
+        } else {
+            Message::from_raw_message(raw).map(MessageOrChannelPost::Message)
+        };
+
+        res.map_err(|err| D::Error::custom(err))
+    }
+}
+
 /// This object represents a message. Directly mapped.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub struct RawMessage {
@@ -307,7 +491,7 @@ pub struct RawMessage {
     pub forward_date: Option<Integer>,
     /// For replies, the original message. Note that the Message object in this field will not
     /// contain further reply_to_message fields even if it itself is a reply.
-    pub reply_to_message: Option<Box<Message>>,
+    pub reply_to_message: Option<Box<MessageOrChannelPost>>,
     /// Date the message was last edited in Unix time.
     pub edit_date: Option<Integer>,
     /// For text messages, the actual UTF-8 text of the message, 0-4096 characters.
@@ -368,7 +552,7 @@ pub struct RawMessage {
     pub migrate_from_chat_id: Option<Integer>,
     /// Specified message was pinned. Note that the Message object in this field will not contain
     /// further reply_to_message fields even if it is itself a reply.
-    pub pinned_message: Option<Box<Message>>,
+    pub pinned_message: Option<Box<MessageOrChannelPost>>,
 }
 
 /// This object represents one special entity in a text message.
