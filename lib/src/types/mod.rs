@@ -15,6 +15,7 @@ pub use telegram_bot_raw::{Contact, Location, Venue, File, FileRef};
 pub use telegram_bot_raw::{ToChatRef, ToUserId, ToMessageId, ToSourceChat, ToFileRef};
 
 pub use telegram_bot_raw::{ParseMode};
-pub use telegram_bot_raw::{ReplyMarkup, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton};
+pub use telegram_bot_raw::{ReplyMarkup, ReplyKeyboardMarkup, KeyboardButton};
+pub use telegram_bot_raw::{InlineKeyboardMarkup, InlineKeyboardButton};
 pub use telegram_bot_raw::{ReplyKeyboardRemove, ForceReply};
 pub use telegram_bot_raw::{ChatAction};

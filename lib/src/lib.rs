@@ -18,6 +18,7 @@ extern crate hyper_tls;
 mod api;
 mod errors;
 mod future;
+mod macros;
 mod stream;
 
 pub mod connector;

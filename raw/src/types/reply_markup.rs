@@ -49,13 +49,13 @@ impl Serialize for ReplyMarkup {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ReplyKeyboardMarkup {
-    pub keyboard: Vec<Vec<KeyboardButton>>,
+    keyboard: Vec<Vec<KeyboardButton>>,
     #[serde(skip_serializing_if = "Not::not")]
-    pub resize_keyboard: bool,
+    resize_keyboard: bool,
     #[serde(skip_serializing_if = "Not::not")]
-    pub one_time_keyboard: bool,
+    one_time_keyboard: bool,
     #[serde(skip_serializing_if = "Not::not")]
-    pub selective: bool
+    selective: bool
 }
 
 impl ReplyKeyboardMarkup {
@@ -67,6 +67,40 @@ impl ReplyKeyboardMarkup {
             selective: false,
         }
     }
+
+    fn init(rows: Vec<Vec<KeyboardButton>>) -> Self {
+        let mut keyboard = Self::new();
+        keyboard.keyboard = rows;
+        keyboard
+    }
+
+    pub fn resize_keyboard(&mut self) -> &mut Self {
+        self.resize_keyboard = true;
+        self
+    }
+
+    pub fn one_time_keyboard(&mut self) -> &mut Self {
+        self.one_time_keyboard = true;
+        self
+    }
+
+    pub fn selective(&mut self) -> &mut Self {
+        self.selective = true;
+        self
+    }
+
+    pub fn add_row(&mut self, row: Vec<KeyboardButton>) -> &mut Vec<KeyboardButton> {
+        self.keyboard.push(row);
+        self.keyboard.last_mut().unwrap()
+    }
+
+    pub fn add_empty_row(&mut self) -> &mut Vec<KeyboardButton> {
+        self.add_row(Default::default())
+    }
+}
+
+impl From<Vec<Vec<KeyboardButton>>> for ReplyKeyboardMarkup {
+    fn from(value: Vec<Vec<KeyboardButton>>) -> Self { Self::init(value) }
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
@@ -79,20 +113,22 @@ pub struct KeyboardButton {
 }
 
 impl KeyboardButton {
-    pub fn new(text: &str) -> Self {
+    pub fn new<S: AsRef<str>>(text: S) -> Self {
         Self {
-            text: text.to_string(),
+            text: text.as_ref().to_string(),
             request_contact: false,
             request_location: false,
         }
     }
 
     pub fn request_contact(&mut self) -> &mut Self {
+        self.request_location = false;
         self.request_contact = true;
         self
     }
 
     pub fn request_location(&mut self) -> &mut Self {
+        self.request_contact = false;
         self.request_location = true;
         self
     }
@@ -104,11 +140,17 @@ impl<'a> From<&'a str> for KeyboardButton {
     }
 }
 
+impl From<String> for KeyboardButton {
+    fn from(value: String) -> KeyboardButton {
+        KeyboardButton::new(value)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ReplyKeyboardRemove {
-    pub remove_keyboard: True,
+    remove_keyboard: True,
     #[serde(skip_serializing_if = "Not::not")]
-    pub selective: bool,
+    selective: bool,
 }
 
 impl ReplyKeyboardRemove {
@@ -118,17 +160,58 @@ impl ReplyKeyboardRemove {
             selective: false,
         }
     }
+
+    pub fn selective(&mut self) -> &mut Self {
+        self.selective = true;
+        self
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct InlineKeyboardMarkup {
-    pub inline_keyboard: Vec<Vec<InlineKeyboardButton>>
+    inline_keyboard: Vec<Vec<InlineKeyboardButton>>
+}
+
+impl InlineKeyboardMarkup {
+    pub fn new() -> Self {
+        Self {
+            inline_keyboard: Default::default(),
+        }
+    }
+
+    fn init(inline_keyboard: Vec<Vec<InlineKeyboardButton>>) -> Self {
+        Self {
+            inline_keyboard,
+        }
+    }
+
+    pub fn add_row(&mut self, row: Vec<InlineKeyboardButton>) -> &mut Vec<InlineKeyboardButton> {
+        self.inline_keyboard.push(row);
+        self.inline_keyboard.last_mut().unwrap()
+    }
+
+    pub fn add_empty_row(&mut self) -> &mut Vec<InlineKeyboardButton> {
+        self.add_row(Default::default())
+    }
+}
+
+impl From<Vec<Vec<InlineKeyboardButton>>> for InlineKeyboardMarkup {
+    fn from(value: Vec<Vec<InlineKeyboardButton>>) -> Self { Self::init(value) }
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct InlineKeyboardButton {
-    pub text: String,
-    pub kind: InlineKeyboardButtonKind
+    text: String,
+    kind: InlineKeyboardButtonKind
+}
+
+impl InlineKeyboardButton {
+    pub fn callback<T: AsRef<str>, C: AsRef<str>>(text: T, callback: C) -> Self {
+        Self {
+            text: text.as_ref().to_string(),
+            kind: InlineKeyboardButtonKind::CallbackData(callback.as_ref().to_string())
+        }
+    }
 }
 
 impl Serialize for InlineKeyboardButton {
@@ -179,10 +262,23 @@ struct InlineKeyboardButtonRaw<'a> {
 //    callback_game: Option<CallbackGame>,
 }
 
-
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ForceReply {
-    pub force_reply: True,
+    force_reply: True,
     #[serde(skip_serializing_if = "Not::not")]
-    pub selective: bool,
+    selective: bool,
+}
+
+impl ForceReply {
+    pub fn new() -> Self {
+        Self {
+            force_reply: True,
+            selective: false,
+        }
+    }
+
+    pub fn selective(&mut self) -> &mut Self {
+        self.selective = true;
+        self
+    }
 }
