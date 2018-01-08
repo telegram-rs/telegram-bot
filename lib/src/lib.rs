@@ -1,3 +1,6 @@
+//! This crate helps writing bots for the messenger Telegram.
+//! See [readme](https://github.com/telegram-rs/telegram-bot) for details.
+
 extern crate antidote;
 #[macro_use]
 extern crate error_chain;
