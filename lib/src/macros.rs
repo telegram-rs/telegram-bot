@@ -108,15 +108,15 @@ macro_rules! reply_markup {
         $crate::InlineKeyboardMarkup::from(vec![$(reply_markup![_inline_keyboard_row, $($content)*]), *])
     );
 
-    (_inline_keyboard_row, ($($acc:tt)*); $text:tt callback $callback:tt) => (
-        vec![$($acc)* reply_markup!(_inline_keyboard_button_callback,  $text, $callback)]
+    (_inline_keyboard_row, ($($acc:tt)*); $text:tt $request:tt $callback:tt) => (
+        vec![$($acc)* reply_markup!(_inline_keyboard_button, $request,  $text, $callback)]
     );
-    (_inline_keyboard_row, $($text:tt callback $callback:tt), *) => (
-        vec![$(reply_markup!(_inline_keyboard_button_callback, $text, $callback)), *]
+    (_inline_keyboard_row, $($text:tt $request:tt $callback:tt), *) => (
+        vec![$(reply_markup!(_inline_keyboard_button, $request, $text, $callback)), *]
     );
     (_inline_keyboard_row, $($content:tt)*) => (reply_markup!(_inline_keyboard_row, (); $($content)*));
 
-    (_inline_keyboard_button_callback, $text:expr, $callback:expr) => (
+    (_inline_keyboard_button, callback, $text:expr, $callback:expr) => (
         $crate::InlineKeyboardButton::callback($text, $callback)
     );
 }
