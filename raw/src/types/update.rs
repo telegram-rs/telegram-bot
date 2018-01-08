@@ -77,5 +77,5 @@ pub struct RawUpdate {
     pub edited_channel_post: Option<ChannelPost>,
     // pub inline_query: Option<InlineQuery>,
     // pub chosen_inline_result: Option<ChosenInlineResult>,
-     pub callback_query: Option<CallbackQuery>,
+    pub callback_query: Option<CallbackQuery>,
 }
