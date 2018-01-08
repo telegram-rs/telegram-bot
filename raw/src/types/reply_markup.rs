@@ -47,6 +47,7 @@ impl Serialize for ReplyMarkup {
     }
 }
 
+/// This object represents a custom keyboard with reply options.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ReplyKeyboardMarkup {
     keyboard: Vec<Vec<KeyboardButton>>,
@@ -74,16 +75,29 @@ impl ReplyKeyboardMarkup {
         keyboard
     }
 
+    /// Requests clients to resize the keyboard vertically for
+    /// optimal fit (e.g., make the keyboard smaller if there
+    /// are just two rows of buttons). Defaults to false, in which case
+    /// the custom keyboard is always of the same height as the app's standard keyboard.
     pub fn resize_keyboard(&mut self) -> &mut Self {
         self.resize_keyboard = true;
         self
     }
 
+    /// Requests clients to hide the keyboard as soon as it's been used.
+    /// The keyboard will still be available, but clients will automatically
+    /// display the usual letter-keyboard in the chat – the user can
+    /// press a special button in the input field to see the custom
+    /// keyboard again. Defaults to false.
     pub fn one_time_keyboard(&mut self) -> &mut Self {
         self.one_time_keyboard = true;
         self
     }
 
+    /// Use this method if you want to force reply from specific users only.
+    /// Targets: 1) users that are @mentioned in the text of
+    /// the Message object; 2) if the bot's message is a reply (has reply_to_message_id),
+    /// sender of the original message.
     pub fn selective(&mut self) -> &mut Self {
         self.selective = true;
         self
@@ -103,6 +117,7 @@ impl From<Vec<Vec<KeyboardButton>>> for ReplyKeyboardMarkup {
     fn from(value: Vec<Vec<KeyboardButton>>) -> Self { Self::init(value) }
 }
 
+/// This object represents one button of the reply keyboard.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct KeyboardButton {
     text: String,
@@ -121,12 +136,16 @@ impl KeyboardButton {
         }
     }
 
+    /// The user's phone number will be sent as a contact when the
+    /// button is pressed. Available in private chats only
     pub fn request_contact(&mut self) -> &mut Self {
         self.request_location = false;
         self.request_contact = true;
         self
     }
 
+    /// The user's current location will be sent when the
+    /// button is pressed. Available in private chats only
     pub fn request_location(&mut self) -> &mut Self {
         self.request_contact = false;
         self.request_location = true;
@@ -146,6 +165,11 @@ impl From<String> for KeyboardButton {
     }
 }
 
+/// Upon receiving a message with this object, Telegram clients will remove
+/// the current custom keyboard and display the default letter-keyboard.
+/// By default, custom keyboards are displayed until a new keyboard is sent
+/// by a bot. An exception is made for one-time keyboards that are hidden
+/// immediately after the user presses a button (see ReplyKeyboardMarkup).
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ReplyKeyboardRemove {
     remove_keyboard: True,
@@ -161,12 +185,17 @@ impl ReplyKeyboardRemove {
         }
     }
 
+    /// Use this method if you want to force reply from specific users only.
+    /// Targets: 1) users that are @mentioned in the text of
+    /// the Message object; 2) if the bot's message is a reply (has reply_to_message_id),
+    /// sender of the original message.
     pub fn selective(&mut self) -> &mut Self {
         self.selective = true;
         self
     }
 }
 
+/// This object represents an inline keyboard that appears right next to the message it belongs to.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct InlineKeyboardMarkup {
     inline_keyboard: Vec<Vec<InlineKeyboardButton>>
@@ -199,6 +228,7 @@ impl From<Vec<Vec<InlineKeyboardButton>>> for InlineKeyboardMarkup {
     fn from(value: Vec<Vec<InlineKeyboardButton>>) -> Self { Self::init(value) }
 }
 
+/// This object represents one button of an inline keyboard.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct InlineKeyboardButton {
     text: String,
@@ -206,6 +236,7 @@ pub struct InlineKeyboardButton {
 }
 
 impl InlineKeyboardButton {
+    /// Data to be sent in a callback query to the bot when button is pressed, 1-64 bytes
     pub fn callback<T: AsRef<str>, C: AsRef<str>>(text: T, callback: C) -> Self {
         Self {
             text: text.as_ref().to_string(),
@@ -228,10 +259,10 @@ impl Serialize for InlineKeyboardButton {
         };
 
         match self.kind {
-            Url(ref data) => raw.url = Some(data),
+//            Url(ref data) => raw.url = Some(data),
             CallbackData(ref data) => raw.callback_data = Some(data),
-            SwitchInlineQuery(ref data) => raw.switch_inline_query = Some(data),
-            SwitchInlineQueryCurrentChat(ref data) => raw.switch_inline_query_current_chat = Some(data),
+//            SwitchInlineQuery(ref data) => raw.switch_inline_query = Some(data),
+//            SwitchInlineQueryCurrentChat(ref data) => raw.switch_inline_query_current_chat = Some(data),
 //            CallbackGame(ref data) => raw.callback_game = Some(data),
         }
 
@@ -241,10 +272,10 @@ impl Serialize for InlineKeyboardButton {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum InlineKeyboardButtonKind {
-    Url(String), // TODO(knsd): Url?
+//    Url(String), // TODO(knsd): Url?
     CallbackData(String),  //TODO(knsd) Validate size?
-    SwitchInlineQuery(String),
-    SwitchInlineQueryCurrentChat(String),
+//    SwitchInlineQuery(String),
+//    SwitchInlineQueryCurrentChat(String),
 //    CallbackGame(CallbackGame),
 }
 
@@ -262,6 +293,11 @@ struct InlineKeyboardButtonRaw<'a> {
 //    callback_game: Option<CallbackGame>,
 }
 
+/// Upon receiving a message with this object, Telegram clients will
+/// display a reply interface to the user (act as if the user has
+/// selected the bot‘s message and tapped ’Reply'). This can be
+/// extremely useful if you want to create user-friendly step-by-step
+/// interfaces without having to sacrifice privacy mod
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ForceReply {
     force_reply: True,
@@ -277,6 +313,10 @@ impl ForceReply {
         }
     }
 
+    /// Use this method if you want to force reply from specific users only.
+    /// Targets: 1) users that are @mentioned in the text of
+    /// the Message object; 2) if the bot's message is a reply (has reply_to_message_id),
+    /// sender of the original message.
     pub fn selective(&mut self) -> &mut Self {
         self.selective = true;
         self
