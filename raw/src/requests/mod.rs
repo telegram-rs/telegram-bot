@@ -1,4 +1,5 @@
 pub mod _base;
+pub mod answer_callback_query;
 pub mod delete_message;
 pub mod edit_message_caption;
 pub mod edit_message_reply_markup;
@@ -22,6 +23,7 @@ pub mod send_venue;
 pub mod unban_chat_member;
 
 pub use self::_base::*;
+pub use self::answer_callback_query::*;
 pub use self::delete_message::*;
 pub use self::edit_message_caption::*;
 pub use self::edit_message_reply_markup::*;

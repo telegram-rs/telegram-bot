@@ -3,6 +3,7 @@
 //! This module re-exports request builder traits from telegram-bot-raw.
 
 pub use telegram_bot_raw::{ToRequest, ToReplyRequest};
+pub use telegram_bot_raw::CanAnswerCallbackQuery;
 pub use telegram_bot_raw::{CanReplySendContact, CanSendContact};
 pub use telegram_bot_raw::{CanReplySendLocation, CanSendLocation};
 pub use telegram_bot_raw::{CanReplySendMessage, CanSendMessage};

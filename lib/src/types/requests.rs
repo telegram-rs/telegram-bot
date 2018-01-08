@@ -1,5 +1,6 @@
 //! Telegram Bot API methods.
 
+pub use telegram_bot_raw::AnswerCallbackQuery;
 pub use telegram_bot_raw::{DeleteMessage, ForwardMessage};
 pub use telegram_bot_raw::{GetFile, GetMe, GetUpdates, GetUserProfilePhotos};
 pub use telegram_bot_raw::{SendLocation, SendMessage, SendContact, SendVenue};

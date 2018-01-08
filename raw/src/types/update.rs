@@ -25,7 +25,7 @@ pub enum UpdateKind {
     EditedChannelPost(ChannelPost),
     // InlineQuery(InlineQuery),
     // ChosenInlineResult(ChosenInlineResult),
-    // CallbackQuery(OptionCallbackQuery),
+    CallbackQuery(CallbackQuery),
     #[doc(hidden)]
     Unknown(RawUpdate),
 }
@@ -52,7 +52,7 @@ impl<'de> Deserialize<'de> for Update {
         maybe_field!(edited_channel_post, EditedChannelPost);
         // maybe_field!(inline_query, InlineQuery);
         // maybe_field!(chosen_inline_result, ChosenInlineResult);
-        // maybe_field!(callback_query, CallbackQuery);
+         maybe_field!(callback_query, CallbackQuery);
 
         Ok(Update {
             id: raw.update_id,
@@ -77,5 +77,5 @@ pub struct RawUpdate {
     pub edited_channel_post: Option<ChannelPost>,
     // pub inline_query: Option<InlineQuery>,
     // pub chosen_inline_result: Option<ChosenInlineResult>,
-    // pub callback_query: Option<CallbackQuery>,
+     pub callback_query: Option<CallbackQuery>,
 }

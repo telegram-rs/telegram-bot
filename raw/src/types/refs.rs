@@ -342,3 +342,45 @@ impl Serialize for FileRef {
         serializer.serialize_str(&self.inner)
     }
 }
+
+/// Get `CallbackQueryId` from the type reference.
+pub trait ToCallbackQueryId {
+    fn to_callback_query_id(&self) -> CallbackQueryId;
+}
+
+impl<S> ToCallbackQueryId for S where S: Deref, S::Target: ToCallbackQueryId {
+    fn to_callback_query_id(&self) -> CallbackQueryId {
+        self.deref().to_callback_query_id()
+    }
+}
+
+impl ToCallbackQueryId for CallbackQuery {
+    fn to_callback_query_id(&self) -> CallbackQueryId {
+        self.id.clone()
+    }
+}
+
+/// Unique identifier for CallbackQuery.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CallbackQueryId {
+    inner: String
+}
+
+impl<'de> ::serde::de::Deserialize<'de> for CallbackQueryId {
+    fn deserialize<D>(deserializer: D) -> Result<CallbackQueryId, D::Error>
+        where D: ::serde::de::Deserializer<'de>
+    {
+        let inner = ::serde::de::Deserialize::deserialize(deserializer)?;
+        Ok(Self {
+            inner
+        })
+    }
+}
+
+impl Serialize for CallbackQueryId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        serializer.serialize_str(&self.inner)
+    }
+}
