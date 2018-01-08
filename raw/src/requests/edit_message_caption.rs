@@ -35,7 +35,7 @@ impl<'s> EditMessageCaption<'s> {
         }
     }
 
-    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> { // TODO(knsd): nice builder?
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> {
         self.reply_markup = Some(reply_markup.into());
         self
     }
