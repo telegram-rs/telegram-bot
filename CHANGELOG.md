@@ -1,7 +1,9 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 0.6.0 - 2018-01-09
+
+Rewritten from scratch.
 
 ## 0.5.0 - 2016-10-21
 
