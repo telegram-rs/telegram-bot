@@ -8,7 +8,7 @@ Rust Telegram Bot Library
   <tbody>
     <tr>
       <td><b>Documentation:</b></td>
-      <td><a href="https://docs.rs/telegram-bot/0.5.0/telegram_bot/">Latest crates.io version</a></td>
+      <td><a href="https://docs.rs/telegram-bot/">Latest crates.io version</a></td>
       <td><a href="https://telegram-rs.github.io/telegram-bot/telegram_bot/"><code>master</code></a></td>
     </tr>
   </tbody>
