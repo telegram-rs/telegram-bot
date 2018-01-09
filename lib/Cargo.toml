@@ -10,7 +10,7 @@ repository = "https://github.com/telegram-rs/telegram-bot"
 readme = "../README.md"
 
 keywords = ["telegram", "bot", "chat", "api"]
-categories = ["api-bidings", "asynchronous"]
+categories = ["api-bindings", "asynchronous"]
 license = "MIT"
 
 [dependencies]
