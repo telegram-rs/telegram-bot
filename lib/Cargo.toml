@@ -3,9 +3,14 @@ name = "telegram-bot"
 version = "0.6.0"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
 
-description = "A library for creating Telegram bots."
+description = "A library for creating Telegram bots"
+
+documentation = "https://docs.rs/telegram-bot/"
+repository = "https://github.com/telegram-rs/telegram-bot"
+readme = "../README.md"
 
 keywords = ["telegram", "bot", "chat", "api"]
+categories = ["api-bidings", "asynchronous"]
 license = "MIT"
 
 [dependencies]
