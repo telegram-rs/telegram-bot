@@ -16,7 +16,7 @@ impl Request for UnpinChatMessage {
     type Response = JsonTrueToUnitResponse;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
-        Self::Type::serialize(RequestUrl::method("pinChatMessage"), self)
+        Self::Type::serialize(RequestUrl::method("unpinChatMessage"), self)
     }
 }
 
