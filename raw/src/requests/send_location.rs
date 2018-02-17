@@ -10,6 +10,8 @@ pub struct SendLocation {
     chat_id: ChatRef,
     latitude: Float,
     longitude: Float,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    live_period: Option<Integer>,
     #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -33,10 +35,17 @@ impl SendLocation {
             chat_id: chat.to_chat_ref(),
             latitude: latitude,
             longitude: longitude,
+            live_period: None,
             disable_notification: false,
             reply_to_message_id: None,
             reply_markup: None,
         }
+    }
+
+    /// Period in seconds for which the location will be updated, should be between 60 and 86400.
+    pub fn live_period(&mut self, period: Integer) -> &mut Self {
+        self.live_period = Some(period);
+        self
     }
 
     pub fn disable_notification(&mut self) -> &mut Self {

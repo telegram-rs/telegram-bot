@@ -18,3 +18,4 @@ pub use telegram_bot_raw::CanLeaveChat;
 pub use telegram_bot_raw::{CanEditMessageText, CanEditMessageCaption, CanEditMessageReplyMarkup};
 pub use telegram_bot_raw::{CanGetUserProfilePhotos, CanGetFile};
 pub use telegram_bot_raw::{CanPinMessage, CanUnpinMessage};
+pub use telegram_bot_raw::{CanEditMessageLiveLocation, CanStopMessageLiveLocation};
