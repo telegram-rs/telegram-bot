@@ -1,6 +1,6 @@
 [package]
 name = "telegram-bot"
-version = "0.6.0"
+version = "0.6.1"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
 
 description = "A library for creating Telegram bots"
@@ -22,7 +22,7 @@ futures = "0.1"
 curl = {version = "0.4.6", optional = true}
 tokio-curl = {version = "0.1.9", optional = true}
 
-telegram-bot-raw = { version = "=0.6.0", path = "../raw" }
+telegram-bot-raw = { version = "=0.6.1", path = "../raw" }
 
 [dependencies.hyper]
 version = "0.11"
