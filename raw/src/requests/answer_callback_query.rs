@@ -11,7 +11,8 @@ use requests::*;
 #[must_use = "requests do nothing unless sent"]
 pub struct AnswerCallbackQuery<'t> {
     callback_query_id: CallbackQueryId,
-    text: Cow<'t, str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    text: Option<Cow<'t, str>>,
     #[serde(skip_serializing_if = "Not::not")]
     show_alert: bool,
 }
@@ -29,7 +30,15 @@ impl<'t> AnswerCallbackQuery<'t> {
     fn new<Q, T>(query: Q, text: T) -> Self where Q: ToCallbackQueryId, T: Into<Cow<'t, str>> {
         Self {
             callback_query_id: query.to_callback_query_id(),
-            text: text.into(),
+            text: Some(text.into()),
+            show_alert: false,
+        }
+    }
+
+    fn acknowledge<Q>(query: Q) -> Self where Q: ToCallbackQueryId {
+        Self {
+            callback_query_id: query.to_callback_query_id(),
+            text: None,
             show_alert: false,
         }
     }
@@ -45,10 +54,14 @@ impl<'t> AnswerCallbackQuery<'t> {
 /// Send answers to callback queries sent from inline keyboards.
 pub trait CanAnswerCallbackQuery {
     fn answer<'t, T>(&self, text: T) -> AnswerCallbackQuery<'t> where T: Into<Cow<'t, str>>;
+    fn acknowledge<'t>(&self) -> AnswerCallbackQuery<'t>;
 }
 
 impl<Q> CanAnswerCallbackQuery for Q where Q: ToCallbackQueryId {
     fn answer<'t, T>(&self, text: T) -> AnswerCallbackQuery<'t> where T: Into<Cow<'t, str>> {
         AnswerCallbackQuery::new(&self, text)
+    }
+    fn acknowledge<'t>(&self) -> AnswerCallbackQuery<'t> {
+        AnswerCallbackQuery::acknowledge(&self)
     }
 }
