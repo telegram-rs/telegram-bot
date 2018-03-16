@@ -128,3 +128,22 @@ where
         req
     }
 }
+
+/// Send an audio
+pub trait CanSendAudio {
+    fn send_audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    where
+        T: Into<Cow<'s, str>>;
+}
+
+impl<M> CanSendAudio for M
+where
+    M: ToSourceChat,
+{
+    fn send_audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    where
+        T: Into<Cow<'s, str>>,
+    {
+        SendAudio::with_audio_url(self.to_source_chat(), url)
+    }
+}
