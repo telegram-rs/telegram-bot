@@ -138,12 +138,12 @@ pub trait CanSendAudio {
 
 impl<M> CanSendAudio for M
 where
-    M: ToSourceChat,
+    M: ToChatRef,
 {
     fn send_audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
     where
         T: Into<Cow<'s, str>>,
     {
-        SendAudio::with_audio_url(self.to_source_chat(), url)
+        SendAudio::with_audio_url(self.to_chat_ref(), url)
     }
 }
