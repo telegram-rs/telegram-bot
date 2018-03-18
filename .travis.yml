@@ -16,3 +16,7 @@ after_success:
         test ${TRAVIS_BRANCH} == "master" && \
         test "${TRAVIS_BUILD_NUMBER}.1" == "${TRAVIS_JOB_NUMBER}" && \
         bash deploy.sh
+
+notifications:
+    webhooks:
+        - http://heimdallr.thesharp.org/travis
