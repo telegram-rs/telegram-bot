@@ -12,7 +12,8 @@ use serde_json;
 
 use api::Api;
 
-use hyper::{Error, Method, StatusCode};
+use hyper::error::Error;
+use hyper::{Method, StatusCode};
 use hyper::server::{Http, Request, Response, Service};
 
 const TELEGRAM_WEBHOOK_DEFAULT_PATH: &'static str = "/";
@@ -48,22 +49,20 @@ impl Service for WebhookService {
 
         match (method, path) {
             (Method::Post, ref p) if *p == self.path => {
-                req.body()
+                let send_body_fut = req.body()
                     .concat2()
-                    .wait()
                     .map_err(|_| ())
                     .and_then(|x| serde_json::from_slice(&x).map_err(|_| ()))
                     .map_err(|_| ())
-                    .map(move |u: Update| sink.send(u))
-                    .ok();
+                    .and_then(|u: Update| sink.send(u).map_err(|_| ()));
                 response.set_status(StatusCode::Ok);
+                return Box::new(send_body_fut.and_then(|_| ok(response)).map_err(|_| Error::Method));
             }
             (_, _) => {
                 response.set_status(StatusCode::NotFound);
+                return Box::new(ok(response))
             }
-        }
-
-        Box::new(ok(response))
+        };
     }
 }
 
@@ -72,7 +71,8 @@ impl Stream for Webhook {
     type Error = ();
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-        self.source.poll()
+        let res = self.source.poll();
+        res
     }
 }
 
@@ -88,12 +88,23 @@ impl Webhook {
         }
     }
 
+    pub fn path<T>(&mut self, p: T) -> &mut Self
+    where T: AsRef<str> {
+        self.path = p.as_ref().to_string();
+        self
+    }
+
     // Register webhook on Telegram
     pub fn register<T>(&self, url: T)
     where
         T: AsRef<str>,
     {
         self.api.spawn(SetWebhook::new(url.as_ref()));
+    }
+
+    pub fn unregister(&self)
+    {
+        self.api.spawn(DeleteWebhook::new());
     }
 
     // Listen on a port and start serving the webhook service
@@ -104,10 +115,14 @@ impl Webhook {
             sink: self.sink.clone(),
         };
 
+        let server_handle = handle.clone();
         let serve = Http::new()
             .serve_addr_handle(&addr, &handle, move || Ok(service.clone()))
             .unwrap()
-            .for_each(|_| ok(()))
+            .for_each(move |conn| {
+                server_handle.spawn(conn.map(|_| ()).map_err(|_| ()));
+                Ok(())
+            })
             .map_err(|_| ());
         handle.spawn(serve);
     }
@@ -115,6 +130,6 @@ impl Webhook {
 
 impl Drop for Webhook {
     fn drop(&mut self) {
-        self.api.spawn(DeleteWebhook::new());
+        self.unregister();
     }
 }
