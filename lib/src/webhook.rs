@@ -49,15 +49,14 @@ impl Service for WebhookService {
 
         match (method, path) {
             (Method::Post, ref p) if *p == self.path => {
-                let send_body_fut = req.body()
-                    .concat2()
-                    .map_err(|_| ())
-                    .and_then(|x| serde_json::from_slice(&x).map_err(|_| ()))
-                    .map_err(|_| ())
-                    .and_then(|u: Update| sink.send(u).map_err(|_| ()));
                 response.set_status(StatusCode::Ok);
-                return Box::new(send_body_fut.and_then(|_| ok(response)).map_err(|_| Error::Method));
-            }
+                let response_fut = req.body()
+                    .concat2()
+                    .and_then(|x| serde_json::from_slice(&x).map_err(|_| Error::Header))
+                    .and_then(|u: Update| sink.send(u).map_err(|_| Error::Header))
+                    .and_then(|_| ok(response));
+                return Box::new(response_fut);
+            },
             (_, _) => {
                 response.set_status(StatusCode::NotFound);
                 return Box::new(ok(response))
@@ -71,14 +70,70 @@ impl Stream for Webhook {
     type Error = ();
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-        let res = self.source.poll();
-        res
+        self.source.poll()
     }
 }
 
+/// Telegram Webhook
+///
+/// This module implements support for Telegram Webhook feature.
+///
+/// Implementation details:
+///
+/// When a Webhook instance is set up and started serving, it will start
+/// an asynchronized HTTP server that binds on specified port. This server will
+/// handle incoming POST requests that matches upon given *path* (otherwise an
+/// HTTP error 404 will be responded). The requested body will be parsed as JSON
+/// into an `Update` object, and sent through a buffered mpsc channel. When
+/// you call a Stream method (like `for_each`) on a webhook, it will try to
+/// obtain updates from the channel.
+///
+/// Of course, after setting up the service, we need to ask Telegram to begin
+/// sending updates to our webhook server, so we need to register our callback
+/// URL with the `setWebhook` bot API. Such functionality is provided in
+/// `Webhook::register(url)` method. When the app quits, you need to unregister
+/// webhook, or you'll no longer be able to get updates with long polling
+/// next time. This is automatically done when a Webhook finish its lifetime
+/// thanks to the `std::ops::Drop` trait implementation.
+///
+/// Notice:
+///
+/// Since Telegram requires webhook to run on HTTPS protocol,
+/// you need a working HTTPS gateway to forward requests to your webhook.
+/// In development environment, I found ngrok helpful for debugging and
+/// tests. In production, a modern web server (like nginx) will do the job.
+///
+/// # Examples
+///
+/// ```rust
+/// let mut webhook = api.webhook();
+/// webhook.path("/my/crazy/path");
+/// webhook.serve("127.0.0.1:9876".parse().unwrap());
+/// webhook.register("https://my.website.com/telegram-webhook");
+/// webhook.for_each(|update| {
+///    println!("{:?}", update);
+///    Ok(())
+/// })
+/// ```
+///
+/// ```
+/// # sample nginx config
+/// http {
+///     server_name my.website.com;
+///     listen 443 ssl;
+///
+///     location /telegram-webhook {
+///         proxy_pass http://127.0.0.1:9876/my/crazy/path;
+///     }
+/// }
+/// ```
+///
 impl Webhook {
+    /// Create a webhook instance
+    ///
+    /// Please call `Api::webhook()` instead of calling this function directly.
     pub fn new(api: Api, handle: Handle) -> Self {
-        let (sink, source) = channel(100);
+        let (sink, source) = channel(1);
         Self {
             path: TELEGRAM_WEBHOOK_DEFAULT_PATH.into(),
             sink,
@@ -88,13 +143,14 @@ impl Webhook {
         }
     }
 
+    /// Specify webhook server matching path
     pub fn path<T>(&mut self, p: T) -> &mut Self
     where T: AsRef<str> {
         self.path = p.as_ref().to_string();
         self
     }
 
-    // Register webhook on Telegram
+    // Register webhook callback URL with Telegram
     pub fn register<T>(&self, url: T)
     where
         T: AsRef<str>,
@@ -102,6 +158,7 @@ impl Webhook {
         self.api.spawn(SetWebhook::new(url.as_ref()));
     }
 
+    // Unregister webhook from Telegram
     pub fn unregister(&self)
     {
         self.api.spawn(DeleteWebhook::new());

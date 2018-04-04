@@ -129,7 +129,8 @@ impl Api {
         }
     }
 
-    /// Create a stream which produces updates from the Telegram server.
+    /// Create a stream which produces updates from the Telegram server using
+    /// long polling.
     ///
     /// # Examples
     ///
@@ -154,6 +155,7 @@ impl Api {
         UpdatesStream::new(self.clone(), self.inner.handle.clone())
     }
 
+    /// Create a webhook instance to receive updates from Telegram.
     pub fn webhook(&self) -> Webhook {
         Webhook::new(self.clone(), self.inner.handle.clone())
     }
