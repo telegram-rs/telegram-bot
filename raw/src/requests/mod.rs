@@ -25,6 +25,8 @@ pub mod send_venue;
 pub mod stop_message_live_location;
 pub mod unban_chat_member;
 pub mod unpin_chat_message;
+pub mod set_webhook;
+pub mod delete_webhook;
 
 pub use self::_base::*;
 pub use self::answer_callback_query::*;
@@ -53,3 +55,5 @@ pub use self::send_venue::*;
 pub use self::stop_message_live_location::*;
 pub use self::unban_chat_member::*;
 pub use self::unpin_chat_message::*;
+pub use self::set_webhook::*;
+pub use self::delete_webhook::*;
