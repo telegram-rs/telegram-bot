@@ -23,6 +23,7 @@ curl = {version = "0.4.6", optional = true}
 tokio-curl = {version = "0.1.9", optional = true}
 
 telegram-bot-raw = { version = "=0.6.1", path = "../raw" }
+serde_json = "1.0"
 
 [dependencies.hyper]
 version = "0.11"
