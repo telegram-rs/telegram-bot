@@ -52,9 +52,10 @@ impl Service for WebhookService {
                 response.set_status(StatusCode::Ok);
                 let response_fut = req.body()
                     .concat2()
-                    .and_then(|x| serde_json::from_slice(&x).map_err(|_| Error::Header))
-                    .and_then(|u: Update| sink.send(u).map_err(|_| Error::Header))
-                    .and_then(|_| ok(response));
+                    .map_err(|_| ())
+                    .and_then(|x| serde_json::from_slice(&x).map_err(|_| ()))
+                    .and_then(|u: Update| sink.send(u).map_err(|_| ()))
+                    .then(|_| ok(response));
                 return Box::new(response_fut);
             },
             (_, _) => {
