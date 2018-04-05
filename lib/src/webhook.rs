@@ -204,7 +204,7 @@ impl Webhook {
 impl Drop for Webhook {
     fn drop(&mut self) {
         if self.registered {
-            self.api.send(DeleteWebhook::new()).wait().ok();
+            self.api.spawn(DeleteWebhook::new());
         }
     }
 }
