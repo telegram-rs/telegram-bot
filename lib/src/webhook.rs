@@ -106,26 +106,37 @@ impl Stream for Webhook {
 /// # Examples
 ///
 /// ```rust
+/// # extern crate futures;
+/// # extern crate telegram_bot;
+/// # extern crate tokio_core;
+/// # use telegram_bot::Api;
+/// # use tokio_core::reactor::Core;
+/// # fn main() {
+/// # let core = Core::new().unwrap();
+/// # let api: Api = Api::configure("token").build(core.handle()).unwrap();
+/// use futures::Stream;
+///
 /// let mut webhook = api.webhook();
 /// webhook.path("/my/crazy/path");
-/// webhook.serve("127.0.0.1:9876".parse().unwrap());
+/// webhook.serve_at("127.0.0.1:9876".parse().unwrap());
 /// webhook.register("https://my.website.com/telegram-webhook");
-/// webhook.for_each(|update| {
+/// let future = webhook.for_each(|update| {
 ///    println!("{:?}", update);
 ///    Ok(())
-/// })
+/// });
+/// # }
 /// ```
 ///
 /// ```
-/// # sample nginx config
-/// http {
-///     server_name my.website.com;
-///     listen 443 ssl;
-///
-///     location /telegram-webhook {
-///         proxy_pass http://127.0.0.1:9876/my/crazy/path;
-///     }
-/// }
+/// // # sample nginx config
+/// // http {
+/// //    server_name my.website.com;
+/// //    listen 443 ssl;
+/// //
+/// //    location /telegram-webhook {
+/// //        proxy_pass http://127.0.0.1:9876/my/crazy/path;
+/// //    }
+/// // }
 /// ```
 ///
 impl Webhook {
