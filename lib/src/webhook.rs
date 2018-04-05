@@ -89,19 +89,19 @@ impl Stream for Webhook {
 /// obtain updates from the channel.
 ///
 /// Of course, after setting up the service, we need to ask Telegram to begin
-/// sending updates to our webhook server, so we need to register our callback
-/// URL with the `setWebhook` bot API. Such functionality is provided in
-/// `Webhook::register(url)` method. When the app quits, you need to unregister
-/// webhook, or you'll no longer be able to get updates with long polling
-/// next time. This is automatically done when a Webhook finish its lifetime
-/// thanks to the `std::ops::Drop` trait implementation.
+/// sending updates to our webhook server, that is, we need to register our
+/// callback URL with the `setWebhook` bot API. Such functionality is provided
+/// by `Webhook::register(url)` method. When the app quits, you need to
+/// unregister webhook, or you'll no longer be able to get updates with long
+/// polling next time. This is automatically done when a Webhook finish its
+/// lifetime thanks to the `std::ops::Drop` trait implementation.
 ///
 /// Notice:
 ///
 /// Since Telegram requires webhook to run on HTTPS protocol,
 /// you need a working HTTPS gateway to forward requests to your webhook.
-/// In development environment, I found ngrok helpful for debugging and
-/// tests. In production, a modern web server (like nginx) will do the job.
+/// In development environment, I found ngrok helpful for debugging.
+/// In production, a modern web server (like nginx) will do the job.
 ///
 /// # Examples
 ///
@@ -132,6 +132,7 @@ impl Stream for Webhook {
 /// // http {
 /// //    server_name my.website.com;
 /// //    listen 443 ssl;
+/// //    # other tls settings
 /// //
 /// //    location /telegram-webhook {
 /// //        proxy_pass http://127.0.0.1:9876/my/crazy/path;
