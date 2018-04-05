@@ -27,6 +27,7 @@ pub struct Webhook {
     path: String,
     sink: Sender<Update>,
     source: Receiver<Update>,
+    registered: bool
 }
 
 #[derive(Clone)]
@@ -146,9 +147,10 @@ impl Webhook {
     ///
     /// Please call `Api::webhook()` instead of calling this function directly.
     pub fn new(api: Api, handle: Handle) -> Self {
-        let (sink, source) = channel(1);
+        let (sink, source) = channel(100);
         Self {
             path: TELEGRAM_WEBHOOK_DEFAULT_PATH.into(),
+            registered: false,
             sink,
             source,
             api,
@@ -164,11 +166,12 @@ impl Webhook {
     }
 
     // Register webhook callback URL with Telegram
-    pub fn register<T>(&self, url: T)
+    pub fn register<T>(&mut self, url: T)
     where
         T: AsRef<str>,
     {
         self.api.spawn(SetWebhook::new(url.as_ref()));
+        self.registered = true;
     }
 
     // Unregister webhook from Telegram
@@ -200,6 +203,8 @@ impl Webhook {
 
 impl Drop for Webhook {
     fn drop(&mut self) {
-        self.unregister();
+        if self.registered {
+            self.api.send(DeleteWebhook::new()).wait().ok();
+        }
     }
 }
