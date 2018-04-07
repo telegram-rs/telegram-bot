@@ -204,7 +204,12 @@ impl Message {
         let id = raw.message_id;
         let from = match raw.from.clone() {
             Some(from) => from,
-            None => return Err(format!("Missing `from` field for Message"))
+            None => User {
+                id: UserId::from(0),
+                username: None,
+                first_name: String::new(),
+                last_name: None,
+            }
         };
         let date = raw.date;
         let chat = match raw.chat.clone() {
