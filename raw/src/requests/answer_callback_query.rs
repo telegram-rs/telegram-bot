@@ -65,7 +65,10 @@ impl<'t> AnswerCallbackQuery<'t> {
         self
     }
 
-    /// URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @Botfather, specify the URL that opens your game – note that this will only work if the query comes from a callback_game button.
+    /// URL that will be opened by the user's client. If you have created a
+    /// Game and accepted the conditions via @Botfather, specify the URL
+    /// that opens your game – note that this will only work if the query
+    /// comes from a callback_game button.
     ///
     /// Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
     pub fn url<T>(&mut self, url: T) -> &mut Self
@@ -76,7 +79,9 @@ impl<'t> AnswerCallbackQuery<'t> {
         self
     }
 
-    /// The maximum amount of time in seconds that the result of the callback query may be cached client-side. Telegram apps will support caching starting in version 3.14. Defaults to 0.
+    /// The maximum amount of time in seconds that the result of the callback query
+    /// may be cached client-side. Telegram apps will support caching starting in
+    /// version 3.14. Defaults to 0.
     pub fn cache_time(&mut self, time: i64) -> &mut Self {
         self.cache_time = Some(time);
         self
