@@ -38,7 +38,7 @@ impl<'s, 'c, 'p, 't> Request for SendAudio<'s, 'c, 'p, 't> {
 }
 
 impl<'s, 'c, 'p, 't> SendAudio<'s, 'c, 'p, 't> {
-    pub fn with_audio_url<C, T>(chat: C, url: T) -> Self
+    pub fn with_url<C, T>(chat: C, url: T) -> Self
     where
         C: ToChatRef,
         T: Into<Cow<'s, str>>,
@@ -123,7 +123,7 @@ where
     where
         T: Into<Cow<'s, str>>,
     {
-        let mut req = SendAudio::with_audio_url(self.to_source_chat(), url);
+        let mut req = SendAudio::with_url(self.to_source_chat(), url);
         req.reply_to(self);
         req
     }
@@ -144,6 +144,6 @@ where
     where
         T: Into<Cow<'s, str>>,
     {
-        SendAudio::with_audio_url(self.to_source_chat(), url)
+        SendAudio::with_url(self.to_source_chat(), url)
     }
 }
