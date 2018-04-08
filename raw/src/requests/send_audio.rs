@@ -110,7 +110,7 @@ impl<'s, 'c, 'p, 't> SendAudio<'s, 'c, 'p, 't> {
 
 /// Can reply with an audio
 pub trait CanReplySendAudio {
-    fn reply_audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn audio_url_reply<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
     where
         T: Into<Cow<'s, str>>;
 }
@@ -119,7 +119,7 @@ impl<M> CanReplySendAudio for M
 where
     M: ToMessageId + ToSourceChat,
 {
-    fn reply_audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn audio_url_reply<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
     where
         T: Into<Cow<'s, str>>,
     {
@@ -131,7 +131,7 @@ where
 
 /// Send an audio
 pub trait CanSendAudio {
-    fn send_audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
     where
         T: Into<Cow<'s, str>>;
 }
@@ -140,7 +140,7 @@ impl<M> CanSendAudio for M
 where
     M: ToChatRef,
 {
-    fn send_audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
     where
         T: Into<Cow<'s, str>>,
     {
