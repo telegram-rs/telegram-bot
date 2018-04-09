@@ -30,6 +30,8 @@ pub struct Message {
     pub edit_date: Option<Integer>,
     /// Kind of the message.
     pub kind: MessageKind,
+    /// The unique identifier of a media message group this message belongs to.
+    pub media_group_id: Option<String>,
 }
 
 /// This object represents a channel message.
@@ -217,6 +219,7 @@ impl Message {
 
         let reply_to_message = raw.reply_to_message.clone();
         let edit_date = raw.edit_date;
+        let media_group_id = raw.media_group_id.clone();
 
         let forward = match (raw.forward_date,
                              &raw.forward_from,
@@ -251,6 +254,7 @@ impl Message {
                 reply_to_message: reply_to_message,
                 edit_date: edit_date,
                 kind: kind,
+                media_group_id: media_group_id,
             })
         };
 
@@ -494,6 +498,8 @@ pub struct RawMessage {
     pub reply_to_message: Option<Box<MessageOrChannelPost>>,
     /// Date the message was last edited in Unix time.
     pub edit_date: Option<Integer>,
+    /// The unique identifier of a media message group this message belongs to.
+    pub media_group_id: Option<String>,
     /// For text messages, the actual UTF-8 text of the message, 0-4096 characters.
     pub text: Option<String>,
     /// For text messages, special entities like usernames, URLs, bot commands, etc.
