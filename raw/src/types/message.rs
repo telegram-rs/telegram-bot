@@ -30,8 +30,6 @@ pub struct Message {
     pub edit_date: Option<Integer>,
     /// Kind of the message.
     pub kind: MessageKind,
-    /// The unique identifier of a media message group this message belongs to.
-    pub media_group_id: Option<String>,
 }
 
 /// This object represents a channel message.
@@ -108,6 +106,8 @@ pub enum MessageKind {
         data: Vec<PhotoSize>,
         /// Caption for the photo, 0-200 characters.
         caption: Option<String>,
+        /// The unique identifier of a media message group this message belongs to.
+        media_group_id: Option<String>,
     },
     /// Message is a sticker.
     Sticker {
@@ -120,6 +120,8 @@ pub enum MessageKind {
         data: Video,
         /// Caption for the video, 0-200 characters.
         caption: Option<String>,
+        /// The unique identifier of a media message group this message belongs to.
+        media_group_id: Option<String>,
     },
     /// Message is a voice message.
     Voice {
@@ -219,7 +221,6 @@ impl Message {
 
         let reply_to_message = raw.reply_to_message.clone();
         let edit_date = raw.edit_date;
-        let media_group_id = raw.media_group_id.clone();
 
         let forward = match (raw.forward_date,
                              &raw.forward_from,
@@ -254,7 +255,6 @@ impl Message {
                 reply_to_message: reply_to_message,
                 edit_date: edit_date,
                 kind: kind,
-                media_group_id: media_group_id,
             })
         };
 
@@ -279,6 +279,18 @@ impl Message {
             }}
         }
 
+        macro_rules! maybe_field_with_caption_and_group {
+            ($name:ident, $variant:ident) => {{
+                if let Some(val) = raw.$name {
+                    return make_message(MessageKind::$variant {
+                        data: val,
+                        caption: raw.caption,
+                        media_group_id: raw.media_group_id,
+                    })
+                }
+            }}
+        }
+
         macro_rules! maybe_true_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(True) = raw.$name {
@@ -297,9 +309,9 @@ impl Message {
 
         maybe_field!(audio, Audio);
         maybe_field_with_caption!(document, Document);
-        maybe_field_with_caption!(photo, Photo);
+        maybe_field_with_caption_and_group!(photo, Photo);
         maybe_field!(sticker, Sticker);
-        maybe_field_with_caption!(video, Video);
+        maybe_field_with_caption_and_group!(video, Video);
         maybe_field!(voice, Voice);
         maybe_field!(video_note, VideoNote);
         maybe_field!(contact, Contact);
@@ -399,6 +411,18 @@ impl ChannelPost {
             }}
         }
 
+        macro_rules! maybe_field_with_caption_and_group {
+            ($name:ident, $variant:ident) => {{
+                if let Some(val) = raw.$name {
+                    return make_message(MessageKind::$variant {
+                        data: val,
+                        caption: raw.caption,
+                        media_group_id: raw.media_group_id,
+                    })
+                }
+            }}
+        }
+
         macro_rules! maybe_true_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(True) = raw.$name {
@@ -417,9 +441,9 @@ impl ChannelPost {
 
         maybe_field!(audio, Audio);
         maybe_field_with_caption!(document, Document);
-        maybe_field_with_caption!(photo, Photo);
+        maybe_field_with_caption_and_group!(photo, Photo);
         maybe_field!(sticker, Sticker);
-        maybe_field_with_caption!(video, Video);
+        maybe_field_with_caption_and_group!(video, Video);
         maybe_field!(voice, Voice);
         maybe_field!(video_note, VideoNote);
         maybe_field!(contact, Contact);
