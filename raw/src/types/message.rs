@@ -163,7 +163,7 @@ pub enum MessageKind {
     /// New chat photo.
     NewChatPhoto {
         /// A chat photo was change to this value.
-        data: PhotoSize,
+        data: Vec<PhotoSize>,
     },
     /// Service message: the chat photo was deleted.
     DeleteChatPhoto,
@@ -531,7 +531,7 @@ pub struct RawMessage {
     /// A chat title was changed to this value.
     pub new_chat_title: Option<String>,
     /// A chat photo was change to this value.
-    pub new_chat_photo: Option<PhotoSize>,
+    pub new_chat_photo: Option<Vec<PhotoSize>>,
     /// Service message: the chat photo was deleted.
     pub delete_chat_photo: Option<True>,
     /// Service message: the group has been created.
