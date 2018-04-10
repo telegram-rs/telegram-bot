@@ -10,7 +10,11 @@ use requests::*;
 pub struct RestrictChatMember {
     chat_id: ChatRef,
     user_id: UserId,
-    can_send_messages: bool,
+    until_date: Option<i32>,
+    can_send_messages: Option<bool>,
+    can_send_media_messages: Option<bool>,
+    can_send_other_messages: Option<bool>,
+    can_add_web_page_previews: Option<bool>,
 }
 
 impl Request for RestrictChatMember {
@@ -23,33 +27,37 @@ impl Request for RestrictChatMember {
 }
 
 impl RestrictChatMember {
-    pub fn new<C, U>(chat: C, user: U, cansend: bool) -> Self where C: ToChatRef, U: ToUserId {
+    pub fn new<C, U>(chat: C, user: U, until_date: Option<i32>, can_send_messages: Option<bool>, can_send_media_messages: Option<bool>, can_send_other_messages: Option<bool>, can_add_web_page_previews: Option<bool>) -> Self where C: ToChatRef, U: ToUserId {
         RestrictChatMember {
             chat_id: chat.to_chat_ref(),
             user_id: user.to_user_id(),
-            can_send_messages: cansend,
+            until_date: until_date,
+            can_send_messages: can_send_messages,
+            can_send_media_messages: can_send_media_messages,
+            can_send_other_messages: can_send_other_messages,
+            can_add_web_page_previews: can_add_web_page_previews,
         }
     }
 }
 
 /// Restrict a user from a group or a supergroup.
 pub trait CanRestrictChatMemberForChat {
-    fn restrict<O>(&self, other: O, cansend: bool) -> RestrictChatMember where O: ToUserId;
+    fn restrict<O>(&self, other: O, until_date: Option<i32>, can_send_messages: Option<bool>, can_send_media_messages: Option<bool>, can_send_other_messages: Option<bool>, can_add_web_page_previews: Option<bool>) -> RestrictChatMember where O: ToUserId;
 }
 
 impl<C> CanRestrictChatMemberForChat for C where C: ToChatRef {
-    fn restrict<O>(&self, other: O, cansend: bool) -> RestrictChatMember where O: ToUserId {
-        RestrictChatMember::new(self, other, cansend)
+    fn restrict<O>(&self, other: O, until_date: Option<i32>, can_send_messages: Option<bool>, can_send_media_messages: Option<bool>, can_send_other_messages: Option<bool>, can_add_web_page_previews: Option<bool>) -> RestrictChatMember where O: ToUserId {
+        RestrictChatMember::new(self, other, until_date, can_send_messages, can_send_media_messages, can_send_other_messages, can_add_web_page_previews)
     }
 }
 
 /// Restrict a user from a group or a supergroup.
 pub trait CanRestrictChatMemberForUser {
-    fn restrict_from<O>(&self, other: O, cansend: bool) -> RestrictChatMember where O: ToChatRef;
+    fn restrict_from<O>(&self, other: O, until_date: Option<i32>, can_send_messages: Option<bool>, can_send_media_messages: Option<bool>, can_send_other_messages: Option<bool>, can_add_web_page_previews: Option<bool>) -> RestrictChatMember where O: ToChatRef;
 }
 
 impl<U> CanRestrictChatMemberForUser for U where U: ToUserId {
-    fn restrict_from<O>(&self, other: O, cansend: bool) -> RestrictChatMember where O: ToChatRef {
-        RestrictChatMember::new(other, self, cansend)
+    fn restrict_from<O>(&self, other: O, until_date: Option<i32>, can_send_messages: Option<bool>, can_send_media_messages: Option<bool>, can_send_other_messages: Option<bool>, can_add_web_page_previews: Option<bool>) -> RestrictChatMember where O: ToChatRef {
+        RestrictChatMember::new(other, self, until_date, can_send_messages, can_send_media_messages, can_send_other_messages, can_add_web_page_previews)
     }
 }
