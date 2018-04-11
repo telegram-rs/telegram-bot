@@ -5,7 +5,7 @@ mod errors;
 pub use self::errors::{Error, ErrorKind};
 
 mod http;
-pub use self::http::{Body, MultipartValue, RequestUrl};
+pub use self::http::{Body, Multipart, MultipartValue, RequestUrl};
 pub use self::http::{HttpRequest, HttpResponse, Method};
 
 mod request_types;

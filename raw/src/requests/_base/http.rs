@@ -29,11 +29,13 @@ pub enum MultipartValue {
     File { filename: String, path: String },
 }
 
+pub type Multipart = Vec<(String, MultipartValue)>;
+
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Body {
     Empty,
     Json(Vec<u8>),
-    Multipart(Vec<(String, MultipartValue)>),
+    Multipart(Multipart),
     #[doc(hidden)]
     __Nonexhaustive,
 }
