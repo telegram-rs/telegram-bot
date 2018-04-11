@@ -5,8 +5,8 @@ extern crate antidote;
 #[macro_use]
 extern crate error_chain;
 extern crate futures;
-extern crate tokio_core;
 extern crate telegram_bot_raw;
+extern crate tokio_core;
 
 #[cfg(feature = "curl_connector")]
 extern crate curl;
@@ -17,6 +17,8 @@ extern crate tokio_curl;
 extern crate hyper;
 #[cfg(feature = "hyper_connector")]
 extern crate hyper_tls;
+#[cfg(feature = "hyper_connector")]
+extern crate multipart;
 
 mod api;
 mod errors;
