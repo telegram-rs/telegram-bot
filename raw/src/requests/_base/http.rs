@@ -24,9 +24,16 @@ pub enum Method {
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+pub enum MultipartField {
+    Text(String),
+    File { filename: String, path: String },
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Body {
     Empty,
     Json(Vec<u8>),
+    Multipart(Vec<(String, MultipartField)>),
     #[doc(hidden)]
     __Nonexhaustive,
 }
@@ -40,5 +47,5 @@ pub struct HttpRequest {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct HttpResponse {
-    pub body: Option<Vec<u8>>
+    pub body: Option<Vec<u8>>,
 }
