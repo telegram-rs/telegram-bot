@@ -24,7 +24,7 @@ pub enum Method {
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
-pub enum MultipartField {
+pub enum MultipartValue {
     Text(String),
     File { filename: String, path: String },
 }
@@ -33,7 +33,7 @@ pub enum MultipartField {
 pub enum Body {
     Empty,
     Json(Vec<u8>),
-    Multipart(Vec<(String, MultipartField)>),
+    Multipart(Vec<(String, MultipartValue)>),
     #[doc(hidden)]
     __Nonexhaustive,
 }
