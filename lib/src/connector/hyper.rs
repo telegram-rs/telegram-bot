@@ -44,7 +44,7 @@ mod multipart {
     use telegram_bot_raw::MultipartValue;
     use hyper::client::Request;
 
-    struct Adapter<'d> {
+    pub struct Adapter<'d> {
         prepared: PreparedFields<'d>,
     }
 
@@ -112,8 +112,10 @@ impl<C: Connect> Connector for HyperConnector<C> {
                     http_request.set_body(body);
                     http_request.headers_mut().set(ContentType::json());
                 }
-                TelegramBody::Multipart(_parts) => {
-                    // TODO
+                TelegramBody::Multipart(parts) => {
+                    let mut adapter = multipart::Adapter::from(parts);
+                    adapter.set_header(&mut http_request);
+                    adapter.set_body(&mut http_request);
                 }
                 body => panic!("Unknown body type {:?}", body),
             }
