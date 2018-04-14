@@ -28,8 +28,18 @@ pub struct SendAudio<'s, 'c, 'p, 't> {
     reply_markup: Option<ReplyMarkup>,
 }
 
+impl<'s, 'c, 'p, 't> ToMultipart for SendAudio<'s, 'c, 'p, 't> {
+    fn to_multipart(&self) -> Multipart {
+        let mut result = Vec::new();
+        multipart_field!(result, audio (file) => self.audio);
+        multipart_field!(result, audio (text) => self.caption.as_ref().unwrap(),
+                         skip_if self.caption.is_none());
+        result
+    }
+}
+
 impl<'s, 'c, 'p, 't> Request for SendAudio<'s, 'c, 'p, 't> {
-    type Type = JsonRequestType<Self>;
+    type Type = MultipartRequestType<Self>;
     type Response = JsonTrueToUnitResponse;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {

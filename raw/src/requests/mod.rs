@@ -1,3 +1,4 @@
+#[macro_use]
 pub mod _base;
 pub mod answer_callback_query;
 pub mod delete_message;
