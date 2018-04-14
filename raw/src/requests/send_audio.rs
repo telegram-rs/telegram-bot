@@ -35,6 +35,7 @@ impl<'s, 'c, 'p, 't> ToMultipart for SendAudio<'s, 'c, 'p, 't> {
         multipart_field!(result, caption (text) => self.caption, optional);
         multipart_field!(result, disable_notification (text) => self.disable_notification,
                             skip_if !self.disable_notification);
+        multipart_field!(result, reply_markup (json) => self.reply_markup, optional);
         result
     }
 }
