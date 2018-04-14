@@ -32,8 +32,9 @@ impl<'s, 'c, 'p, 't> ToMultipart for SendAudio<'s, 'c, 'p, 't> {
     fn to_multipart(&self) -> Multipart {
         let mut result = Vec::new();
         multipart_field!(result, audio (file) => self.audio);
-        multipart_field!(result, audio (text) => self.caption.as_ref().unwrap(),
-                         skip_if self.caption.is_none());
+        multipart_field!(result, caption (text) => self.caption, optional);
+        multipart_field!(result, disable_notification (text) => self.disable_notification,
+                            skip_if !self.disable_notification);
         result
     }
 }

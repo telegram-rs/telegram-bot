@@ -26,9 +26,15 @@ impl<Request: ToMultipart> RequestType for MultipartRequestType<Request> {
 
 #[macro_export]
 macro_rules! multipart_field {
-    ($result:expr, $field:ident($type:ident) => $val:expr,skip_if $cond:expr) => {{
+    ($result:expr, $field:ident($type:ident) => $val:expr, skip_if $cond:expr) => {{
         if $cond {
             multipart_field!($result, $field ($type) => $val);
+        }
+    }};
+
+    ($result:expr, $field:ident($type:ident) => $val:expr, optional) => {{
+        if $val.is_some() {
+            multipart_field!($result, $field ($type) => $val.as_ref().unwrap());
         }
     }};
 
