@@ -22,7 +22,7 @@ pub struct SendAudio<'s, 'c, 'p, 't> {
 impl<'s, 'c, 'p, 't> ToMultipart for SendAudio<'s, 'c, 'p, 't> {
     fn to_multipart(&self) -> Multipart {
         multipart_map! {
-            (chat_id (text) => self.chat_id.to_string());
+            (chat_id (text) => self.chat_id);
             (audio (file) => self.audio);
             (caption (text) => self.caption, optional);
             (parse_mode (text) => self.parse_mode, optional);
