@@ -22,16 +22,17 @@ pub struct SendAudio<'s, 'c, 'p, 't> {
 impl<'s, 'c, 'p, 't> ToMultipart for SendAudio<'s, 'c, 'p, 't> {
     fn to_multipart(&self) -> Multipart {
         multipart_map! {
-            (chat_id (text) => self.chat_id);
-            (audio (file) => self.audio);
-            (caption (text) => self.caption, optional);
-            (parse_mode (text) => self.parse_mode, optional);
-            (duration (text) => self.duration, optional);
-            (performer (text) => self.performer, optional);
-            (title (text) => self.title, optional);
-            (reply_to_message_id (text) => self.reply_to_message_id, optional);
-            (disable_notification (text) => self.disable_notification, when_true);
-            (reply_markup (json) => self.reply_markup, optional);
+            self,
+            (chat_id (text));
+            (audio (file));
+            (caption (text), optional);
+            (parse_mode (text), optional);
+            (duration (text), optional);
+            (performer (text), optional);
+            (title (text), optional);
+            (reply_to_message_id (text), optional);
+            (disable_notification (text), when_true);
+            (reply_markup (json), optional);
         }
     }
 }

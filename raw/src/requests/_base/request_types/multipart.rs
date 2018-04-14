@@ -26,45 +26,56 @@ impl<Request: ToMultipart> RequestType for MultipartRequestType<Request> {
 
 #[macro_export]
 macro_rules! multipart_map {
-    ($( ( $($opts:tt)* ) ; )*) => {
+    ($self:expr, $( ( $($opts:tt)* ) ; )*) => {
         let mut result = Vec::new();
         $(
-            multipart_field!(result, $($opts)*);
+            multipart_field!($self, result, $($opts)*);
         )*
         result
     }
 }
 
 macro_rules! multipart_field {
-    ($result:expr, $field:ident($type:ident) => $val:expr,skip_if $cond:expr) => {{
-        if $cond {
-            multipart_field!($result, $field ($type) => $val);
+    ($self:expr, $result:expr, $field:ident($type:ident)) => {{
+        let value = &$self.$field;
+        multipart_field!($self, $result, $field ($type) => value);
+    }};
+
+    ($self:expr, $result:expr, $field:ident($type:ident), $($t:tt)*) => {{
+        let value = &$self.$field;
+        multipart_field!($self, $result, $field ($type) => value, $($t)*);
+    }};
+
+    ($self:expr, $result:expr, $field:ident($type:ident) => $val:expr,skip_if $cond:expr) => {{
+        if *$cond {
+            multipart_field!($self, $result, $field ($type) => $val);
         }
     }};
 
-    ($result:expr, $field:ident($type:ident) => $val:expr,optional) => {{
-        if $val.is_some() {
-            multipart_field!($result, $field ($type) => $val.as_ref().unwrap());
+    ($self:expr, $result:expr, $field:ident($type:ident) => $val:expr,optional) => {{
+        let value = $val.as_ref();
+        if value.is_some() {
+            multipart_field!($self, $result, $field ($type) => value.unwrap());
         }
     }};
 
-    ($result:expr, $field:ident($type:ident) => $val:expr,when_true) => {{
+    ($self:expr, $result:expr, $field:ident($type:ident) => $val:expr,when_true) => {{
         let value = $val;
-        multipart_field!($result, $field ($type) => value, skip_if value);
+        multipart_field!($self, $result, $field ($type) => value, skip_if value);
     }};
 
-    ($result:expr, $field:ident(text) => $val:expr) => {{
+    ($self:expr, $result:expr, $field:ident(text) => $val:expr) => {{
         let value = MultipartValue::Text($val.to_string());
         $result.push((stringify!($field).into(), value));
     }};
 
-    ($result:expr, $field:ident(json) => $val:expr) => {{
+    ($self:expr, $result:expr, $field:ident(json) => $val:expr) => {{
         let stringified = ::serde_json::to_string($val).unwrap();
         let value = MultipartValue::Text(stringified);
         $result.push((stringify!($field).into(), value));
     }};
 
-    ($result:expr, $field:ident(file) => $val:expr) => {{
+    ($self:expr, $result:expr, $field:ident(file) => $val:expr) => {{
         use std::ffi::OsStr;
         use std::path::Path;
         let filename = Path::new(&$val.to_string())
