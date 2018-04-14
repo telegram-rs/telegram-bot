@@ -5,7 +5,7 @@ use serde::ser::{Serialize, Serializer};
 use types::*;
 
 macro_rules! integer_id_impls {
-    ($name: ident) => {
+    ($name:ident) => {
         impl $name {
             pub fn new(inner: Integer) -> Self {
                 $name(inner)
@@ -32,7 +32,8 @@ macro_rules! integer_id_impls {
 
         impl<'de> ::serde::de::Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<$name, D::Error>
-                where D: ::serde::de::Deserializer<'de>
+            where
+                D: ::serde::de::Deserializer<'de>,
             {
                 let inner = ::serde::de::Deserialize::deserialize(deserializer)?;
                 Ok($name::new(inner))
@@ -41,7 +42,8 @@ macro_rules! integer_id_impls {
 
         impl ::serde::ser::Serialize for $name {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-                where S: ::serde::ser::Serializer
+            where
+                S: ::serde::ser::Serializer,
             {
                 serializer.serialize_i64(self.0)
             }
@@ -54,7 +56,11 @@ pub trait ToSourceChat {
     fn to_source_chat(&self) -> ChatId;
 }
 
-impl<S> ToSourceChat for S where S: Deref, S::Target: ToSourceChat {
+impl<S> ToSourceChat for S
+where
+    S: Deref,
+    S::Target: ToSourceChat,
+{
     fn to_source_chat(&self) -> ChatId {
         self.deref().to_source_chat()
     }
@@ -101,7 +107,11 @@ pub trait ToChatRef {
     fn to_chat_ref(&self) -> ChatRef;
 }
 
-impl<S> ToChatRef for S where S: Deref, S::Target: ToChatRef {
+impl<S> ToChatRef for S
+where
+    S: Deref,
+    S::Target: ToChatRef,
+{
     fn to_chat_ref(&self) -> ChatRef {
         self.deref().to_chat_ref()
     }
@@ -134,8 +144,8 @@ impl ToChatRef for ChatMember {
 impl ToChatRef for ForwardFrom {
     fn to_chat_ref(&self) -> ChatRef {
         match *self {
-            ForwardFrom::User {ref user, ..} => user.to_chat_ref(),
-            ForwardFrom::Channel {ref channel, ..} => channel.to_chat_ref(),
+            ForwardFrom::User { ref user, .. } => user.to_chat_ref(),
+            ForwardFrom::Channel { ref channel, .. } => channel.to_chat_ref(),
         }
     }
 }
@@ -148,7 +158,8 @@ impl ToChatRef for Forward {
 
 impl Serialize for ChatRef {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
+    where
+        S: Serializer,
     {
         match *self {
             ChatRef::Id(id) => serializer.serialize_i64(id.into()),
@@ -157,8 +168,17 @@ impl Serialize for ChatRef {
     }
 }
 
+impl ::std::fmt::Display for ChatRef {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        match *self {
+            ChatRef::Id(id) => write!(f, "{}", id),
+            ChatRef::ChannelUsername(ref username) => write!(f, "{}", username),
+        }
+    }
+}
+
 macro_rules! chat_id_impls {
-    ($id: ident) => {
+    ($id:ident) => {
         integer_id_impls!($id);
 
         impl ToChatRef for $id {
@@ -170,7 +190,7 @@ macro_rules! chat_id_impls {
 }
 
 macro_rules! specific_chat_id_impls {
-    ($id: ident, $typ: ident) => {
+    ($id:ident, $typ:ident) => {
         chat_id_impls!($id);
 
         impl From<$id> for ChatId {
@@ -192,7 +212,11 @@ pub trait ToUserId {
     fn to_user_id(&self) -> UserId;
 }
 
-impl<S> ToUserId for S where S: Deref, S::Target: ToUserId {
+impl<S> ToUserId for S
+where
+    S: Deref,
+    S::Target: ToUserId,
+{
     fn to_user_id(&self) -> UserId {
         self.deref().to_user_id()
     }
@@ -246,7 +270,11 @@ pub trait ToMessageId {
     fn to_message_id(&self) -> MessageId;
 }
 
-impl<S> ToMessageId for S where S: Deref, S::Target: ToMessageId {
+impl<S> ToMessageId for S
+where
+    S: Deref,
+    S::Target: ToMessageId,
+{
     fn to_message_id(&self) -> MessageId {
         self.deref().to_message_id()
     }
@@ -289,20 +317,24 @@ pub trait ToFileRef {
     fn to_file_ref(&self) -> FileRef;
 }
 
-impl<S> ToFileRef for S where S: Deref, S::Target: ToFileRef {
+impl<S> ToFileRef for S
+where
+    S: Deref,
+    S::Target: ToFileRef,
+{
     fn to_file_ref(&self) -> FileRef {
         self.deref().to_file_ref()
     }
 }
 
 macro_rules! file_id_impls {
-    ($name: ident) => {
+    ($name:ident) => {
         impl ToFileRef for $name {
             fn to_file_ref(&self) -> FileRef {
                 self.file_id.clone().into()
             }
         }
-    }
+    };
 }
 
 file_id_impls!(PhotoSize);
@@ -316,28 +348,27 @@ file_id_impls!(VideoNote);
 /// Unique file identifier reference.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FileRef {
-    inner: String
+    inner: String,
 }
 
 impl<'a> From<&'a str> for FileRef {
     fn from(s: &'a str) -> Self {
         FileRef {
-            inner: s.to_string()
+            inner: s.to_string(),
         }
     }
 }
 
 impl<'a> From<String> for FileRef {
     fn from(s: String) -> Self {
-        FileRef {
-            inner: s.clone()
-        }
+        FileRef { inner: s.clone() }
     }
 }
 
 impl Serialize for FileRef {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
+    where
+        S: Serializer,
     {
         serializer.serialize_str(&self.inner)
     }
@@ -348,7 +379,11 @@ pub trait ToCallbackQueryId {
     fn to_callback_query_id(&self) -> CallbackQueryId;
 }
 
-impl<S> ToCallbackQueryId for S where S: Deref, S::Target: ToCallbackQueryId {
+impl<S> ToCallbackQueryId for S
+where
+    S: Deref,
+    S::Target: ToCallbackQueryId,
+{
     fn to_callback_query_id(&self) -> CallbackQueryId {
         self.deref().to_callback_query_id()
     }
@@ -363,23 +398,23 @@ impl ToCallbackQueryId for CallbackQuery {
 /// Unique identifier for CallbackQuery.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CallbackQueryId {
-    inner: String
+    inner: String,
 }
 
 impl<'de> ::serde::de::Deserialize<'de> for CallbackQueryId {
     fn deserialize<D>(deserializer: D) -> Result<CallbackQueryId, D::Error>
-        where D: ::serde::de::Deserializer<'de>
+    where
+        D: ::serde::de::Deserializer<'de>,
     {
         let inner = ::serde::de::Deserialize::deserialize(deserializer)?;
-        Ok(Self {
-            inner
-        })
+        Ok(Self { inner })
     }
 }
 
 impl Serialize for CallbackQueryId {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
+    where
+        S: Serializer,
     {
         serializer.serialize_str(&self.inner)
     }

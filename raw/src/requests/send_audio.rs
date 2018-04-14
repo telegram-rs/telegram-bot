@@ -31,6 +31,7 @@ pub struct SendAudio<'s, 'c, 'p, 't> {
 impl<'s, 'c, 'p, 't> ToMultipart for SendAudio<'s, 'c, 'p, 't> {
     fn to_multipart(&self) -> Multipart {
         let mut result = Vec::new();
+        multipart_field!(result, chat_id (text) => self.chat_id.to_string());
         multipart_field!(result, audio (file) => self.audio);
         multipart_field!(result, caption (text) => self.caption, optional);
         multipart_field!(result, disable_notification (text) => self.disable_notification,
