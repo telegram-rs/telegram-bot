@@ -25,31 +25,46 @@ impl<Request: ToMultipart> RequestType for MultipartRequestType<Request> {
 }
 
 #[macro_export]
+macro_rules! multipart_map {
+    ($( ( $a:ident ($b:ident) => $c:expr $(, $opts:tt)* ); )*) => {
+        let mut result = Vec::new();
+        $(
+            multipart_field!(result, $a ($b) => $c $(, $opts)*);
+        )*
+        result
+    }
+}
+
 macro_rules! multipart_field {
-    ($result:expr, $field:ident($type:ident) => $val:expr,skip_if $cond:expr) => {{
+    ($result:expr, $field:ident ($type:ident) => $val:expr, skip_if $cond:expr) => {{
         if $cond {
             multipart_field!($result, $field ($type) => $val);
         }
     }};
 
-    ($result:expr, $field:ident($type:ident) => $val:expr,optional) => {{
+    ($result:expr, $field:ident ($type:ident) => $val:expr, optional) => {{
         if $val.is_some() {
             multipart_field!($result, $field ($type) => $val.as_ref().unwrap());
         }
     }};
 
-    ($result:expr, $field:ident(text) => $val:expr) => {{
+    ($result:expr, $field:ident ($type:ident) => $val:expr, when_true) => {{
+        let value = $val;
+        multipart_field!($result, $field ($type) => value, skip_if value);
+    }};
+
+    ($result:expr, $field:ident (text) => $val:expr) => {{
         let value = MultipartValue::Text(format!("{}", $val));
         $result.push((stringify!($field).into(), value));
     }};
 
-    ($result:expr, $field:ident(json) => $val:expr) => {{
+    ($result:expr, $field:ident (json) => $val:expr) => {{
         use serde_json::to_string;
         let value = MultipartValue::Text(to_string($val).unwrap());
         $result.push((stringify!($field).into(), value));
     }};
 
-    ($result:expr, $field:ident(file) => $val:expr) => {{
+    ($result:expr, $field:ident (file) => $val:expr) => {{
         use std::ffi::OsStr;
         use std::path::Path;
         let filename = Path::new(&format!("{}", $val))

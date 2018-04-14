@@ -1,43 +1,38 @@
-use std::ops::Not;
 use std::borrow::Cow;
 
 use types::*;
 use requests::*;
 
 /// Use this method to send an audio
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 #[must_use = "requests do nothing unless sent"]
 pub struct SendAudio<'s, 'c, 'p, 't> {
     chat_id: ChatRef,
     audio: Cow<'s, str>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     caption: Option<Cow<'c, str>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     parse_mode: Option<ParseMode>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     duration: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     performer: Option<Cow<'p, str>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     title: Option<Cow<'t, str>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     reply_to_message_id: Option<MessageId>,
-    #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
 }
 
 impl<'s, 'c, 'p, 't> ToMultipart for SendAudio<'s, 'c, 'p, 't> {
     fn to_multipart(&self) -> Multipart {
-        let mut result = Vec::new();
-        multipart_field!(result, chat_id (text) => self.chat_id.to_string());
-        multipart_field!(result, audio (file) => self.audio);
-        multipart_field!(result, caption (text) => self.caption, optional);
-        multipart_field!(result, disable_notification (text) => self.disable_notification,
-                            skip_if !self.disable_notification);
-        multipart_field!(result, reply_markup (json) => self.reply_markup, optional);
-        result
+        multipart_map! {
+            (chat_id (text) => self.chat_id.to_string());
+            (audio (file) => self.audio);
+            (caption (text) => self.caption, optional);
+            (parse_mode (text) => self.parse_mode, optional);
+            (duration (text) => self.duration, optional);
+            (performer (text) => self.performer, optional);
+            (title (text) => self.title, optional);
+            (reply_to_message_id (text) => self.reply_to_message_id, optional);
+            (disable_notification (text) => self.disable_notification, when_true);
+            (reply_markup (json) => self.reply_markup, optional);
+        }
     }
 }
 
