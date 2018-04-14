@@ -27,6 +27,7 @@ pub enum Method {
 pub enum MultipartValue {
     Text(String),
     File { filename: String, path: String },
+    Data { filename: Option<String>, data: Vec<u8> }
 }
 
 pub type Multipart = Vec<(String, MultipartValue)>;

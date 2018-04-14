@@ -5,6 +5,7 @@ error_chain! {
         Url(::hyper::error::UriError) #[cfg(feature = "hyper_connector")];
         Hyper(::hyper::Error) #[cfg(feature = "hyper_connector")];
         Curl(::curl::Error) #[cfg(feature = "curl_connector")];
+        CurlFormError(::curl::FormError) #[cfg(feature = "curl_connector")];
         CurlPerformError(::tokio_curl::PerformError) #[cfg(feature = "curl_connector")];
         Io(::std::io::Error);
     }

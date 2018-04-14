@@ -1,15 +1,15 @@
 //! Connector with hyper backend.
 
 use std::fmt;
-use std::str::FromStr;
 use std::rc::Rc;
+use std::str::FromStr;
 
-use futures::{Future, Stream};
 use futures::future::result;
+use futures::{Future, Stream};
 use hyper;
-use hyper::{Method, Uri};
 use hyper::client::{Client, Connect};
 use hyper::header::ContentType;
+use hyper::{Method, Uri};
 use hyper_tls::HttpsConnector;
 use tokio_core::reactor::Handle;
 
@@ -40,9 +40,10 @@ impl<C> HyperConnector<C> {
 }
 
 mod multipart {
-    use multipart::client::lazy::*;
-    use telegram_bot_raw::MultipartValue;
     use hyper::client::Request;
+    use multipart::client::lazy::*;
+    use std::io::Cursor;
+    use telegram_bot_raw::MultipartValue;
 
     pub struct Adapter<'d> {
         prepared: PreparedFields<'d>,
@@ -50,19 +51,22 @@ mod multipart {
 
     impl<'d> From<Vec<(String, MultipartValue)>> for Adapter<'d> {
         fn from(fields: Vec<(String, MultipartValue)>) -> Self {
-            let mut data = Multipart::new();
+            let mut part = Multipart::new();
             for (key, value) in fields.into_iter() {
                 match value {
                     MultipartValue::Text(text) => {
-                        data.add_text(key, text);
+                        part.add_text(key, text);
                     }
                     MultipartValue::File { filename: _, path } => {
-                        data.add_file(key, path);
+                        part.add_file(key, path);
+                    }
+                    MultipartValue::Data { filename, data } => {
+                        part.add_stream(key, Cursor::new(data), filename, None);
                     }
                 }
             }
             Self {
-                prepared: data.prepare().unwrap(),
+                prepared: part.prepare().unwrap(),
             }
         }
     }
