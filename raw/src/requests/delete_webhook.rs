@@ -3,7 +3,7 @@ use requests::*;
 /// Use this method to delete webhook
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct DeleteWebhook {}
+pub struct DeleteWebhook;
 
 impl Request for DeleteWebhook {
     type Type = JsonRequestType<Self>;
@@ -16,6 +16,6 @@ impl Request for DeleteWebhook {
 
 impl DeleteWebhook {
     pub fn new() -> Self {
-        DeleteWebhook {}
+        DeleteWebhook
     }
 }

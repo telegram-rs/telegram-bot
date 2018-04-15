@@ -15,6 +15,7 @@ pub use telegram_bot_raw::{MessageEntity, MessageEntityKind};
 pub use telegram_bot_raw::{Audio, Document, PhotoSize, Sticker, Video, Voice};
 pub use telegram_bot_raw::{Contact, Location, Venue, File, FileRef};
 pub use telegram_bot_raw::{ToChatRef, ToUserId, ToMessageId, ToSourceChat, ToFileRef, ToCallbackQueryId};
+pub use telegram_bot_raw::{SetWebhook, DeleteWebhook};
 
 pub use telegram_bot_raw::{ParseMode};
 pub use telegram_bot_raw::{ReplyMarkup, ReplyKeyboardMarkup, KeyboardButton};
