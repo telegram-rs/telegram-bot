@@ -70,15 +70,15 @@ impl CurlConnector {
                             part.contents(text.as_bytes());
                             part.add()?;
                         }
-                        MultipartValue::File { filename: _, path } => {
+                        MultipartValue::File { path } => {
                             let mut part = form.part(&k);
                             part.file_content(path);
                             part.add()?;
                         }
-                        MultipartValue::Data { filename, data } => {
-                            let filename = filename.unwrap_or("".into());
+                        MultipartValue::Data { file_name, data } => {
+                            let file_name = file_name.unwrap_or("".into());
                             let mut part = form.part(&k);
-                            part.buffer(filename.as_str(), data);
+                            part.buffer(file_name.as_str(), data);
                             part.add()?;
                         }
                     }

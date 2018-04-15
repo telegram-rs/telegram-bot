@@ -57,11 +57,11 @@ mod multipart {
                     MultipartValue::Text(text) => {
                         part.add_text(key, text);
                     }
-                    MultipartValue::File { filename: _, path } => {
+                    MultipartValue::File { path } => {
                         part.add_file(key, path);
                     }
-                    MultipartValue::Data { filename, data } => {
-                        part.add_stream(key, Cursor::new(data), filename, None);
+                    MultipartValue::Data { file_name, data } => {
+                        part.add_stream(key, Cursor::new(data), file_name, None);
                     }
                 }
             }

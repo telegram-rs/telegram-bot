@@ -78,15 +78,20 @@ macro_rules! multipart_field {
     ($self:expr, $result:expr, $field:ident(file) => $val:expr) => {{
         use std::ffi::OsStr;
         use std::path::Path;
-        let filename = Path::new(&$val.to_string())
+        let file_name = Path::new(&$val.to_string())
             .file_name()
             .unwrap_or(OsStr::new(""))
             .to_string_lossy()
             .into();
         let value = MultipartValue::File {
-            filename,
+            file_name,
             path: $val.to_string(),
         };
+        $result.push((stringify!($field).into(), value));
+    }};
+
+    ($self:expr, $result:expr, $field:ident(raw) => $val:expr) => {{
+        let value = $val.clone();
         $result.push((stringify!($field).into(), value));
     }};
 }
