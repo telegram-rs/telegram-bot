@@ -590,11 +590,11 @@ pub struct RawMessage {
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct MessageEntity {
     /// Offset in UTF-16 code units to the start of the entity
-    offset: Integer,
+    pub offset: Integer,
     /// Length of the entity in UTF-16 code units
-    length: Integer,
+    pub length: Integer,
     /// Kind of the entity.
-    kind: MessageEntityKind,
+    pub kind: MessageEntityKind,
 }
 
 /// Kind of the entity.
