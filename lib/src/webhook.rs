@@ -88,12 +88,12 @@ impl Stream for WebhookStream {
 ///
 /// Implementation details:
 ///
-/// When a Webhook instance is set up and started serving, it will start
+/// When a webhook instance is set up and started serving, it will start
 /// an asynchronized HTTP server that binds on specified port. This server will
 /// handle incoming POST requests that matches upon given *path* (otherwise an
 /// HTTP error 404 will be responded). The requested body will be parsed as JSON
 /// into an `Update` object, and sent through a buffered mpsc channel. When
-/// you call a Stream method (like `for_each`) on a webhook, it will try to
+/// you call a Stream method (like `for_each`) on a WebhookStream, it will try to
 /// obtain updates from the channel.
 ///
 /// Of course, after setting up the service, we need to ask Telegram to begin
@@ -101,7 +101,7 @@ impl Stream for WebhookStream {
 /// callback URL with the `setWebhook` bot API. Such functionality is provided
 /// by `Webhook::register(url)` method. When the app quits, you need to
 /// unregister webhook, or you'll no longer be able to get updates with long
-/// polling next time. This is automatically done when a Webhook finish its
+/// polling next time. This is automatically done when a WebhookConfig finish its
 /// lifetime thanks to the `std::ops::Drop` trait implementation.
 ///
 /// Notice:
@@ -126,9 +126,9 @@ impl Stream for WebhookStream {
 ///
 /// let mut webhook = api.webhook();
 /// webhook.path("/my/crazy/path");
-/// webhook.serve_at("127.0.0.1:9876".parse().unwrap());
 /// webhook.register("https://my.website.com/telegram-webhook");
-/// let future = webhook.for_each(|update| {
+/// let stream = webhook.serve_at("127.0.0.1:9876".parse().unwrap()).unwrap();
+/// let future = stream.for_each(|update| {
 ///    println!("{:?}", update);
 ///    Ok(())
 /// });
