@@ -1,4 +1,5 @@
 use requests::*;
+use types::Integer;
 
 use std::borrow::Cow;
 
@@ -8,7 +9,7 @@ use std::borrow::Cow;
 pub struct SetWebhook<'t> {
     url: Cow<'t, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    max_connections: Option<i32>,
+    max_connections: Option<Integer>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     allowed_updates: Vec<AllowedUpdate>,
 }
@@ -39,7 +40,7 @@ impl<'t> SetWebhook<'t> {
         self
     }
 
-    pub fn max_connections(&mut self, n: i32) -> &mut Self {
+    pub fn max_connections(&mut self, n: Integer) -> &mut Self {
         self.max_connections = Some(n);
         self
     }
