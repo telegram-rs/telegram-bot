@@ -106,6 +106,8 @@ pub enum MessageKind {
         data: Vec<PhotoSize>,
         /// Caption for the photo, 0-200 characters.
         caption: Option<String>,
+        /// The unique identifier of a media message group this message belongs to.
+        media_group_id: Option<String>,
     },
     /// Message is a sticker.
     Sticker {
@@ -118,6 +120,8 @@ pub enum MessageKind {
         data: Video,
         /// Caption for the video, 0-200 characters.
         caption: Option<String>,
+        /// The unique identifier of a media message group this message belongs to.
+        media_group_id: Option<String>,
     },
     /// Message is a voice message.
     Voice {
@@ -163,7 +167,7 @@ pub enum MessageKind {
     /// New chat photo.
     NewChatPhoto {
         /// A chat photo was change to this value.
-        data: PhotoSize,
+        data: Vec<PhotoSize>,
     },
     /// Service message: the chat photo was deleted.
     DeleteChatPhoto,
@@ -275,6 +279,18 @@ impl Message {
             }}
         }
 
+        macro_rules! maybe_field_with_caption_and_group {
+            ($name:ident, $variant:ident) => {{
+                if let Some(val) = raw.$name {
+                    return make_message(MessageKind::$variant {
+                        data: val,
+                        caption: raw.caption,
+                        media_group_id: raw.media_group_id,
+                    })
+                }
+            }}
+        }
+
         macro_rules! maybe_true_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(True) = raw.$name {
@@ -293,9 +309,9 @@ impl Message {
 
         maybe_field!(audio, Audio);
         maybe_field_with_caption!(document, Document);
-        maybe_field_with_caption!(photo, Photo);
+        maybe_field_with_caption_and_group!(photo, Photo);
         maybe_field!(sticker, Sticker);
-        maybe_field_with_caption!(video, Video);
+        maybe_field_with_caption_and_group!(video, Video);
         maybe_field!(voice, Voice);
         maybe_field!(video_note, VideoNote);
         maybe_field!(contact, Contact);
@@ -395,6 +411,18 @@ impl ChannelPost {
             }}
         }
 
+        macro_rules! maybe_field_with_caption_and_group {
+            ($name:ident, $variant:ident) => {{
+                if let Some(val) = raw.$name {
+                    return make_message(MessageKind::$variant {
+                        data: val,
+                        caption: raw.caption,
+                        media_group_id: raw.media_group_id,
+                    })
+                }
+            }}
+        }
+
         macro_rules! maybe_true_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(True) = raw.$name {
@@ -413,9 +441,9 @@ impl ChannelPost {
 
         maybe_field!(audio, Audio);
         maybe_field_with_caption!(document, Document);
-        maybe_field_with_caption!(photo, Photo);
+        maybe_field_with_caption_and_group!(photo, Photo);
         maybe_field!(sticker, Sticker);
-        maybe_field_with_caption!(video, Video);
+        maybe_field_with_caption_and_group!(video, Video);
         maybe_field!(voice, Voice);
         maybe_field!(video_note, VideoNote);
         maybe_field!(contact, Contact);
@@ -494,6 +522,8 @@ pub struct RawMessage {
     pub reply_to_message: Option<Box<MessageOrChannelPost>>,
     /// Date the message was last edited in Unix time.
     pub edit_date: Option<Integer>,
+    /// The unique identifier of a media message group this message belongs to.
+    pub media_group_id: Option<String>,
     /// For text messages, the actual UTF-8 text of the message, 0-4096 characters.
     pub text: Option<String>,
     /// For text messages, special entities like usernames, URLs, bot commands, etc.
@@ -531,7 +561,7 @@ pub struct RawMessage {
     /// A chat title was changed to this value.
     pub new_chat_title: Option<String>,
     /// A chat photo was change to this value.
-    pub new_chat_photo: Option<PhotoSize>,
+    pub new_chat_photo: Option<Vec<PhotoSize>>,
     /// Service message: the chat photo was deleted.
     pub delete_chat_photo: Option<True>,
     /// Service message: the group has been created.
@@ -560,11 +590,11 @@ pub struct RawMessage {
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct MessageEntity {
     /// Offset in UTF-16 code units to the start of the entity
-    offset: Integer,
+    pub offset: Integer,
     /// Length of the entity in UTF-16 code units
-    length: Integer,
+    pub length: Integer,
     /// Kind of the entity.
-    kind: MessageEntityKind,
+    pub kind: MessageEntityKind,
 }
 
 /// Kind of the entity.
