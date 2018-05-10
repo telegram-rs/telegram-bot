@@ -1,9 +1,9 @@
 use std::fmt;
 
-use serde::de::{Deserialize, Deserializer, Visitor, MapAccess, Error};
+use serde::de::{Deserialize, Deserializer, Error, MapAccess, Visitor};
 use serde_value::Value;
 
-use requests::_base::Error;
+use requests::_base::Error as RequestError;
 use serde_json;
 
 use types::*;
@@ -64,7 +64,8 @@ impl<'de> Deserialize<'de> for Update {
             }
 
             fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
-                where V: MapAccess<'de>
+            where
+                V: MapAccess<'de>,
             {
                 let mut update_id = None;
                 let mut error: Option<V::Error> = None;
@@ -135,8 +136,10 @@ impl<'de> Deserialize<'de> for Update {
 
         const FIELDS: &'static [&'static str] = &[
             "update_id",
-            "message", "edited_message",
-            "channel_post", "edited_channel_post",
+            "message",
+            "edited_message",
+            "channel_post",
+            "edited_channel_post",
             "callback_query",
         ];
 
@@ -145,7 +148,7 @@ impl<'de> Deserialize<'de> for Update {
 }
 
 impl Update {
-    pub fn from_raw_json(json: &str) -> Result<Self, Error> {
+    pub fn from_raw_json(json: &str) -> Result<Self, RequestError> {
         Ok(serde_json::from_str(&json)?)
     }
 }
