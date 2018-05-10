@@ -5,15 +5,15 @@ use std::borrow::Cow;
 /// Use this method to set webhook
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SetWebhook<'t, 'u> {
+pub struct SetWebhook<'t> {
     url: Cow<'t, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     max_connections: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    allowed_updates: Option<Vec<Cow<'u, str>>>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    allowed_updates: Vec<AllowedUpdate>,
 }
 
-impl<'t, 'u> Request for SetWebhook<'t, 'u> {
+impl<'t> Request for SetWebhook<'t> {
     type Type = JsonRequestType<Self>;
     type Response = JsonTrueToUnitResponse;
 
@@ -22,7 +22,7 @@ impl<'t, 'u> Request for SetWebhook<'t, 'u> {
     }
 }
 
-impl<'t, 'u> SetWebhook<'t, 'u> {
+impl<'t> SetWebhook<'t> {
     pub fn new<T>(url: T) -> Self
     where
         T: Into<Cow<'t, str>>,
@@ -30,16 +30,12 @@ impl<'t, 'u> SetWebhook<'t, 'u> {
         SetWebhook {
             url: url.into(),
             max_connections: None,
-            allowed_updates: None,
+            allowed_updates: Vec::new(),
         }
     }
 
-    pub fn allowed_updates<T>(&mut self, updates: Vec<T>) -> &mut Self
-    where
-        T: Into<Cow<'u, str>>,
-    {
-        let updates = updates.into_iter().map(|x| x.into()).collect();
-        self.allowed_updates = Some(updates);
+    pub fn allowed_updates<T>(&mut self, updates: &[AllowedUpdate]) -> &mut Self {
+        self.allowed_updates = updates.into();
         self
     }
 
