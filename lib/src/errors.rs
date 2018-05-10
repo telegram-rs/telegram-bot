@@ -12,4 +12,11 @@ error_chain! {
     links {
         Raw(telegram_bot_raw::Error, telegram_bot_raw::ErrorKind);
     }
+
+    errors {
+        WebhookNotRegistered {
+            description("webhook not registered"),
+            display("webhook must be registered before streaming"),
+        }
+    }
 }

@@ -2,8 +2,8 @@ use std::borrow::Borrow;
 use std::rc::Rc;
 use std::time::Duration;
 
-use futures::Future;
 use futures::future::result;
+use futures::Future;
 use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{Request, ResponseType};
@@ -12,7 +12,7 @@ use connector::{default_connector, Connector};
 use errors::Error;
 use future::{NewTelegramFuture, TelegramFuture};
 use stream::{NewUpdatesStream, UpdatesStream};
-use webhook::Webhook;
+use webhook::WebhookConfig;
 
 /// Main type for sending requests to the Telegram bot API.
 #[derive(Clone)]
@@ -156,8 +156,8 @@ impl Api {
     }
 
     /// Create a webhook instance to receive updates from Telegram.
-    pub fn webhook(&self) -> Webhook {
-        Webhook::new(self.clone(), self.inner.handle.clone())
+    pub fn webhook(&self) -> WebhookConfig {
+        WebhookConfig::new(self.clone(), self.inner.handle.clone())
     }
 
     /// Send a request to the Telegram server and do not wait for a response.

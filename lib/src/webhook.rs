@@ -10,22 +10,26 @@ use telegram_bot_raw::{DeleteWebhook, SetWebhook};
 
 use api::Api;
 
-use hyper::error::Error;
+use hyper::error::Error as HyperError;
 use hyper::server::{Http, Request, Response, Service};
 use hyper::{Method, StatusCode};
+
+use errors::{Error, ErrorKind};
 
 const TELEGRAM_WEBHOOK_DEFAULT_PATH: &'static str = "/";
 
 /// This type represents stream of Telegram API updates and uses
 /// webhook under the hood.
 #[must_use = "streams do nothing unless polled"]
-pub struct Webhook {
+pub struct WebhookConfig {
     api: Api,
     handle: Handle,
-    path: String,
-    sink: Sender<Update>,
-    source: Receiver<Update>,
     registered: bool,
+    path: String,
+}
+
+pub struct WebhookStream {
+    source: Receiver<Update>,
 }
 
 #[derive(Clone)]
@@ -37,7 +41,7 @@ struct WebhookService {
 impl Service for WebhookService {
     type Request = Request;
     type Response = Response;
-    type Error = Error;
+    type Error = HyperError;
     type Future = Box<Future<Item = Self::Response, Error = Self::Error>>;
 
     fn call(&self, req: Request) -> Self::Future {
@@ -69,7 +73,7 @@ impl Service for WebhookService {
     }
 }
 
-impl Stream for Webhook {
+impl Stream for WebhookStream {
     type Item = Update;
     type Error = ();
 
@@ -144,19 +148,16 @@ impl Stream for Webhook {
 /// // }
 /// ```
 ///
-impl Webhook {
+impl WebhookConfig {
     /// Create a webhook instance
     ///
     /// Please call `Api::webhook()` instead of calling this function directly.
     pub fn new(api: Api, handle: Handle) -> Self {
-        let (sink, source) = channel(100);
         Self {
             path: TELEGRAM_WEBHOOK_DEFAULT_PATH.into(),
-            registered: false,
-            sink,
-            source,
             api,
             handle,
+            registered: false,
         }
     }
 
@@ -184,11 +185,16 @@ impl Webhook {
     }
 
     // Listen on a port and start serving the webhook service
-    pub fn serve_at(&self, addr: SocketAddr) {
+    pub fn serve_at(&self, addr: SocketAddr) -> Result<WebhookStream, Error> {
+        if !self.registered {
+            return Err(ErrorKind::WebhookNotRegistered.into());
+        }
         let handle = self.handle.clone();
+        let (sink, source) = channel(100);
+
         let service = WebhookService {
             path: self.path.clone(),
-            sink: self.sink.clone(),
+            sink: sink.clone(),
         };
 
         let server_handle = handle.clone();
@@ -201,13 +207,13 @@ impl Webhook {
             })
             .map_err(|_| ());
         handle.spawn(serve);
+
+        Ok(WebhookStream { source })
     }
 }
 
-impl Drop for Webhook {
+impl Drop for WebhookConfig {
     fn drop(&mut self) {
-        if self.registered {
-            self.api.spawn(DeleteWebhook::new());
-        }
+        self.api.spawn(DeleteWebhook::new());
     }
 }
