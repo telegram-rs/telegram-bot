@@ -1,20 +1,18 @@
 use std::net::SocketAddr;
 
-use futures::{Future, Poll, Stream};
 use futures::future::ok;
 use futures::sync::mpsc::{channel, Receiver, Sender};
+use futures::{Future, Poll, Stream};
 use tokio_core::reactor::Handle;
 
 use telegram_bot_raw::Update;
 use telegram_bot_raw::{DeleteWebhook, SetWebhook};
 
-use serde_json;
-
 use api::Api;
 
 use hyper::error::Error;
-use hyper::{Method, StatusCode};
 use hyper::server::{Http, Request, Response, Service};
+use hyper::{Method, StatusCode};
 
 const TELEGRAM_WEBHOOK_DEFAULT_PATH: &'static str = "/";
 
@@ -27,7 +25,7 @@ pub struct Webhook {
     path: String,
     sink: Sender<Update>,
     source: Receiver<Update>,
-    registered: bool
+    registered: bool,
 }
 
 #[derive(Clone)]
@@ -44,6 +42,7 @@ impl Service for WebhookService {
 
     fn call(&self, req: Request) -> Self::Future {
         use futures::Sink;
+        use std::str;
         let mut response = Response::new();
         let (method, path): (_, String) = (req.method().clone(), req.path().into());
         let sink = self.sink.clone();
@@ -54,14 +53,17 @@ impl Service for WebhookService {
                 let response_fut = req.body()
                     .concat2()
                     .map_err(|_| ())
-                    .and_then(|x| serde_json::from_slice(&x).map_err(|_| ()))
-                    .and_then(|u: Update| sink.send(u).map_err(|_| ()))
+                    .and_then(|chunk| {
+                        let s = str::from_utf8(&chunk).map_err(|_| ())?;
+                        Update::from_raw_json(&s).map_err(|_| ())
+                    })
+                    .and_then(|update| sink.send(update).map_err(|_| ()))
                     .then(|_| ok(response));
                 return Box::new(response_fut);
-            },
+            }
             (_, _) => {
                 response.set_status(StatusCode::NotFound);
-                return Box::new(ok(response))
+                return Box::new(ok(response));
             }
         };
     }
@@ -160,7 +162,9 @@ impl Webhook {
 
     /// Specify webhook server matching path
     pub fn path<T>(&mut self, p: T) -> &mut Self
-    where T: AsRef<str> {
+    where
+        T: AsRef<str>,
+    {
         self.path = p.as_ref().to_string();
         self
     }
@@ -175,8 +179,7 @@ impl Webhook {
     }
 
     // Unregister webhook from Telegram
-    pub fn unregister(&self)
-    {
+    pub fn unregister(&self) {
         self.api.spawn(DeleteWebhook::new());
     }
 

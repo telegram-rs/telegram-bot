@@ -1,5 +1,8 @@
 use serde::de::{Deserialize, Deserializer};
 
+use requests::_base::Error;
+use serde_json;
+
 use types::*;
 
 /// This object represents an incoming update.
@@ -42,9 +45,9 @@ impl<'de> Deserialize<'de> for Update {
                     return Ok(Update {
                         id: raw.update_id,
                         kind: UpdateKind::$variant(val),
-                    })
+                    });
                 }
-            }}
+            }};
         }
 
         maybe_field!(message, Message);
@@ -79,4 +82,10 @@ pub struct RawUpdate {
     // pub inline_query: Option<InlineQuery>,
     // pub chosen_inline_result: Option<ChosenInlineResult>,
     pub callback_query: Option<CallbackQuery>,
+}
+
+impl Update {
+    pub fn from_raw_json(json: &str) -> Result<Self, Error> {
+        Ok(serde_json::from_str(&json)?)
+    }
 }
