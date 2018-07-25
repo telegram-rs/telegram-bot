@@ -13,6 +13,7 @@ use errors::Error;
 use future::{TelegramFuture, NewTelegramFuture};
 
 const TELEGRAM_LONG_POLL_TIMEOUT_SECONDS: u64 = 5;
+const TELEGRAM_LONG_POLL_LIMIT_MESSAGES: Integer = 100;
 const TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS: u64 = 500;
 
 /// This type represents stream of Telegram API updates and uses
@@ -25,6 +26,7 @@ pub struct UpdatesStream {
     buffer: VecDeque<Update>,
     current_request: Option<TelegramFuture<Option<Vec<Update>>>>,
     timeout: Duration,
+    limit: Integer,
     error_delay: Duration
 }
 
@@ -73,6 +75,7 @@ impl Stream for UpdatesStream {
                 let request = self.api.send_timeout(GetUpdates::new()
                     .offset(self.last_update + 1)
                     .timeout(self.timeout.as_secs() as Integer)
+                    .limit(self.limit)
                 , timeout);
 
                 self.current_request = Some(request);
@@ -99,6 +102,7 @@ impl NewUpdatesStream for UpdatesStream{
             buffer: VecDeque::new(),
             current_request: None,
             timeout: Duration::from_secs(TELEGRAM_LONG_POLL_TIMEOUT_SECONDS),
+            limit: TELEGRAM_LONG_POLL_LIMIT_MESSAGES,
             error_delay: Duration::from_millis(TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS)
         }
     }
@@ -113,6 +117,16 @@ impl UpdatesStream {
     /// Default timeout is 5 seconds.
     pub fn timeout(&mut self, timeout: Duration) -> &mut Self {
         self.timeout = timeout;
+        self
+    }
+
+    /// Set limits the number of updates to be retrieved, this corresponds with `limit` field
+    /// in [getUpdates](https://core.telegram.org/bots/api#getupdates) method.
+    /// Values between 1—100 are accepted.
+    ///
+    /// Defaults to 100.
+    pub fn limit(&mut self, limit: Integer) -> &mut Self {
+        self.limit = limit;
         self
     }
 
