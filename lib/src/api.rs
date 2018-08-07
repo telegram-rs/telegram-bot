@@ -101,18 +101,16 @@ impl Api {
     ///
     /// ```rust
     /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
+    /// # extern crate tokio;
     /// # #[cfg(feature = "hyper_connector")]
     /// # fn main() {
     /// use telegram_bot::Api;
     /// use telegram_bot::connector::hyper;
-    /// use tokio_core::reactor::Core;
     ///
-    /// let core = Core::new().unwrap();
     /// # let telegram_token = "token";
     /// let api = Api::configure(telegram_token)
-    ///     .connector(hyper::default_connector(&core.handle()).unwrap())
-    ///     .build(core.handle()).unwrap();
+    ///     .connector(hyper::default_connector().unwrap())
+    ///     .build().unwrap();
     /// # }
     ///
     /// # #[cfg(not(feature = "hyper_connector"))]
@@ -132,12 +130,10 @@ impl Api {
     /// ```rust
     /// # extern crate futures;
     /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
+    /// # extern crate tokio;
     /// # use telegram_bot::Api;
-    /// # use tokio_core::reactor::Core;
     /// # fn main() {
-    /// # let core = Core::new().unwrap();
-    /// # let api: Api = Api::configure("token").build(core.handle()).unwrap();
+    /// # let api: Api = Api::configure("token").build().unwrap();
     /// use futures::Stream;
     ///
     /// let future = api.stream().for_each(|update| {
@@ -157,16 +153,14 @@ impl Api {
     /// ```rust
     /// # extern crate futures;
     /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
+    /// # extern crate tokio;
     /// # use futures::Future;
     /// # use telegram_bot::{Api, GetMe, ChatId};
     /// # use telegram_bot::prelude::*;
-    /// # use tokio_core::reactor::Core;
     /// #
     /// # fn main() {
-    /// # let core = Core::new().unwrap();
     /// # let telegram_token = "token";
-    /// # let api = Api::configure(telegram_token).build(core.handle()).unwrap();
+    /// # let api = Api::configure(telegram_token).build().unwrap();
     /// # if false {
     /// let chat = ChatId::new(61031);
     /// api.spawn(chat.text("Message"))
@@ -184,15 +178,14 @@ impl Api {
     /// ```rust
     /// # extern crate futures;
     /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
+    /// # extern crate tokio;
     /// # use futures::Future;
     /// # use telegram_bot::{Api, GetMe};
-    /// # use tokio_core::reactor::Core;
     /// #
     /// # fn main() {
     /// # let core = Core::new().unwrap();
     /// # let telegram_token = "token";
-    /// # let api = Api::configure(telegram_token).build(core.handle()).unwrap();
+    /// # let api = Api::configure(telegram_token).build().unwrap();
     /// # if false {
     /// use std::time::Duration;
     ///
@@ -226,15 +219,13 @@ impl Api {
     /// ```rust
     /// # extern crate futures;
     /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
+    /// # extern crate tokio;
     /// # use futures::Future;
     /// # use telegram_bot::{Api, GetMe};
-    /// # use tokio_core::reactor::Core;
     /// #
     /// # fn main() {
-    /// # let core = Core::new().unwrap();
     /// # let telegram_token = "token";
-    /// # let api = Api::configure(telegram_token).build(core.handle()).unwrap();
+    /// # let api = Api::configure(telegram_token).build().unwrap();
     /// # if false {
     /// let future = api.send(GetMe);
     /// future.and_then(|me| Ok(println!("{:?}", me)));
