@@ -85,14 +85,12 @@ impl Api {
     ///
     /// ```rust
     /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
+    /// # extern crate tokio;
     /// use telegram_bot::Api;
-    /// use tokio_core::reactor::Core;
     ///
     /// # fn main() {
-    /// let core = Core::new().unwrap();
     /// # let telegram_token = "token";
-    /// let api = Api::configure(telegram_token).build(core.handle()).unwrap();
+    /// let api = Api::configure(telegram_token).build().unwrap();
     /// # }
     /// ```
     ///
@@ -183,7 +181,6 @@ impl Api {
     /// # use telegram_bot::{Api, GetMe};
     /// #
     /// # fn main() {
-    /// # let core = Core::new().unwrap();
     /// # let telegram_token = "token";
     /// # let api = Api::configure(telegram_token).build().unwrap();
     /// # if false {
