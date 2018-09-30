@@ -1,7 +1,7 @@
 use serde::de::{Deserialize, Deserializer, Error};
 
 use types::*;
-use url::*;
+use url::telegram_api_url;
 
 /// This object represents a chat message or a channel post.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -844,7 +844,7 @@ pub struct File {
 
 impl File {
     pub fn get_url(&self, token: &str) -> Option<String> {
-        self.file_path.as_ref().map(|path| format!("{}file/bot{}/{}", TELEGRAM_URL, token, path))
+        self.file_path.as_ref().map(|path| format!("{}file/bot{}/{}", telegram_api_url(), token, path))
     }
 }
 

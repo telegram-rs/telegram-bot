@@ -1,6 +1,6 @@
 [package]
 name = "telegram-bot-raw"
-version = "0.6.1"
+version = "0.6.2"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
 
 description = "Telegram Bot API types"
