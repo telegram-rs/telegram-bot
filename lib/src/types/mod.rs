@@ -5,7 +5,7 @@ pub use requests::*;
 
 pub use telegram_bot_raw::{Integer, Float, Request, DetachedRequest};
 pub use telegram_bot_raw::{ResponseType, JsonResponse, JsonIdResponse, JsonTrueToUnitResponse};
-pub use telegram_bot_raw::{Update, UpdateKind};
+pub use telegram_bot_raw::{Update, UpdateKind, AllowedUpdate};
 pub use telegram_bot_raw::{User, Group, Supergroup, Channel, Chat, MessageChat};
 pub use telegram_bot_raw::{UserId, GroupId, SupergroupId, ChannelId, ChatId, ChatRef};
 pub use telegram_bot_raw::{CallbackQuery, CallbackQueryId};
