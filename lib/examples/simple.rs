@@ -4,23 +4,23 @@ extern crate tokio;
 
 use std::env;
 
-use futures::{Stream, future::lazy};
+use futures::{future::lazy, Stream};
 
 use telegram_bot::*;
 
 fn main() {
     let mut runtime = tokio::runtime::current_thread::Runtime::new().unwrap();
-    runtime.block_on(lazy(|| {
-        let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
-        let api = Api::configure(token).build().unwrap();
+    runtime
+        .block_on(lazy(|| {
+            let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
+            let api = Api::configure(token).build().unwrap();
 
-        let stream = api.stream().then(|mb_update| {
-            let res: Result<Result<Update, Error>, ()> = Ok(mb_update);
-            res
-        });
+            let stream = api.stream().then(|mb_update| {
+                let res: Result<Result<Update, Error>, ()> = Ok(mb_update);
+                res
+            });
 
-        tokio::executor::current_thread::spawn(
-            stream.for_each(move |update| {
+            tokio::executor::current_thread::spawn(stream.for_each(move |update| {
                 match update {
                     Ok(update) => {
                         // If the received update contains a new message...
@@ -30,9 +30,10 @@ fn main() {
                                 println!("<{}>: {}", &message.from.first_name, data);
 
                                 // Answer message with "Hi".
-                                api.spawn(message.text_reply(
-                                    format!("Hi, {}! You just wrote '{}'", &message.from.first_name, data)
-                                ));
+                                api.spawn(message.text_reply(format!(
+                                    "Hi, {}! You just wrote '{}'",
+                                    &message.from.first_name, data
+                                )));
                             }
                         }
                     }
@@ -40,11 +41,11 @@ fn main() {
                 }
 
                 Ok(())
-            })
-        );
+            }));
 
-        Ok::<_, ()>(())
-    })).unwrap();
+            Ok::<_, ()>(())
+        }))
+        .unwrap();
 
     runtime.run().unwrap();
 }

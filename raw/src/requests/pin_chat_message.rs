@@ -1,7 +1,7 @@
 use std::ops::Not;
 
-use types::*;
 use requests::*;
+use types::*;
 
 /// Use this method to pin a message in a supergroup or a channel.
 /// The bot must be an administrator in the chat for this to work
@@ -26,11 +26,15 @@ impl Request for PinChatMessage {
 }
 
 impl PinChatMessage {
-    fn new<C, M>(chat: C, message: M) -> Self where C: ToChatRef, M: ToMessageId {
+    fn new<C, M>(chat: C, message: M) -> Self
+    where
+        C: ToChatRef,
+        M: ToMessageId,
+    {
         Self {
             chat_id: chat.to_chat_ref(),
             message_id: message.to_message_id(),
-            disable_notification: false
+            disable_notification: false,
         }
     }
 
@@ -44,7 +48,10 @@ pub trait CanPinMessage {
     fn pin(&self) -> PinChatMessage;
 }
 
-impl<M> CanPinMessage for M where M: ToMessageId + ToSourceChat {
+impl<M> CanPinMessage for M
+where
+    M: ToMessageId + ToSourceChat,
+{
     fn pin(&self) -> PinChatMessage {
         PinChatMessage::new(self.to_source_chat(), self.to_message_id())
     }

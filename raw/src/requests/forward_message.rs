@@ -1,7 +1,7 @@
 use std::ops::Not;
 
-use types::*;
 use requests::*;
+use types::*;
 
 /// Use this method to forward messages of any kind.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
@@ -25,8 +25,11 @@ impl Request for ForwardMessage {
 
 impl ForwardMessage {
     pub fn new<M, F, T>(message: M, from: F, to: T) -> Self
-        where M: ToMessageId, F: ToChatRef, T: ToChatRef {
-
+    where
+        M: ToMessageId,
+        F: ToChatRef,
+        T: ToChatRef,
+    {
         ForwardMessage {
             chat_id: to.to_chat_ref(),
             from_chat_id: from.to_chat_ref(),
@@ -43,11 +46,19 @@ impl ForwardMessage {
 
 /// Forward message.
 pub trait CanForwardMessage {
-    fn forward<T>(&self, to: T) -> ForwardMessage where T: ToChatRef;
+    fn forward<T>(&self, to: T) -> ForwardMessage
+    where
+        T: ToChatRef;
 }
 
-impl<M> CanForwardMessage for M where M: ToMessageId + ToSourceChat {
-    fn forward<T>(&self, to: T) -> ForwardMessage where T: ToChatRef {
+impl<M> CanForwardMessage for M
+where
+    M: ToMessageId + ToSourceChat,
+{
+    fn forward<T>(&self, to: T) -> ForwardMessage
+    where
+        T: ToChatRef,
+    {
         ForwardMessage::new(self.to_message_id(), self.to_source_chat(), to)
     }
 }

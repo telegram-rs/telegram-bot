@@ -1,5 +1,5 @@
-use types::*;
 use requests::*;
+use types::*;
 
 // Use this method to delete a message.
 // A message can only be deleted if it was sent less than 48 hours ago.
@@ -27,8 +27,10 @@ impl Request for DeleteMessage {
 
 impl DeleteMessage {
     pub fn new<C, M>(chat: C, message_id: M) -> Self
-        where C: ToChatRef, M: ToMessageId {
-
+    where
+        C: ToChatRef,
+        M: ToMessageId,
+    {
         DeleteMessage {
             chat_id: chat.to_chat_ref(),
             message_id: message_id.to_message_id(),
@@ -41,7 +43,10 @@ pub trait CanDeleteMessage {
     fn delete(&self) -> DeleteMessage;
 }
 
-impl<M> CanDeleteMessage for M where M: ToMessageId + ToSourceChat {
+impl<M> CanDeleteMessage for M
+where
+    M: ToMessageId + ToSourceChat,
+{
     fn delete(&self) -> DeleteMessage {
         DeleteMessage::new(self.to_source_chat(), self.to_message_id())
     }

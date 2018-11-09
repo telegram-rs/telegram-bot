@@ -19,7 +19,8 @@ pub enum ChatMemberStatus {
 
 impl<'de> Deserialize<'de> for ChatMemberStatus {
     fn deserialize<D>(deserializer: D) -> Result<ChatMemberStatus, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         struct ChatMemberStatusVisitor;
         use self::ChatMemberStatus::*;
@@ -32,7 +33,8 @@ impl<'de> Deserialize<'de> for ChatMemberStatus {
             }
 
             fn visit_str<E>(self, value: &str) -> Result<ChatMemberStatus, E>
-                where E: de::Error
+            where
+                E: de::Error,
             {
                 Ok(match value {
                     "creator" => Creator,
