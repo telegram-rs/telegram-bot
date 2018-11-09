@@ -1,8 +1,8 @@
-use std::ops::Not;
 use std::borrow::Cow;
+use std::ops::Not;
 
-use types::*;
 use requests::*;
+use types::*;
 
 /// Use this method to edit text messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
@@ -30,8 +30,11 @@ impl<'s> Request for EditMessageText<'s> {
 
 impl<'s> EditMessageText<'s> {
     pub fn new<C, M, T>(chat: C, message_id: M, text: T) -> Self
-        where C: ToChatRef, M: ToMessageId, T: Into<Cow<'s, str>> {
-
+    where
+        C: ToChatRef,
+        M: ToMessageId,
+        T: Into<Cow<'s, str>>,
+    {
         EditMessageText {
             chat_id: chat.to_chat_ref(),
             message_id: message_id.to_message_id(),
@@ -52,7 +55,10 @@ impl<'s> EditMessageText<'s> {
         self
     }
 
-    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> {
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self
+    where
+        R: Into<ReplyMarkup>,
+    {
         self.reply_markup = Some(reply_markup.into());
         self
     }
@@ -60,11 +66,19 @@ impl<'s> EditMessageText<'s> {
 
 /// Edit text of messages sent by the bot.
 pub trait CanEditMessageText {
-    fn edit_text<'s, T>(&self, text: T) -> EditMessageText<'s> where T: Into<Cow<'s, str>>;
+    fn edit_text<'s, T>(&self, text: T) -> EditMessageText<'s>
+    where
+        T: Into<Cow<'s, str>>;
 }
 
-impl<M> CanEditMessageText for M where M: ToMessageId + ToSourceChat {
-    fn edit_text<'s, T>(&self, text: T) -> EditMessageText<'s> where T: Into<Cow<'s, str>> {
+impl<M> CanEditMessageText for M
+where
+    M: ToMessageId + ToSourceChat,
+{
+    fn edit_text<'s, T>(&self, text: T) -> EditMessageText<'s>
+    where
+        T: Into<Cow<'s, str>>,
+    {
         EditMessageText::new(self.to_source_chat(), self.to_message_id(), text)
     }
 }

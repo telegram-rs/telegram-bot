@@ -1,5 +1,5 @@
-use types::*;
 use requests::*;
+use types::*;
 
 /// Use this method to stop updating a live location message sent by the bot
 /// before live_period expires.
@@ -23,8 +23,10 @@ impl Request for StopMessageLiveLocation {
 
 impl StopMessageLiveLocation {
     pub fn new<C, M>(chat: C, message_id: M) -> Self
-        where C: ToChatRef, M: ToMessageId {
-
+    where
+        C: ToChatRef,
+        M: ToMessageId,
+    {
         StopMessageLiveLocation {
             chat_id: chat.to_chat_ref(),
             message_id: message_id.to_message_id(),
@@ -32,7 +34,10 @@ impl StopMessageLiveLocation {
         }
     }
 
-    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> {
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self
+    where
+        R: Into<ReplyMarkup>,
+    {
         self.reply_markup = Some(reply_markup.into());
         self
     }
@@ -43,8 +48,11 @@ pub trait CanStopMessageLiveLocation {
     fn stop_live_location(&self) -> StopMessageLiveLocation;
 }
 
-impl<M> CanStopMessageLiveLocation for M where M: ToMessageId + ToSourceChat {
-    fn stop_live_location(&self, ) -> StopMessageLiveLocation {
+impl<M> CanStopMessageLiveLocation for M
+where
+    M: ToMessageId + ToSourceChat,
+{
+    fn stop_live_location(&self) -> StopMessageLiveLocation {
         StopMessageLiveLocation::new(self.to_source_chat(), self.to_message_id())
     }
 }

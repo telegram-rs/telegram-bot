@@ -208,7 +208,7 @@ impl Message {
         let id = raw.message_id;
         let from = match raw.from.clone() {
             Some(from) => from,
-            None => return Err(format!("Missing `from` field for Message"))
+            None => return Err(format!("Missing `from` field for Message")),
         };
         let date = raw.date;
         let chat = match raw.chat.clone() {
@@ -216,23 +216,23 @@ impl Message {
             Chat::Group(x) => MessageChat::Group(x),
             Chat::Supergroup(x) => MessageChat::Supergroup(x),
             Chat::Unknown(x) => MessageChat::Unknown(x),
-            Chat::Channel(_) => return Err(format!("Channel chat in Message"))
+            Chat::Channel(_) => return Err(format!("Channel chat in Message")),
         };
 
         let reply_to_message = raw.reply_to_message.clone();
         let edit_date = raw.edit_date;
 
-        let forward = match (raw.forward_date,
-                             &raw.forward_from,
-                             &raw.forward_from_chat,
-                             raw.forward_from_message_id) {
+        let forward = match (
+            raw.forward_date,
+            &raw.forward_from,
+            &raw.forward_from_chat,
+            raw.forward_from_message_id,
+        ) {
             (None, &None, &None, None) => None,
-            (Some(date), &Some(ref from), &None, None) => {
-                Some(Forward {
-                    date: date,
-                    from: ForwardFrom::User { user: from.clone() },
-                })
-            }
+            (Some(date), &Some(ref from), &None, None) => Some(Forward {
+                date: date,
+                from: ForwardFrom::User { user: from.clone() },
+            }),
             (Some(date), &None, &Some(Chat::Channel(ref channel)), Some(message_id)) => {
                 Some(Forward {
                     date: date,
@@ -261,11 +261,9 @@ impl Message {
         macro_rules! maybe_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(val) = raw.$name {
-                    return make_message(MessageKind::$variant {
-                        data: val
-                    })
+                    return make_message(MessageKind::$variant { data: val });
                 }
-            }}
+            }};
         }
 
         macro_rules! maybe_field_with_caption {
@@ -274,9 +272,9 @@ impl Message {
                     return make_message(MessageKind::$variant {
                         data: val,
                         caption: raw.caption,
-                    })
+                    });
                 }
-            }}
+            }};
         }
 
         macro_rules! maybe_field_with_caption_and_group {
@@ -286,17 +284,17 @@ impl Message {
                         data: val,
                         caption: raw.caption,
                         media_group_id: raw.media_group_id,
-                    })
+                    });
                 }
-            }}
+            }};
         }
 
         macro_rules! maybe_true_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(True) = raw.$name {
-                    return make_message(MessageKind::$variant)
+                    return make_message(MessageKind::$variant);
                 }
-            }}
+            }};
         }
 
         if let Some(text) = raw.text {
@@ -336,7 +334,8 @@ impl Message {
 
 impl<'de> Deserialize<'de> for Message {
     fn deserialize<D>(deserializer: D) -> Result<Message, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         let raw: RawMessage = Deserialize::deserialize(deserializer)?;
 
@@ -350,22 +349,22 @@ impl ChannelPost {
         let date = raw.date;
         let chat = match raw.chat.clone() {
             Chat::Channel(channel) => channel,
-            _ => return Err(format!("Expected channel chat type for ChannelMessage"))
+            _ => return Err(format!("Expected channel chat type for ChannelMessage")),
         };
         let reply_to_message = raw.reply_to_message.clone();
         let edit_date = raw.edit_date;
 
-        let forward = match (raw.forward_date,
-                             &raw.forward_from,
-                             &raw.forward_from_chat,
-                             raw.forward_from_message_id) {
+        let forward = match (
+            raw.forward_date,
+            &raw.forward_from,
+            &raw.forward_from_chat,
+            raw.forward_from_message_id,
+        ) {
             (None, &None, &None, None) => None,
-            (Some(date), &Some(ref from), &None, None) => {
-                Some(Forward {
-                    date: date,
-                    from: ForwardFrom::User { user: from.clone() },
-                })
-            }
+            (Some(date), &Some(ref from), &None, None) => Some(Forward {
+                date: date,
+                from: ForwardFrom::User { user: from.clone() },
+            }),
             (Some(date), &None, &Some(Chat::Channel(ref channel)), Some(message_id)) => {
                 Some(Forward {
                     date: date,
@@ -393,11 +392,9 @@ impl ChannelPost {
         macro_rules! maybe_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(val) = raw.$name {
-                    return make_message(MessageKind::$variant {
-                        data: val
-                    })
+                    return make_message(MessageKind::$variant { data: val });
                 }
-            }}
+            }};
         }
 
         macro_rules! maybe_field_with_caption {
@@ -406,9 +403,9 @@ impl ChannelPost {
                     return make_message(MessageKind::$variant {
                         data: val,
                         caption: raw.caption,
-                    })
+                    });
                 }
-            }}
+            }};
         }
 
         macro_rules! maybe_field_with_caption_and_group {
@@ -418,17 +415,17 @@ impl ChannelPost {
                         data: val,
                         caption: raw.caption,
                         media_group_id: raw.media_group_id,
-                    })
+                    });
                 }
-            }}
+            }};
         }
 
         macro_rules! maybe_true_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(True) = raw.$name {
-                    return make_message(MessageKind::$variant)
+                    return make_message(MessageKind::$variant);
                 }
-            }}
+            }};
         }
 
         if let Some(text) = raw.text {
@@ -469,7 +466,8 @@ impl ChannelPost {
 impl<'de> Deserialize<'de> for ChannelPost {
     // TODO(knsd): Remove .clone()
     fn deserialize<D>(deserializer: D) -> Result<ChannelPost, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         let raw: RawMessage = Deserialize::deserialize(deserializer)?;
 
@@ -480,7 +478,8 @@ impl<'de> Deserialize<'de> for ChannelPost {
 impl<'de> Deserialize<'de> for MessageOrChannelPost {
     // TODO(knsd): Remove .clone()
     fn deserialize<D>(deserializer: D) -> Result<MessageOrChannelPost, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         let raw: RawMessage = Deserialize::deserialize(deserializer)?;
         let is_channel = match raw.chat {
@@ -617,7 +616,8 @@ pub enum MessageEntityKind {
 
 impl<'de> Deserialize<'de> for MessageEntity {
     fn deserialize<D>(deserializer: D) -> Result<MessageEntity, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         use self::MessageEntityKind::*;
 
@@ -630,9 +630,9 @@ impl<'de> Deserialize<'de> for MessageEntity {
             ($name:ident) => {{
                 match raw.$name {
                     Some(val) => val,
-                    None => return Err(D::Error::missing_field(stringify!($name)))
+                    None => return Err(D::Error::missing_field(stringify!($name))),
                 }
-            }}
+            }};
         }
 
         let kind = match raw.type_.as_str() {
@@ -665,7 +665,7 @@ pub struct RawMessageEntity {
     /// Type of the entity. Can be mention (@username), hashtag, bot_command, url, email,
     /// bold (bold text), italic (italic text), code (monowidth string), pre (monowidth block),
     /// text_link (for clickable text URLs), text_mention (for users without usernames).
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     pub type_: String,
     /// Offset in UTF-16 code units to the start of the entity.
     pub offset: Integer,
@@ -844,7 +844,9 @@ pub struct File {
 
 impl File {
     pub fn get_url(&self, token: &str) -> Option<String> {
-        self.file_path.as_ref().map(|path| format!("{}file/bot{}/{}", TELEGRAM_URL, token, path))
+        self.file_path
+            .as_ref()
+            .map(|path| format!("{}file/bot{}/{}", TELEGRAM_URL, token, path))
     }
 }
 

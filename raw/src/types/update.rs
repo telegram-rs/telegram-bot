@@ -1,6 +1,6 @@
 use std::fmt;
 
-use serde::de::{Deserialize, Deserializer, Visitor, MapAccess, Error};
+use serde::de::{Deserialize, Deserializer, Error, MapAccess, Visitor};
 use serde_value::Value;
 
 use types::*;
@@ -37,7 +37,8 @@ pub enum UpdateKind {
 
 impl<'de> Deserialize<'de> for Update {
     fn deserialize<D>(deserializer: D) -> Result<Update, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         #[derive(Deserialize)]
         #[serde(field_identifier, rename_all = "snake_case")]
@@ -60,7 +61,8 @@ impl<'de> Deserialize<'de> for Update {
             }
 
             fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
-                where V: MapAccess<'de>
+            where
+                V: MapAccess<'de>,
             {
                 let mut update_id = None;
                 let mut error: Option<V::Error> = None;
@@ -131,8 +133,10 @@ impl<'de> Deserialize<'de> for Update {
 
         const FIELDS: &'static [&'static str] = &[
             "update_id",
-            "message", "edited_message",
-            "channel_post", "edited_channel_post",
+            "message",
+            "edited_message",
+            "channel_post",
+            "edited_channel_post",
             "callback_query",
         ];
 

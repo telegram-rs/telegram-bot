@@ -1,7 +1,7 @@
 use std::ops::Not;
 
-use types::*;
 use requests::*;
+use types::*;
 
 /// Use this method to send point on the map.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
@@ -30,7 +30,10 @@ impl Request for SendLocation {
 }
 
 impl SendLocation {
-    pub fn new<C>(chat: C, latitude: Float, longitude: Float) -> Self where C: ToChatRef {
+    pub fn new<C>(chat: C, latitude: Float, longitude: Float) -> Self
+    where
+        C: ToChatRef,
+    {
         SendLocation {
             chat_id: chat.to_chat_ref(),
             latitude: latitude,
@@ -53,12 +56,18 @@ impl SendLocation {
         self
     }
 
-    pub fn reply_to<R>(&mut self, to: R) -> &mut Self where R: ToMessageId {
+    pub fn reply_to<R>(&mut self, to: R) -> &mut Self
+    where
+        R: ToMessageId,
+    {
         self.reply_to_message_id = Some(to.to_message_id());
         self
     }
 
-    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> {
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self
+    where
+        R: Into<ReplyMarkup>,
+    {
         self.reply_markup = Some(reply_markup.into());
         self
     }
@@ -69,7 +78,10 @@ pub trait CanSendLocation {
     fn location(&self, latitude: Float, longitude: Float) -> SendLocation;
 }
 
-impl<C> CanSendLocation for C where C: ToChatRef {
+impl<C> CanSendLocation for C
+where
+    C: ToChatRef,
+{
     fn location(&self, latitude: Float, longitude: Float) -> SendLocation {
         SendLocation::new(self, latitude, longitude)
     }
@@ -80,7 +92,10 @@ pub trait CanReplySendLocation {
     fn location_reply(&self, latitude: Float, longitude: Float) -> SendLocation;
 }
 
-impl<M> CanReplySendLocation for M where M: ToMessageId + ToSourceChat {
+impl<M> CanReplySendLocation for M
+where
+    M: ToMessageId + ToSourceChat,
+{
     fn location_reply(&self, latitude: Float, longitude: Float) -> SendLocation {
         let mut rq = self.to_source_chat().location(latitude, longitude);
         rq.reply_to(self.to_message_id());
@@ -91,7 +106,10 @@ impl<M> CanReplySendLocation for M where M: ToMessageId + ToSourceChat {
 impl<'b> ToRequest<'b> for Location {
     type Request = SendLocation;
 
-    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef {
+    fn to_request<C>(&'b self, chat: C) -> Self::Request
+    where
+        C: ToChatRef,
+    {
         chat.location(self.latitude, self.longitude)
     }
 }
@@ -100,8 +118,9 @@ impl<'b> ToReplyRequest<'b> for Location {
     type Request = SendLocation;
 
     fn to_reply_request<M>(&'b self, message: M) -> Self::Request
-        where M: ToMessageId + ToSourceChat {
-
+    where
+        M: ToMessageId + ToSourceChat,
+    {
         message.location_reply(self.latitude, self.longitude)
     }
 }

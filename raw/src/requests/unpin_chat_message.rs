@@ -1,5 +1,5 @@
-use types::*;
 use requests::*;
+use types::*;
 
 ///Use this method to unpin a message in a supergroup or a channel.
 /// The bot must be an administrator in the chat for this to work
@@ -21,7 +21,10 @@ impl Request for UnpinChatMessage {
 }
 
 impl UnpinChatMessage {
-    fn new<C>(chat: C) -> Self where C: ToChatRef {
+    fn new<C>(chat: C) -> Self
+    where
+        C: ToChatRef,
+    {
         Self {
             chat_id: chat.to_chat_ref(),
         }
@@ -32,7 +35,10 @@ pub trait CanUnpinMessage {
     fn unpin_message(&self) -> UnpinChatMessage;
 }
 
-impl<C> CanUnpinMessage for C where C: ToChatRef {
+impl<C> CanUnpinMessage for C
+where
+    C: ToChatRef,
+{
     fn unpin_message(&self) -> UnpinChatMessage {
         UnpinChatMessage::new(self)
     }

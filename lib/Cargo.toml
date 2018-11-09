@@ -1,6 +1,6 @@
 [package]
 name = "telegram-bot"
-version = "0.6.1"
+version = "0.7.0"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
 
 description = "A library for creating Telegram bots"
@@ -15,25 +15,25 @@ license = "MIT"
 
 [dependencies]
 antidote = "1.0"
-tokio-core = "0.1"
+tokio = "0.1"
 error-chain = "0.11.0"
 futures = "0.1"
 
-curl = {version = "0.4.6", optional = true}
-tokio-curl = {version = "0.1.9", optional = true}
+tokio-timer = "0.2.4"
 
-telegram-bot-raw = { version = "=0.6.1", path = "../raw" }
+http = "0.1.8"
+
+telegram-bot-raw = { version = "=0.7.0", path = "../raw" }
 
 [dependencies.hyper]
-version = "0.11"
+version = "0.12"
 optional = true
 
 [dependencies.hyper-tls]
-version = "0.1"
+version = "0.3"
 optional = true
 
 [features]
 default = ["hyper_connector"]
 
-curl_connector = ["curl", "tokio-curl"]
 hyper_connector = ["hyper", "hyper-tls"]

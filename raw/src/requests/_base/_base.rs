@@ -66,7 +66,9 @@ pub trait ToRequest<'b> {
     type Request: Request;
 
     /// Convert type to request and send it to the chat.
-    fn to_request<C>(&'b self, chat: C) -> Self::Request where C: ToChatRef;
+    fn to_request<C>(&'b self, chat: C) -> Self::Request
+    where
+        C: ToChatRef;
 }
 
 /// Use this trait to convert a complex type to corresponding request and reply to the message.
@@ -76,5 +78,6 @@ pub trait ToReplyRequest<'b> {
 
     /// Convert type to request and reply to the message.
     fn to_reply_request<M>(&'b self, message: M) -> Self::Request
-        where M: ToMessageId + ToSourceChat;
+    where
+        M: ToMessageId + ToSourceChat;
 }

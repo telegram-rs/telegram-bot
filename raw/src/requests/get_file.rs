@@ -19,9 +19,12 @@ impl<'s> Request for GetFile {
 }
 
 impl GetFile {
-    pub fn new<F>(file: F) -> Self where F: ToFileRef {
+    pub fn new<F>(file: F) -> Self
+    where
+        F: ToFileRef,
+    {
         Self {
-            file_id: file.to_file_ref()
+            file_id: file.to_file_ref(),
         }
     }
 }
@@ -31,7 +34,10 @@ pub trait CanGetFile {
     fn get_file(&self) -> GetFile;
 }
 
-impl<F> CanGetFile for F where F: ToFileRef {
+impl<F> CanGetFile for F
+where
+    F: ToFileRef,
+{
     fn get_file(&self) -> GetFile {
         GetFile::new(self)
     }

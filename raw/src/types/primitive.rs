@@ -1,8 +1,8 @@
 use std::fmt;
 
 use serde::de;
+use serde::de::{Deserialize, Deserializer, Unexpected, Visitor};
 use serde::ser::{Serialize, Serializer};
-use serde::de::{Deserialize, Deserializer, Visitor, Unexpected};
 
 /// The Telegram `Integer`, currently i64.
 pub type Integer = i64;
@@ -15,7 +15,8 @@ pub struct True;
 
 impl<'de> Deserialize<'de> for True {
     fn deserialize<D>(deserializer: D) -> Result<True, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         struct TrueVisitor;
 
@@ -27,7 +28,8 @@ impl<'de> Deserialize<'de> for True {
             }
 
             fn visit_bool<E>(self, value: bool) -> Result<True, E>
-                where E: de::Error
+            where
+                E: de::Error,
             {
                 match value {
                     true => Ok(True),
@@ -42,7 +44,8 @@ impl<'de> Deserialize<'de> for True {
 
 impl Serialize for True {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
+    where
+        S: Serializer,
     {
         serializer.serialize_bool(true)
     }

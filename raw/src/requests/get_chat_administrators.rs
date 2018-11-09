@@ -1,5 +1,5 @@
-use types::*;
 use requests::*;
+use types::*;
 
 /// Use this method to get a list of administrators in a chat.
 /// If the chat is a group or a supergroup and no administrators were appointed,
@@ -7,7 +7,7 @@ use requests::*;
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
 pub struct GetChatAdministrators {
-    chat_id: ChatRef
+    chat_id: ChatRef,
 }
 
 impl Request for GetChatAdministrators {
@@ -20,9 +20,12 @@ impl Request for GetChatAdministrators {
 }
 
 impl GetChatAdministrators {
-    pub fn new<C>(chat: C) -> Self where C: ToChatRef {
+    pub fn new<C>(chat: C) -> Self
+    where
+        C: ToChatRef,
+    {
         GetChatAdministrators {
-            chat_id: chat.to_chat_ref()
+            chat_id: chat.to_chat_ref(),
         }
     }
 }
@@ -32,7 +35,10 @@ pub trait CanGetChatAdministrators {
     fn get_administrators(&self) -> GetChatAdministrators;
 }
 
-impl<C> CanGetChatAdministrators for C where C: ToChatRef {
+impl<C> CanGetChatAdministrators for C
+where
+    C: ToChatRef,
+{
     fn get_administrators(&self) -> GetChatAdministrators {
         GetChatAdministrators::new(self)
     }

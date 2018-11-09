@@ -1,5 +1,5 @@
-use types::*;
 use requests::*;
+use types::*;
 
 /// Use this method to edit live location messages sent by the bot.
 /// A location can be edited until its live_period expires or editing
@@ -26,8 +26,10 @@ impl Request for EditMessageLiveLocation {
 
 impl EditMessageLiveLocation {
     pub fn new<C, M>(chat: C, message_id: M, latitude: Float, longitude: Float) -> Self
-        where C: ToChatRef, M: ToMessageId {
-
+    where
+        C: ToChatRef,
+        M: ToMessageId,
+    {
         EditMessageLiveLocation {
             chat_id: chat.to_chat_ref(),
             message_id: message_id.to_message_id(),
@@ -37,7 +39,10 @@ impl EditMessageLiveLocation {
         }
     }
 
-    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self where R: Into<ReplyMarkup> {
+    pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self
+    where
+        R: Into<ReplyMarkup>,
+    {
         self.reply_markup = Some(reply_markup.into());
         self
     }
@@ -48,8 +53,16 @@ pub trait CanEditMessageLiveLocation {
     fn edit_live_location(&self, latitude: Float, longitude: Float) -> EditMessageLiveLocation;
 }
 
-impl<M> CanEditMessageLiveLocation for M where M: ToMessageId + ToSourceChat {
+impl<M> CanEditMessageLiveLocation for M
+where
+    M: ToMessageId + ToSourceChat,
+{
     fn edit_live_location(&self, latitude: Float, longitude: Float) -> EditMessageLiveLocation {
-        EditMessageLiveLocation::new(self.to_source_chat(), self.to_message_id(), latitude, longitude)
+        EditMessageLiveLocation::new(
+            self.to_source_chat(),
+            self.to_message_id(),
+            latitude,
+            longitude,
+        )
     }
 }

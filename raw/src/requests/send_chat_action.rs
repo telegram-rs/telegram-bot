@@ -1,5 +1,5 @@
-use types::*;
 use requests::*;
+use types::*;
 
 /// Strongly typed ChatAction. Instead of passing a String to the
 /// `chat_action` method, this is used.
@@ -43,7 +43,10 @@ impl Request for SendChatAction {
 }
 
 impl SendChatAction {
-    pub fn new<C>(chat: C, action: ChatAction) -> Self where C: ToChatRef {
+    pub fn new<C>(chat: C, action: ChatAction) -> Self
+    where
+        C: ToChatRef,
+    {
         SendChatAction {
             chat_id: chat.to_chat_ref(),
             action: action,
@@ -56,7 +59,10 @@ pub trait CanSendChatAction {
     fn chat_action(&self, action: ChatAction) -> SendChatAction;
 }
 
-impl<C> CanSendChatAction for C where C: ToChatRef {
+impl<C> CanSendChatAction for C
+where
+    C: ToChatRef,
+{
     fn chat_action(&self, action: ChatAction) -> SendChatAction {
         SendChatAction::new(self, action)
     }

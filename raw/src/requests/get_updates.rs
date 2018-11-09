@@ -11,7 +11,7 @@ pub struct GetUpdates {
     limit: Option<Integer>, // TODO(knsd): Values between 1—100 are accepted
     #[serde(skip_serializing_if = "Option::is_none")]
     timeout: Option<Integer>, // TODO(knsd): Should be positive
-    allowed_updates: Vec<AllowedUpdate> // TODO(knsd) BitSet? HashSet? BTreeSet?
+    allowed_updates: Vec<AllowedUpdate>, // TODO(knsd) BitSet? HashSet? BTreeSet?
 }
 
 impl Request for GetUpdates {
@@ -29,7 +29,7 @@ impl GetUpdates {
             offset: None,
             limit: None,
             timeout: None,
-            allowed_updates: Vec::new()
+            allowed_updates: Vec::new(),
         }
     }
 
@@ -56,13 +56,13 @@ impl GetUpdates {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum AllowedUpdate {
-    #[serde(rename="message")]
+    #[serde(rename = "message")]
     Message,
-    #[serde(rename="edited_message")]
+    #[serde(rename = "edited_message")]
     EditedMessage,
-    #[serde(rename="channel_post")]
+    #[serde(rename = "channel_post")]
     ChannelPost,
-    #[serde(rename="edited_channel_post")]
+    #[serde(rename = "edited_channel_post")]
     EditedChannelPost,
     #[serde(rename="inline_query")]
     InlineQuery,
