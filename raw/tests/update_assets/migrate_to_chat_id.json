@@ -6,7 +6,8 @@
       "id": 174976101,
       "first_name": "Fedor",
       "last_name": "Gogolev",
-      "username": "FedorGogolev"
+      "username": "FedorGogolev",
+      "is_bot": false
     },
     "chat": {
       "id": -216055857,
