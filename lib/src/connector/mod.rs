@@ -31,6 +31,6 @@ pub fn default_connector(handle: &Handle) -> Result<Box<Connector>, Error> {
 ///
 /// See module level documentation for details.
 #[cfg(all(not(feature = "curl_connector"), all(feature = "hyper_connector")))]
-pub fn default_connector(handle: &Handle) -> Result<Box<Connector>, Error> {
-    hyper::default_connector(handle)
+pub fn default_connector(_handle: &Handle) -> Result<Box<Connector>, Error> {
+    hyper::default_connector()
 }
