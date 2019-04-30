@@ -1,5 +1,3 @@
-#[macro_use]
-
 pub mod callback_query;
 pub mod chat;
 pub mod chat_member;
@@ -9,6 +7,7 @@ pub mod refs;
 pub mod reply_markup;
 pub mod response_parameters;
 pub mod update;
+pub mod inline_query;
 
 pub use self::callback_query::*;
 pub use self::chat::*;
@@ -19,3 +18,4 @@ pub use self::refs::*;
 pub use self::reply_markup::*;
 pub use self::response_parameters::*;
 pub use self::update::*;
+pub use self::inline_query::*;
