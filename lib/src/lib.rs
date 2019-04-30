@@ -1,22 +1,8 @@
 //! This crate helps writing bots for the messenger Telegram.
 //! See [readme](https://github.com/telegram-rs/telegram-bot) for details.
 
-extern crate antidote;
 #[macro_use]
 extern crate error_chain;
-extern crate futures;
-extern crate tokio_core;
-extern crate telegram_bot_raw;
-
-#[cfg(feature = "curl_connector")]
-extern crate curl;
-#[cfg(feature = "curl_connector")]
-extern crate tokio_curl;
-
-#[cfg(feature = "hyper_connector")]
-extern crate hyper;
-#[cfg(feature = "hyper_connector")]
-extern crate hyper_tls;
 
 mod api;
 mod errors;
