@@ -1,5 +1,5 @@
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to get a list of profile pictures for a user.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

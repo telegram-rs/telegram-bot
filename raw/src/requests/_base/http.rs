@@ -1,4 +1,4 @@
-use url::TELEGRAM_URL;
+use crate::url::TELEGRAM_URL;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum RequestUrl {

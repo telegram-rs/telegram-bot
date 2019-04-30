@@ -17,7 +17,7 @@ pub use self::curl::CurlConnector;
 #[cfg(feature = "hyper_connector")]
 pub use self::hyper::HyperConnector;
 
-use errors::Error;
+use crate::errors::Error;
 
 /// Returns default connector.
 ///

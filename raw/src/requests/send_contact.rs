@@ -1,8 +1,8 @@
 use std::ops::Not;
 use std::borrow::Cow;
 
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to send phone contacts.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

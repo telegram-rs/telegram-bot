@@ -13,8 +13,8 @@ use hyper_tls::HttpsConnector;
 
 use telegram_bot_raw::{Body as TelegramBody, HttpRequest, HttpResponse, Method as TelegramMethod};
 
-use errors::Error;
-use future::{NewTelegramFuture, TelegramFuture};
+use crate::errors::Error;
+use crate::future::{NewTelegramFuture, TelegramFuture};
 
 use super::_base::Connector;
 

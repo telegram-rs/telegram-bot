@@ -1,7 +1,7 @@
 use std::ops::Not;
 
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to forward messages of any kind.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

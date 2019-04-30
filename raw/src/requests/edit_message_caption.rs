@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to edit captions of messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

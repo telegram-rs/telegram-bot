@@ -3,7 +3,7 @@ use std::fmt;
 use serde::de::{Deserialize, Deserializer, Visitor, MapAccess, Error};
 use serde_value::Value;
 
-use types::*;
+use crate::types::*;
 
 /// This object represents an incoming update.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]

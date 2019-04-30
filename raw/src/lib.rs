@@ -10,6 +10,6 @@ pub mod types;
 pub mod url;
 pub mod requests;
 
-pub use types::*;
-pub use url::*;
-pub use requests::*;
+pub use crate::types::*;
+pub use crate::url::*;
+pub use crate::requests::*;

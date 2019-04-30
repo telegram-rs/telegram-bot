@@ -1,7 +1,7 @@
 use std::ops::Not;
 
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to send point on the map.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

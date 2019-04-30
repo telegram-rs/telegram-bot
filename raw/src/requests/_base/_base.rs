@@ -1,5 +1,5 @@
-use requests::*;
-use types::*;
+use crate::requests::*;
+use crate::types::*;
 
 pub trait RequestType {
     type Options;

@@ -1,5 +1,5 @@
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to unban a previously kicked user in a supergroup or channel.
 /// The user will not return to the group or channel automatically, but will be able to

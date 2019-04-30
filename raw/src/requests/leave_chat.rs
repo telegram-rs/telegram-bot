@@ -1,5 +1,5 @@
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method for your bot to leave a group, supergroup or channel.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

@@ -1,5 +1,5 @@
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to get a list of administrators in a chat.
 /// If the chat is a group or a supergroup and no administrators were appointed,

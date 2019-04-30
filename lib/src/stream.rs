@@ -8,9 +8,9 @@ use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{GetUpdates, Update, Integer};
 
-use api::Api;
-use errors::Error;
-use future::{TelegramFuture, NewTelegramFuture};
+use crate::api::Api;
+use crate::errors::Error;
+use crate::future::{TelegramFuture, NewTelegramFuture};
 
 const TELEGRAM_LONG_POLL_TIMEOUT_SECONDS: u64 = 5;
 const TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS: u64 = 500;

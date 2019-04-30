@@ -1,6 +1,6 @@
 use serde::de::{Deserialize, Deserializer, Error};
 
-use types::*;
+use crate::types::*;
 
 /// This object represents a Telegram user or bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Deserialize)]

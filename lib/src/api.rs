@@ -8,10 +8,11 @@ use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{Request, ResponseType};
 
-use connector::{Connector, default_connector};
-use errors::Error;
-use future::{TelegramFuture, NewTelegramFuture};
-use stream::{NewUpdatesStream, UpdatesStream};
+use crate::connector::{Connector, default_connector};
+use crate::errors::Error;
+use crate::future::{TelegramFuture, NewTelegramFuture};
+use crate::stream::{NewUpdatesStream, UpdatesStream};
+use hyper::Response;
 
 /// Main type for sending requests to the Telegram bot API.
 #[derive(Clone)]
@@ -114,7 +115,7 @@ impl Api {
     /// let core = Core::new().unwrap();
     /// # let telegram_token = "token";
     /// let api = Api::configure(telegram_token)
-    ///     .connector(hyper::default_connector(&core.handle()).unwrap())
+    ///     .connector(hyper::default_connector().unwrap())
     ///     .build(core.handle()).unwrap();
     /// # }
     ///

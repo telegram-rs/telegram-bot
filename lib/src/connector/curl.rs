@@ -11,8 +11,8 @@ use futures::future::result;
 use tokio_core::reactor::Handle;
 use tokio_curl::Session;
 
-use errors::Error;
-use future::{TelegramFuture, NewTelegramFuture};
+use crate::errors::Error;
+use crate::future::{TelegramFuture, NewTelegramFuture};
 
 use telegram_bot_raw::{HttpRequest, HttpResponse, Method, Body};
 

@@ -2,7 +2,7 @@ use std::ops::Deref;
 
 use serde::ser::{Serialize, Serializer};
 
-use types::*;
+use crate::types::*;
 
 macro_rules! integer_id_impls {
     ($name: ident) => {

@@ -1,5 +1,5 @@
-use requests::*;
-use types::*;
+use crate::requests::*;
+use crate::types::*;
 
 /// Use this method to receive incoming updates using long polling.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

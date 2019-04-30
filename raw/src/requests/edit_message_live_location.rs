@@ -1,5 +1,5 @@
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to edit live location messages sent by the bot.
 /// A location can be edited until its live_period expires or editing

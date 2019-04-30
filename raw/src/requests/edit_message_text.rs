@@ -1,8 +1,8 @@
 use std::ops::Not;
 use std::borrow::Cow;
 
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to edit text messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

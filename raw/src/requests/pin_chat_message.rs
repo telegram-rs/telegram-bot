@@ -1,7 +1,7 @@
 use std::ops::Not;
 
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to pin a message in a supergroup or a channel.
 /// The bot must be an administrator in the chat for this to work

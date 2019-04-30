@@ -1,8 +1,8 @@
 use serde::de::DeserializeOwned;
 use serde_json;
 
-use requests::*;
-use types::*;
+use crate::requests::*;
+use crate::types::*;
 
 pub trait JsonResponse {
     type Raw;

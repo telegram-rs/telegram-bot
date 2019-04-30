@@ -1,5 +1,5 @@
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to kick a user from a group or a supergroup.
 /// In the case of supergroups, the user will not be able to return to the group on

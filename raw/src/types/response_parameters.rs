@@ -1,6 +1,6 @@
 use serde::de::{Deserialize, Deserializer, Error};
 
-use types::*;
+use crate::types::*;
 
 /// All API responses are from this type. Mostly used internal.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]

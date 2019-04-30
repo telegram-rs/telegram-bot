@@ -1,5 +1,5 @@
-use types::*;
-use requests::*;
+use crate::types::*;
+use crate::requests::*;
 
 /// Use this method to edit only the reply markup of messages sent by the bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
