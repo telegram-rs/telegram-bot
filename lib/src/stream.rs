@@ -135,6 +135,8 @@ impl UpdatesStream {
     /// so unwanted updates may be received for a short period of time.
     pub fn allowed_updates(&mut self, allowed_updates: &[AllowedUpdate]) -> &mut Self {
         self.allowed_updates = allowed_updates.to_vec();
+        self
+    }
 
     /// Set limits the number of updates to be retrieved, this corresponds with `limit` field
     /// in [getUpdates](https://core.telegram.org/bots/api#getupdates) method.
