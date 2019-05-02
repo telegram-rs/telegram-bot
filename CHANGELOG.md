@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 0.6.2 - 2018-09-30
+
+### Features
+- `TELEGRAM_API_URL` environment variable allowing to do E2E-testing of the bot.
+
 ## 0.6.1 - 2018-02-17
 
 ### Fixes

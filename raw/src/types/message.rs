@@ -846,7 +846,7 @@ impl File {
     pub fn get_url(&self, token: &str) -> Option<String> {
         self.file_path
             .as_ref()
-            .map(|path| format!("{}file/bot{}/{}", TELEGRAM_URL, token, path))
+            .map(|path| format!("{}file/bot{}/{}", telegram_api_url(), token, path))
     }
 }
 

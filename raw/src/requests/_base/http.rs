@@ -1,4 +1,4 @@
-use crate::url::TELEGRAM_URL;
+use crate::url::telegram_api_url;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum RequestUrl {
@@ -12,7 +12,7 @@ impl RequestUrl {
 
     pub fn url(&self, token: &str) -> String {
         match self {
-            &RequestUrl::Method(method) => format!("{}bot{}/{}", TELEGRAM_URL, token, method),
+            &RequestUrl::Method(method) => format!("{}bot{}/{}", telegram_api_url(), token, method),
         }
     }
 }
