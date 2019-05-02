@@ -1,4 +1,4 @@
-use url::telegram_api_url;
+use crate::url::telegram_api_url;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum RequestUrl {
@@ -40,5 +40,5 @@ pub struct HttpRequest {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct HttpResponse {
-    pub body: Option<Vec<u8>>
+    pub body: Option<Vec<u8>>,
 }

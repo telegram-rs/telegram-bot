@@ -2,6 +2,7 @@
 name = "telegram-bot-raw"
 version = "0.6.2"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
+edition = "2018"
 
 description = "Telegram Bot API types"
 
