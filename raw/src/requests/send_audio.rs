@@ -1,8 +1,8 @@
-use std::ops::Not;
 use std::borrow::Cow;
+use std::ops::Not;
 
-use types::*;
-use requests::*;
+use crate::requests::*;
+use crate::types::*;
 
 /// Use this method to send an audio
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

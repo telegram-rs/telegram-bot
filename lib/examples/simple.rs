@@ -5,8 +5,8 @@ extern crate tokio_core;
 use std::env;
 
 use futures::Stream;
-use tokio_core::reactor::Core;
 use telegram_bot::*;
+use tokio_core::reactor::Core;
 
 fn main() {
     let mut core = Core::new().unwrap();
@@ -16,18 +16,17 @@ fn main() {
 
     // Fetch new updates via long poll method
     let future = api.stream().for_each(|update| {
-
         // If the received update contains a new message...
         if let UpdateKind::Message(message) = update.kind {
-
-            if let MessageKind::Text {ref data, ..} = message.kind {
+            if let MessageKind::Text { ref data, .. } = message.kind {
                 // Print received text message to stdout.
                 println!("<{}>: {}", &message.from.first_name, data);
 
                 // Answer message with "Hi".
-                api.spawn(message.text_reply(
-                    format!("Hi, {}! You just wrote '{}'", &message.from.first_name, data)
-                ));
+                api.spawn(message.text_reply(format!(
+                    "Hi, {}! You just wrote '{}'",
+                    &message.from.first_name, data
+                )));
             }
         }
 
