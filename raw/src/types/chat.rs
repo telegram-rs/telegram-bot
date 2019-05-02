@@ -13,6 +13,8 @@ pub struct User {
     pub last_name: Option<String>,
     /// User‘s or bot’s username.
     pub username: Option<String>,
+    /// True, if this user is a bot.
+    pub is_bot: bool,
     /// IETF language tag of the user's language
     pub language_code: Option<String>,
 }
@@ -116,6 +118,7 @@ impl<'de> Deserialize<'de> for Chat {
                 username: raw.username,
                 first_name: required_field!(first_name),
                 last_name: raw.last_name,
+                is_bot: false,
                 language_code: raw.language_code,
             }),
             "group" => Chat::Group(Group {
