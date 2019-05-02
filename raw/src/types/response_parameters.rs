@@ -21,16 +21,15 @@ pub enum ResponseWrapper<T> {
 
 impl<'de, T: Deserialize<'de>> Deserialize<'de> for ResponseWrapper<T> {
     fn deserialize<D>(deserializer: D) -> Result<ResponseWrapper<T>, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         let raw: RawResponse<T> = Deserialize::deserialize(deserializer)?;
         match (raw.ok, raw.description, raw.result) {
-            (false, Some(description), None) => {
-                Ok(ResponseWrapper::Error {
-                    description: description,
-                    parameters: raw.parameters,
-                })
-            }
+            (false, Some(description), None) => Ok(ResponseWrapper::Error {
+                description: description,
+                parameters: raw.parameters,
+            }),
             (true, None, Some(result)) => Ok(ResponseWrapper::Success { result: result }),
             _ => Err(D::Error::custom("ambiguous response")),
         }

@@ -15,9 +15,9 @@ pub mod prelude;
 pub mod types;
 
 pub use self::api::{Api, Config};
-pub use connector::*;
 pub use self::errors::{Error, ErrorKind};
 pub use self::future::TelegramFuture;
-pub use stream::UpdatesStream;
+pub use connector::*;
 pub use prelude::*;
+pub use stream::UpdatesStream;
 pub use types::*;

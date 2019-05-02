@@ -86,5 +86,7 @@ pub fn default_connector() -> Result<Box<Connector>, Error> {
     let connector = HttpsConnector::new(1).map_err(|err| {
         ::std::io::Error::new(::std::io::ErrorKind::Other, format!("tls error: {}", err))
     })?;
-    Ok(Box::new(HyperConnector::new(Client::builder().build(connector))))
+    Ok(Box::new(HyperConnector::new(
+        Client::builder().build(connector),
+    )))
 }

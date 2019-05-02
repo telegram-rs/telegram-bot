@@ -94,7 +94,8 @@ impl Chat {
 
 impl<'de> Deserialize<'de> for Chat {
     fn deserialize<D>(deserializer: D) -> Result<Chat, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         let raw: RawChat = Deserialize::deserialize(deserializer)?;
 
@@ -102,41 +103,33 @@ impl<'de> Deserialize<'de> for Chat {
             ($name:ident) => {{
                 match raw.$name {
                     Some(val) => val,
-                    None => return Err(D::Error::missing_field(stringify!($name)))
+                    None => return Err(D::Error::missing_field(stringify!($name))),
                 }
-            }}
+            }};
         }
 
         Ok(match raw.type_.as_ref() {
-            "private" => {
-                Chat::Private(User {
-                    id: raw.id.into(),
-                    username: raw.username,
-                    first_name: required_field!(first_name),
-                    last_name: raw.last_name,
-                })
-            }
-            "group" => {
-                Chat::Group(Group {
-                    id: raw.id.into(),
-                    title: required_field!(title),
-                    all_members_are_administrators: required_field!(all_members_are_administrators),
-                })
-            }
-            "supergroup" => {
-                Chat::Supergroup(Supergroup {
-                    id: raw.id.into(),
-                    title: required_field!(title),
-                    username: raw.username,
-                })
-            }
-            "channel" => {
-                Chat::Channel(Channel {
-                    id: raw.id.into(),
-                    title: required_field!(title),
-                    username: raw.username,
-                })
-            }
+            "private" => Chat::Private(User {
+                id: raw.id.into(),
+                username: raw.username,
+                first_name: required_field!(first_name),
+                last_name: raw.last_name,
+            }),
+            "group" => Chat::Group(Group {
+                id: raw.id.into(),
+                title: required_field!(title),
+                all_members_are_administrators: required_field!(all_members_are_administrators),
+            }),
+            "supergroup" => Chat::Supergroup(Supergroup {
+                id: raw.id.into(),
+                title: required_field!(title),
+                username: raw.username,
+            }),
+            "channel" => Chat::Channel(Channel {
+                id: raw.id.into(),
+                title: required_field!(title),
+                username: raw.username,
+            }),
             _ => Chat::Unknown(raw),
         })
     }
@@ -148,7 +141,7 @@ pub struct RawChat {
     /// Unique identifier for this chat.
     pub id: Integer,
     /// Type of chat, can be either “private”, “group”, “supergroup” or “channel”
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     pub type_: String,
     /// Title, for supergroups, channels and group chats
     pub title: Option<String>,

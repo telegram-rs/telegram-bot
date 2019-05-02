@@ -2,17 +2,16 @@ use std::borrow::Borrow;
 use std::rc::Rc;
 use std::time::Duration;
 
-use futures::{Future};
-use futures::future::{result};
+use futures::future::result;
+use futures::Future;
 use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{Request, ResponseType};
 
-use crate::connector::{Connector, default_connector};
+use crate::connector::{default_connector, Connector};
 use crate::errors::Error;
-use crate::future::{TelegramFuture, NewTelegramFuture};
+use crate::future::{NewTelegramFuture, TelegramFuture};
 use crate::stream::{NewUpdatesStream, UpdatesStream};
-use hyper::Response;
 
 /// Main type for sending requests to the Telegram bot API.
 #[derive(Clone)]
@@ -29,7 +28,7 @@ struct ApiInner {
 #[derive(Debug)]
 pub enum ConnectorConfig {
     Default,
-    Specified(Box<Connector>)
+    Specified(Box<Connector>),
 }
 
 impl Default for ConnectorConfig {
@@ -46,7 +45,7 @@ impl ConnectorConfig {
     pub fn take(self, handle: &Handle) -> Result<Box<Connector>, Error> {
         match self {
             ConnectorConfig::Default => default_connector(&handle),
-            ConnectorConfig::Specified(connector) => Ok(connector)
+            ConnectorConfig::Specified(connector) => Ok(connector),
         }
     }
 }
@@ -206,14 +205,18 @@ impl Api {
     /// # }
     /// ```
     pub fn send_timeout<Req: Request>(
-        &self, request: Req, duration: Duration)
-        -> TelegramFuture<Option<<Req::Response as ResponseType>::Type>> {
-
+        &self,
+        request: Req,
+        duration: Duration,
+    ) -> TelegramFuture<Option<<Req::Response as ResponseType>::Type>> {
         let timeout_future = result(Timeout::new(duration, &self.inner.handle))
-            .flatten().map_err(From::from).map(|()| None);
+            .flatten()
+            .map_err(From::from)
+            .map(|()| None);
         let send_future = self.send(request).map(|resp| Some(resp));
 
-        let future = timeout_future.select(send_future)
+        let future = timeout_future
+            .select(send_future)
             .map(|(item, _next)| item)
             .map_err(|(item, _next)| item);
 
@@ -242,11 +245,11 @@ impl Api {
     /// # }
     /// # }
     /// ```
-    pub fn send<Req: Request>(&self, request: Req)
-        -> TelegramFuture<<Req::Response as ResponseType>::Type> {
-
-        let request = request.serialize()
-            .map_err(From::from);
+    pub fn send<Req: Request>(
+        &self,
+        request: Req,
+    ) -> TelegramFuture<<Req::Response as ResponseType>::Type> {
+        let request = request.serialize().map_err(From::from);
 
         let request = result(request);
 
@@ -256,9 +259,8 @@ impl Api {
             api.inner.connector.request(token, request)
         });
 
-        let future = response.and_then(move |response| {
-            Req::Response::deserialize(response).map_err(From::from)
-        });
+        let future = response
+            .and_then(move |response| Req::Response::deserialize(response).map_err(From::from));
 
         TelegramFuture::new(Box::new(future))
     }
