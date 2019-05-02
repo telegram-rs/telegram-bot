@@ -68,5 +68,7 @@ This library is available via `crates.io`. In order to use it, just add this to 
 telegram-bot = "0.6"
 ```
 
+The library allows you to do E2E-testing of your bot easily: just specify `TELEGRAM_API_URL` environment variable to point to your fake Telegram test server.
+
 ## Collaboration
 Yes please! Every type of contribution is welcome: Create issues, hack some code or make suggestions. Don't know where to start? Good first issues are tagged with [up for grab](https://github.com/telegram-rs/telegram-bot/issues?q=is%3Aissue+is%3Aopen+label%3A%22up+for+grab%22).
