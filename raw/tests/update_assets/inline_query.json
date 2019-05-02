@@ -1,0 +1,14 @@
+{
+  "update_id": 424151280,
+  "inline_query": {
+    "id": "inline query id",
+    "from": {
+      "id": 174976101,
+      "first_name": "Fedor",
+      "last_name": "Gogolev",
+      "username": "FedorGogolev"
+    },
+    "query": "user query",
+    "offset": "0"
+  }
+}

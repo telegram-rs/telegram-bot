@@ -43,3 +43,11 @@ make_test!(migrate_to_chat_id, |update: Update| {
     }
     assert!(false)
 });
+
+make_test!(inline_query, |update: Update| {
+    if let UpdateKind::InlineQuery(query) = update.kind {
+        return ();
+    }
+
+    assert!(false)
+});

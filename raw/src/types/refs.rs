@@ -387,26 +387,8 @@ impl ToCallbackQueryId for CallbackQuery {
 }
 
 /// Unique identifier for CallbackQuery.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct CallbackQueryId {
-    inner: String,
-}
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub struct CallbackQueryId(String);
 
-impl<'de> ::serde::de::Deserialize<'de> for CallbackQueryId {
-    fn deserialize<D>(deserializer: D) -> Result<CallbackQueryId, D::Error>
-    where
-        D: ::serde::de::Deserializer<'de>,
-    {
-        let inner = ::serde::de::Deserialize::deserialize(deserializer)?;
-        Ok(Self { inner })
-    }
-}
-
-impl Serialize for CallbackQueryId {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.inner)
-    }
-}
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub struct InlineQueryId(String);
