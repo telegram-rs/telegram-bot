@@ -1,4 +1,4 @@
-use types::*;
+use crate::types::*;
 
 /// This object represents an incoming callback query from a callback button in an inline keyboard.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]

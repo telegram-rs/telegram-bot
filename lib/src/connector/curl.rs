@@ -1,26 +1,26 @@
 //! Connector with tokio-curl backend.
 
 use std::fmt;
-use std::sync::Arc;
 use std::rc::Rc;
+use std::sync::Arc;
 
 use antidote::Mutex;
 use curl::easy::{Easy, List};
-use futures::Future;
 use futures::future::result;
+use futures::Future;
 use tokio_core::reactor::Handle;
 use tokio_curl::Session;
 
-use errors::Error;
-use future::{TelegramFuture, NewTelegramFuture};
+use crate::errors::Error;
+use crate::future::{NewTelegramFuture, TelegramFuture};
 
-use telegram_bot_raw::{HttpRequest, HttpResponse, Method, Body};
+use telegram_bot_raw::{Body, HttpRequest, HttpResponse, Method};
 
 use super::_base::Connector;
 
 /// This connector uses `tokio-curl` backend.
 pub struct CurlConnector {
-    inner: Rc<Session>
+    inner: Rc<Session>,
 }
 
 impl fmt::Debug for CurlConnector {
@@ -32,11 +32,15 @@ impl fmt::Debug for CurlConnector {
 impl CurlConnector {
     pub fn new(handle: &Handle) -> Self {
         CurlConnector {
-            inner: Rc::new(Session::new(handle.clone()))
+            inner: Rc::new(Session::new(handle.clone())),
         }
     }
 
-    fn create_request(&self, token: &str, request: HttpRequest) -> Result<(Easy, Arc<Mutex<Vec<u8>>>), Error> {
+    fn create_request(
+        &self,
+        token: &str,
+        request: HttpRequest,
+    ) -> Result<(Easy, Arc<Mutex<Vec<u8>>>), Error> {
         let mut handle = Easy::new();
 
         let url = request.url.url(token);
@@ -56,7 +60,7 @@ impl CurlConnector {
                 headers.append(&format!("Content-Type: application/json"))?;
                 handle.http_headers(headers)?;
             }
-            body => panic!("Unknown body type {:?}", body)
+            body => panic!("Unknown body type {:?}", body),
         }
 
         let result = Arc::new(Mutex::new(Vec::new()));
@@ -85,9 +89,7 @@ impl Connector for CurlConnector {
             let mut guard = result.lock();
             let prev: &mut Vec<u8> = &mut guard;
             ::std::mem::swap(prev, &mut swap);
-            Ok(HttpResponse {
-                body: Some(swap)
-            })
+            Ok(HttpResponse { body: Some(swap) })
         });
 
         TelegramFuture::new(Box::new(future))

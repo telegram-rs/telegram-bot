@@ -1,6 +1,6 @@
 use serde::de::{Deserialize, Deserializer, Error};
 
-use types::*;
+use crate::types::*;
 
 /// This object represents a Telegram user or bot.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Deserialize)]
@@ -15,6 +15,8 @@ pub struct User {
     pub username: Option<String>,
     /// True, if this user is a bot.
     pub is_bot: bool,
+    /// IETF language tag of the user's language
+    pub language_code: Option<String>,
 }
 
 /// This object represents a group.
@@ -96,7 +98,8 @@ impl Chat {
 
 impl<'de> Deserialize<'de> for Chat {
     fn deserialize<D>(deserializer: D) -> Result<Chat, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         let raw: RawChat = Deserialize::deserialize(deserializer)?;
 
@@ -104,42 +107,35 @@ impl<'de> Deserialize<'de> for Chat {
             ($name:ident) => {{
                 match raw.$name {
                     Some(val) => val,
-                    None => return Err(D::Error::missing_field(stringify!($name)))
+                    None => return Err(D::Error::missing_field(stringify!($name))),
                 }
-            }}
+            }};
         }
 
         Ok(match raw.type_.as_ref() {
-            "private" => {
-                Chat::Private(User {
-                    id: raw.id.into(),
-                    username: raw.username,
-                    first_name: required_field!(first_name),
-                    last_name: raw.last_name,
-                    is_bot: false,
-                })
-            }
-            "group" => {
-                Chat::Group(Group {
-                    id: raw.id.into(),
-                    title: required_field!(title),
-                    all_members_are_administrators: required_field!(all_members_are_administrators),
-                })
-            }
-            "supergroup" => {
-                Chat::Supergroup(Supergroup {
-                    id: raw.id.into(),
-                    title: required_field!(title),
-                    username: raw.username,
-                })
-            }
-            "channel" => {
-                Chat::Channel(Channel {
-                    id: raw.id.into(),
-                    title: required_field!(title),
-                    username: raw.username,
-                })
-            }
+            "private" => Chat::Private(User {
+                id: raw.id.into(),
+                username: raw.username,
+                first_name: required_field!(first_name),
+                last_name: raw.last_name,
+                is_bot: false,
+                language_code: raw.language_code,
+            }),
+            "group" => Chat::Group(Group {
+                id: raw.id.into(),
+                title: required_field!(title),
+                all_members_are_administrators: required_field!(all_members_are_administrators),
+            }),
+            "supergroup" => Chat::Supergroup(Supergroup {
+                id: raw.id.into(),
+                title: required_field!(title),
+                username: raw.username,
+            }),
+            "channel" => Chat::Channel(Channel {
+                id: raw.id.into(),
+                title: required_field!(title),
+                username: raw.username,
+            }),
             _ => Chat::Unknown(raw),
         })
     }
@@ -151,7 +147,7 @@ pub struct RawChat {
     /// Unique identifier for this chat.
     pub id: Integer,
     /// Type of chat, can be either “private”, “group”, “supergroup” or “channel”
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     pub type_: String,
     /// Title, for supergroups, channels and group chats
     pub title: Option<String>,
@@ -161,6 +157,8 @@ pub struct RawChat {
     pub first_name: Option<String>,
     /// Last name of the other party in a private chat
     pub last_name: Option<String>,
+    /// IETF language tag of the other party in a private chat
+    pub language_code: Option<String>,
     /// True if a group has ‘All Members Are Admins’ enabled.
     pub all_members_are_administrators: Option<bool>,
 }

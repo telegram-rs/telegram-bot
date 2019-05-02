@@ -1,4 +1,4 @@
-use types::*;
+use crate::types::*;
 
 error_chain! {
     foreign_links {

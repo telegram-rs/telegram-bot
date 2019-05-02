@@ -1,4 +1,4 @@
-use requests::*;
+use crate::requests::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash, Serialize, Deserialize)]
 pub struct DetachedRequestType;
