@@ -16,7 +16,7 @@ pub use telegram_bot_raw::{MessageEntity, MessageEntityKind};
 pub use telegram_bot_raw::{
     ToCallbackQueryId, ToChatRef, ToFileRef, ToMessageId, ToSourceChat, ToUserId,
 };
-pub use telegram_bot_raw::{Update, UpdateKind};
+pub use telegram_bot_raw::{Update, UpdateKind, AllowedUpdate};
 
 pub use telegram_bot_raw::ChatAction;
 pub use telegram_bot_raw::ParseMode;
