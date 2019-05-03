@@ -119,6 +119,9 @@ macro_rules! reply_markup {
     (_inline_keyboard_button, callback, $text:expr, $callback:expr) => (
         $crate::InlineKeyboardButton::callback($text, $callback)
     );
+    (_inline_keyboard_button, url, $text:expr, $url:expr) => (
+        $crate::InlineKeyboardButton::url($text, $url)
+    );
 }
 
 #[cfg(test)]

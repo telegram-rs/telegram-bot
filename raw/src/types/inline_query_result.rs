@@ -14,20 +14,34 @@ pub struct InlineQueryResultArticle {
     id: String,
     title: String,
     input_message_content: InputMessageContent,
+    description: Option<String>,
+    reply_markup: Option<ReplyMarkup>,
     // TODO: Rest of the fields
 }
 
 impl InlineQueryResultArticle {
-    pub fn new(
-        id: String,
-        title: String,
-        input_message_content: InputMessageContent,
+    pub fn new<T: Into<String>, U: Into<String>, V: Into<InputMessageContent>>(
+        id: T,
+        title: U,
+        input_message_content: V,
     ) -> InlineQueryResultArticle {
         InlineQueryResultArticle {
-            id,
-            title,
-            input_message_content,
+            id: id.into(),
+            title: title.into(),
+            input_message_content: input_message_content.into(),
+            description: None,
+            reply_markup: None
         }
+    }
+
+    pub fn description<T: Into<String>>(&mut self, description: T) -> &mut Self {
+        self.description = Some(description.into());
+        self
+    }
+
+    pub fn reply_markup<T: Into<ReplyMarkup>>(&mut self, markup: T) -> &mut Self {
+        self.reply_markup = Some(markup.into());
+        self
     }
 }
 

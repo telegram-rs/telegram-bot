@@ -1,10 +1,9 @@
 use std::ops::Not;
 
-use serde::ser::{Serialize, Serializer};
-
 use crate::types::*;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[serde(untagged)]
 pub enum ReplyMarkup {
     InlineKeyboardMarkup(InlineKeyboardMarkup),
     ReplyKeyboardMarkup(ReplyKeyboardMarkup),
@@ -33,20 +32,6 @@ impl From<ReplyKeyboardRemove> for ReplyMarkup {
 impl From<ForceReply> for ReplyMarkup {
     fn from(value: ForceReply) -> ReplyMarkup {
         ReplyMarkup::ForceReply(value)
-    }
-}
-
-impl Serialize for ReplyMarkup {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        match *self {
-            ReplyMarkup::InlineKeyboardMarkup(ref value) => value.serialize(serializer),
-            ReplyMarkup::ReplyKeyboardMarkup(ref value) => value.serialize(serializer),
-            ReplyMarkup::ReplyKeyboardRemove(ref value) => value.serialize(serializer),
-            ReplyMarkup::ForceReply(ref value) => value.serialize(serializer),
-        }
     }
 }
 
@@ -234,9 +219,10 @@ impl From<Vec<Vec<InlineKeyboardButton>>> for InlineKeyboardMarkup {
 }
 
 /// This object represents one button of an inline keyboard.
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct InlineKeyboardButton {
     text: String,
+    #[serde(flatten)]
     kind: InlineKeyboardButtonKind,
 }
 
@@ -248,43 +234,24 @@ impl InlineKeyboardButton {
             kind: InlineKeyboardButtonKind::CallbackData(callback.as_ref().to_string()),
         }
     }
-}
 
-impl Serialize for InlineKeyboardButton {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        use self::InlineKeyboardButtonKind::*;
-
-        let mut raw = InlineKeyboardButtonRaw {
-            text: &self.text,
-            url: None,
-            callback_data: None,
-            switch_inline_query: None,
-            switch_inline_query_current_chat: None,
-            //            callback_game: None,
-        };
-
-        match self.kind {
-            //            Url(ref data) => raw.url = Some(data),
-            CallbackData(ref data) => raw.callback_data = Some(data),
-            //            SwitchInlineQuery(ref data) => raw.switch_inline_query = Some(data),
-            //            SwitchInlineQueryCurrentChat(ref data) => raw.switch_inline_query_current_chat = Some(data),
-            //            CallbackGame(ref data) => raw.callback_game = Some(data),
+    pub fn url<T: AsRef<str>, U: AsRef<str>>(text: T, url: U) -> Self {
+        Self {
+            text: text.as_ref().to_string(),
+            kind: InlineKeyboardButtonKind::Url(url.as_ref().to_string()),
         }
-
-        Serialize::serialize(&raw, serializer)
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum InlineKeyboardButtonKind {
-    //    Url(String), // TODO(knsd): Url?
-    CallbackData(String), //TODO(knsd) Validate size?
-                          //    SwitchInlineQuery(String),
-                          //    SwitchInlineQueryCurrentChat(String),
-                          //    CallbackGame(CallbackGame),
+    #[serde(rename = "url")]
+    Url(String),          // TODO(knsd): Url?
+    #[serde(rename = "callback_data")]
+    CallbackData(String), // TODO(knsd) Validate size?
+//  SwitchInlineQuery(String),
+//  SwitchInlineQueryCurrentChat(String),
+//  CallbackGame(CallbackGame),
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
