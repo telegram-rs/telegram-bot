@@ -17,6 +17,12 @@ impl From<InlineKeyboardMarkup> for ReplyMarkup {
     }
 }
 
+impl From<Vec<Vec<InlineKeyboardButton>>> for ReplyMarkup {
+    fn from(value: Vec<Vec<InlineKeyboardButton>>) -> ReplyMarkup {
+        ReplyMarkup::InlineKeyboardMarkup(value.into())
+    }
+}
+
 impl From<ReplyKeyboardMarkup> for ReplyMarkup {
     fn from(value: ReplyKeyboardMarkup) -> ReplyMarkup {
         ReplyMarkup::ReplyKeyboardMarkup(value)
