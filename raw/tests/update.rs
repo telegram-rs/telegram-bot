@@ -1,8 +1,3 @@
-extern crate serde;
-extern crate serde_json;
-
-extern crate telegram_bot_raw;
-
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -41,5 +36,13 @@ make_test!(migrate_to_chat_id, |update: Update| {
             return ();
         }
     }
+    assert!(false)
+});
+
+make_test!(inline_query, |update: Update| {
+    if let UpdateKind::InlineQuery(_query) = update.kind {
+        return ();
+    }
+
     assert!(false)
 });

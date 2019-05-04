@@ -1,5 +1,6 @@
 pub mod _base;
 pub mod answer_callback_query;
+pub mod answer_inline_query;
 pub mod delete_message;
 pub mod edit_message_caption;
 pub mod edit_message_live_location;
@@ -29,6 +30,7 @@ pub mod unpin_chat_message;
 
 pub use self::_base::*;
 pub use self::answer_callback_query::*;
+pub use self::answer_inline_query::*;
 pub use self::delete_message::*;
 pub use self::edit_message_caption::*;
 pub use self::edit_message_live_location::*;

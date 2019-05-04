@@ -3,6 +3,7 @@
 //! This module re-exports request builder traits from telegram-bot-raw.
 
 pub use telegram_bot_raw::CanAnswerCallbackQuery;
+pub use telegram_bot_raw::CanAnswerInlineQuery;
 pub use telegram_bot_raw::CanLeaveChat;
 pub use telegram_bot_raw::CanSendChatAction;
 pub use telegram_bot_raw::{CanDeleteMessage, CanForwardMessage};
