@@ -735,6 +735,8 @@ pub struct Sticker {
     pub thumb: Option<PhotoSize>,
     /// Emoji associated with the sticker.
     pub emoji: Option<String>,
+    /// The name of the sticker set this sticker belongs to.
+    pub set_name: Option<String>,
     /// File size.
     pub file_size: Option<Integer>,
 }
