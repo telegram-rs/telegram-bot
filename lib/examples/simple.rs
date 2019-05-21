@@ -11,7 +11,7 @@ use tokio_core::reactor::Core;
 fn main() {
     let mut core = Core::new().unwrap();
 
-    let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
+    let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
     let api = Api::configure(token).build(core.handle()).unwrap();
 
     // Fetch new updates via long poll method
