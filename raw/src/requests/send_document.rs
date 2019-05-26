@@ -1,14 +1,14 @@
-use std::ops::Not;
 use std::borrow::Cow;
+use std::ops::Not;
 
-use types::*;
 use requests::*;
+use types::*;
 
 /// Use this method to send general files. On success, the sent Message is returned.
 /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendDocument<'s, 'c, 'p, 't> {
+pub struct SendDocument<'s, 'c> {
     chat_id: ChatRef,
     document: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -23,7 +23,7 @@ pub struct SendDocument<'s, 'c, 'p, 't> {
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'s, 'c, 'p, 't> Request for SendDocument<'s, 'c, 'p, 't> {
+impl<'s, 'c> Request for SendDocument<'s, 'c> {
     type Type = JsonRequestType<Self>;
     type Response = JsonTrueToUnitResponse;
 
@@ -32,7 +32,7 @@ impl<'s, 'c, 'p, 't> Request for SendDocument<'s, 'c, 'p, 't> {
     }
 }
 
-impl<'s, 'c, 'p, 't> SendDocument<'s, 'c, 'p, 't> {
+impl<'s, 'c> SendDocument<'s, 'c> {
     pub fn with_url<C, T>(chat: C, url: T) -> Self
     where
         C: ToChatRef,
@@ -81,7 +81,7 @@ impl<'s, 'c, 'p, 't> SendDocument<'s, 'c, 'p, 't> {
 
 /// Can reply with a document
 pub trait CanReplySendDocument {
-    fn document_url_reply<'s, 'c, 'p, 't, T>(&self, url: T) -> SendDocument<'s, 'c, 'p, 't>
+    fn document_url_reply<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
     where
         T: Into<Cow<'s, str>>;
 }
@@ -90,7 +90,7 @@ impl<M> CanReplySendDocument for M
 where
     M: ToMessageId + ToSourceChat,
 {
-    fn document_url_reply<'s, 'c, 'p, 't, T>(&self, url: T) -> SendDocument<'s, 'c, 'p, 't>
+    fn document_url_reply<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
     where
         T: Into<Cow<'s, str>>,
     {
@@ -102,7 +102,7 @@ where
 
 /// Send an audio
 pub trait CanSendDocument {
-    fn document_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendDocument<'s, 'c, 'p, 't>
+    fn document_url<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
     where
         T: Into<Cow<'s, str>>;
 }
@@ -111,7 +111,7 @@ impl<M> CanSendDocument for M
 where
     M: ToChatRef,
 {
-    fn document_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendDocument<'s, 'c, 'p, 't>
+    fn document_url<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
     where
         T: Into<Cow<'s, str>>,
     {
