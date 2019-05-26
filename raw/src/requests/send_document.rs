@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 use std::ops::Not;
 
-use requests::*;
-use types::*;
+use crate::requests::*;
+use crate::types::*;
 
 /// Use this method to send general files. On success, the sent Message is returned.
 /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
@@ -28,7 +28,7 @@ impl<'s, 'c> Request for SendDocument<'s, 'c> {
     type Response = JsonTrueToUnitResponse;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
-        Self::Type::serialize(RequestUrl::method("SendDocument"), self)
+        Self::Type::serialize(RequestUrl::method("sendDocument"), self)
     }
 }
 
@@ -95,7 +95,7 @@ where
         T: Into<Cow<'s, str>>,
     {
         let mut req = SendDocument::with_url(self.to_source_chat(), url);
-        req.reply_to(self);
+        req.reply_to(self.to_message_id());
         req
     }
 }
