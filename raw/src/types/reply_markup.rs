@@ -252,12 +252,12 @@ impl InlineKeyboardButton {
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum InlineKeyboardButtonKind {
     #[serde(rename = "url")]
-    Url(String),          // TODO(knsd): Url?
+    Url(String), // TODO(knsd): Url?
     #[serde(rename = "callback_data")]
     CallbackData(String), // TODO(knsd) Validate size?
-//  SwitchInlineQuery(String),
-//  SwitchInlineQueryCurrentChat(String),
-//  CallbackGame(CallbackGame),
+                          //  SwitchInlineQuery(String),
+                          //  SwitchInlineQueryCurrentChat(String),
+                          //  CallbackGame(CallbackGame),
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]

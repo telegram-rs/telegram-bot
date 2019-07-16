@@ -30,7 +30,7 @@ impl InlineQueryResultArticle {
             title: title.into(),
             input_message_content: input_message_content.into(),
             description: None,
-            reply_markup: None
+            reply_markup: None,
         }
     }
 

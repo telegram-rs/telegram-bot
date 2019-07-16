@@ -6,7 +6,7 @@ use futures::future;
 use futures::{Async, Future, Poll, Stream};
 use tokio_core::reactor::{Handle, Timeout};
 
-use telegram_bot_raw::{GetUpdates, AllowedUpdate, Update, Integer};
+use telegram_bot_raw::{AllowedUpdate, GetUpdates, Integer, Update};
 
 use crate::api::Api;
 use crate::errors::Error;
