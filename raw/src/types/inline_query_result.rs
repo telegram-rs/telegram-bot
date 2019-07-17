@@ -14,7 +14,9 @@ pub struct InlineQueryResultArticle {
     id: String,
     title: String,
     input_message_content: InputMessageContent,
+    #[serde(skip_serializing_if = "Option::is_none")]
     description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
     // TODO: Rest of the fields
 }
