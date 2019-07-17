@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 0.6.3 - 2019-07-17
+
+### Fixes
+- Fix InlineQueryResultArticle serialization
+
 ## 0.6.2 - 2018-09-30
 
 ### Refactor
