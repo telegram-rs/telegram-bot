@@ -18,16 +18,9 @@ fn main() {
     let future = api.stream().for_each(|update| {
         // If the received update contains a new message...
         if let UpdateKind::Message(message) = update.kind {
-            if let MessageKind::Text { ref data, .. } = message.kind {
-                // Print received text message to stdout.
-                println!("<{}>: {}", &message.from.first_name, data);
-
-                // Answer message with "Hi".
-                api.spawn(message.text_reply(format!(
-                    "Hi, {}! You just wrote '{}'",
-                    &message.from.first_name, data
-                )));
-            }
+            api.spawn(dbg!(message.document_url_reply(
+                "https://media.giphy.com/media/QvvtwToKIUUpWXDPK6/giphy.gif"
+            )));
         }
 
         Ok(())

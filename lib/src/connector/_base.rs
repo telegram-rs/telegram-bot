@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use future::TelegramFuture;
+use crate::future::TelegramFuture;
 
 use telegram_bot_raw::{HttpRequest, HttpResponse};
 

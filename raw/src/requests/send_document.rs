@@ -4,22 +4,17 @@ use std::ops::Not;
 use crate::requests::*;
 use crate::types::*;
 
-/// Use this method to send an audio
+/// Use this method to send general files. On success, the sent Message is returned.
+/// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendAudio<'s, 'c, 'p, 't> {
+pub struct SendDocument<'s, 'c> {
     chat_id: ChatRef,
-    audio: Cow<'s, str>,
+    document: Cow<'s, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     caption: Option<Cow<'c, str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     parse_mode: Option<ParseMode>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    duration: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    performer: Option<Cow<'p, str>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    title: Option<Cow<'t, str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_to_message_id: Option<MessageId>,
     #[serde(skip_serializing_if = "Not::not")]
@@ -28,16 +23,16 @@ pub struct SendAudio<'s, 'c, 'p, 't> {
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'s, 'c, 'p, 't> Request for SendAudio<'s, 'c, 'p, 't> {
+impl<'s, 'c> Request for SendDocument<'s, 'c> {
     type Type = JsonRequestType<Self>;
     type Response = JsonTrueToUnitResponse;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
-        Self::Type::serialize(RequestUrl::method("sendAudio"), self)
+        Self::Type::serialize(RequestUrl::method("sendDocument"), self)
     }
 }
 
-impl<'s, 'c, 'p, 't> SendAudio<'s, 'c, 'p, 't> {
+impl<'s, 'c> SendDocument<'s, 'c> {
     pub fn with_url<C, T>(chat: C, url: T) -> Self
     where
         C: ToChatRef,
@@ -45,12 +40,9 @@ impl<'s, 'c, 'p, 't> SendAudio<'s, 'c, 'p, 't> {
     {
         Self {
             chat_id: chat.to_chat_ref(),
-            audio: url.into(),
+            document: url.into(),
             caption: None,
             parse_mode: None,
-            duration: None,
-            performer: None,
-            title: None,
             reply_to_message_id: None,
             reply_markup: None,
             disable_notification: false,
@@ -67,27 +59,6 @@ impl<'s, 'c, 'p, 't> SendAudio<'s, 'c, 'p, 't> {
 
     pub fn parse_mode(&mut self, parse_mode: ParseMode) -> &mut Self {
         self.parse_mode = Some(parse_mode);
-        self
-    }
-
-    pub fn duration(&mut self, duration: i64) -> &mut Self {
-        self.duration = Some(duration);
-        self
-    }
-
-    pub fn performer<T>(&mut self, performer: T) -> &mut Self
-    where
-        T: Into<Cow<'p, str>>,
-    {
-        self.performer = Some(performer.into());
-        self
-    }
-
-    pub fn title<T>(&mut self, title: T) -> &mut Self
-    where
-        T: Into<Cow<'t, str>>,
-    {
-        self.title = Some(title.into());
         self
     }
 
@@ -108,42 +79,42 @@ impl<'s, 'c, 'p, 't> SendAudio<'s, 'c, 'p, 't> {
     }
 }
 
-/// Can reply with an audio
-pub trait CanReplySendAudio {
-    fn audio_url_reply<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+/// Can reply with a document
+pub trait CanReplySendDocument {
+    fn document_url_reply<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
     where
         T: Into<Cow<'s, str>>;
 }
 
-impl<M> CanReplySendAudio for M
+impl<M> CanReplySendDocument for M
 where
     M: ToMessageId + ToSourceChat,
 {
-    fn audio_url_reply<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn document_url_reply<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
     where
         T: Into<Cow<'s, str>>,
     {
-        let mut req = SendAudio::with_url(self.to_source_chat(), url);
-        req.reply_to(self);
+        let mut req = SendDocument::with_url(self.to_source_chat(), url);
+        req.reply_to(self.to_message_id());
         req
     }
 }
 
 /// Send an audio
-pub trait CanSendAudio {
-    fn audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+pub trait CanSendDocument {
+    fn document_url<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
     where
         T: Into<Cow<'s, str>>;
 }
 
-impl<M> CanSendAudio for M
+impl<M> CanSendDocument for M
 where
     M: ToChatRef,
 {
-    fn audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn document_url<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
     where
         T: Into<Cow<'s, str>>,
     {
-        SendAudio::with_url(self.to_chat_ref(), url)
+        SendDocument::with_url(self.to_chat_ref(), url)
     }
 }

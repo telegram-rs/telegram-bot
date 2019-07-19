@@ -1,7 +1,7 @@
 use serde::Serialize;
 use serde_json;
 
-use requests::*;
+use crate::requests::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash, Serialize, Deserialize)]
 pub struct JsonRequestType<Request> {
