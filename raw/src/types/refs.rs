@@ -146,6 +146,7 @@ impl ToChatRef for ForwardFrom {
         match *self {
             ForwardFrom::User { ref user, .. } => user.to_chat_ref(),
             ForwardFrom::Channel { ref channel, .. } => channel.to_chat_ref(),
+            ForwardFrom::ChannelHiddenUser { ref sender_name } => ChatRef::ChannelUsername(sender_name.clone())
         }
     }
 }

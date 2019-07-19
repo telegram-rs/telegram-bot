@@ -76,6 +76,9 @@ pub enum ForwardFrom {
         /// Identifier of the original message in the channel
         message_id: Integer,
     },
+    ChannelHiddenUser {
+        sender_name: String
+    }
 }
 
 /// Kind of the message.
@@ -227,19 +230,26 @@ impl Message {
             &raw.forward_from,
             &raw.forward_from_chat,
             raw.forward_from_message_id,
+            &raw.forward_sender_name
         ) {
-            (None, &None, &None, None) => None,
-            (Some(date), &Some(ref from), &None, None) => Some(Forward {
+            (None, &None, &None, None, &None) => None,
+            (Some(date), &Some(ref from), &None, None, &None) => Some(Forward {
                 date: date,
                 from: ForwardFrom::User { user: from.clone() },
             }),
-            (Some(date), &None, &Some(Chat::Channel(ref channel)), Some(message_id)) => {
+            (Some(date), &None, &Some(Chat::Channel(ref channel)), Some(message_id), &None) => {
                 Some(Forward {
                     date: date,
                     from: ForwardFrom::Channel {
                         channel: channel.clone(),
                         message_id: message_id,
                     },
+                })
+            }
+            (Some(date), &None, &None, None, &Some(ref sender_name)) => {
+                Some(Forward {
+                    date,
+                    from: ForwardFrom::ChannelHiddenUser { sender_name: sender_name.clone() },
                 })
             }
             _ => return Err(format!("invalid forward fields combination")),
@@ -359,19 +369,26 @@ impl ChannelPost {
             &raw.forward_from,
             &raw.forward_from_chat,
             raw.forward_from_message_id,
+            &raw.forward_sender_name
         ) {
-            (None, &None, &None, None) => None,
-            (Some(date), &Some(ref from), &None, None) => Some(Forward {
+            (None, &None, &None, None, &None) => None,
+            (Some(date), &Some(ref from), &None, None, &None) => Some(Forward {
                 date: date,
                 from: ForwardFrom::User { user: from.clone() },
             }),
-            (Some(date), &None, &Some(Chat::Channel(ref channel)), Some(message_id)) => {
+            (Some(date), &None, &Some(Chat::Channel(ref channel)), Some(message_id), &None) => {
                 Some(Forward {
                     date: date,
                     from: ForwardFrom::Channel {
                         channel: channel.clone(),
                         message_id: message_id,
                     },
+                })
+            }
+            (Some(date), &None, &None, None, &Some(ref sender_name)) => {
+                Some(Forward {
+                    date,
+                    from: ForwardFrom::ChannelHiddenUser { sender_name: sender_name.clone() },
                 })
             }
             _ => return Err(format!("invalid forward fields combination")),
@@ -582,6 +599,8 @@ pub struct RawMessage {
     /// Specified message was pinned. Note that the Message object in this field will not contain
     /// further reply_to_message fields even if it is itself a reply.
     pub pinned_message: Option<Box<MessageOrChannelPost>>,
+    /// Forward from channel by a hidden user.
+    pub forward_sender_name: Option<String>,
 }
 
 /// This object represents one special entity in a text message.
