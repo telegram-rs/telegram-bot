@@ -1,18 +1,13 @@
-extern crate telegram_bot;
-extern crate tokio_core;
-
+#![feature(async_await, async_closure)]
 use std::env;
 
-use telegram_bot::{Api, GetMe};
-use tokio_core::reactor::Core;
+use telegram_bot::{Api, Error, GetMe};
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Error> {
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
 
-    let mut core = Core::new().unwrap();
-
-    let api = Api::configure(token).build(core.handle()).unwrap();
-    let future = api.send(GetMe);
-
-    println!("{:?}", core.run(future))
+    let api = Api::new(token);
+    api.send(GetMe).await?;
+    Ok(())
 }

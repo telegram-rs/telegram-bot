@@ -1,130 +1,56 @@
-use std::borrow::Borrow;
-use std::rc::Rc;
 use std::time::Duration;
 
-use futures::future::result;
-use futures::Future;
-use tokio_core::reactor::{Handle, Timeout};
+use tokio::timer::Timeout;
 
 use telegram_bot_raw::{Request, ResponseType};
 
-use crate::connector::{default_connector, Connector};
+use crate::connector;
 use crate::errors::Error;
-use crate::future::{NewTelegramFuture, TelegramFuture};
-use crate::stream::{NewUpdatesStream, UpdatesStream};
+use crate::stream::UpdatesStream;
 
 /// Main type for sending requests to the Telegram bot API.
 #[derive(Clone)]
 pub struct Api {
-    inner: Rc<ApiInner>,
+    pub token: String,
 }
 
-struct ApiInner {
+pub(crate) async fn send_request<Req: Request>(
     token: String,
-    connector: Box<Connector>,
-    handle: Handle,
+    request: Req,
+) -> Result<<Req::Response as ResponseType>::Type, Error> {
+    let request = request.serialize()?;
+    let response = connector::request(token.as_ref(), request).await?;
+
+    Req::Response::deserialize(response).map_err(From::from)
 }
 
-#[derive(Debug)]
-pub enum ConnectorConfig {
-    Default,
-    Specified(Box<Connector>),
-}
-
-impl Default for ConnectorConfig {
-    fn default() -> Self {
-        ConnectorConfig::Default
-    }
-}
-
-impl ConnectorConfig {
-    pub fn new(connector: Box<Connector>) -> Self {
-        ConnectorConfig::Specified(connector)
-    }
-
-    pub fn take(self, handle: &Handle) -> Result<Box<Connector>, Error> {
-        match self {
-            ConnectorConfig::Default => default_connector(&handle),
-            ConnectorConfig::Specified(connector) => Ok(connector),
-        }
-    }
-}
-
-/// Configuration for an `Api`.
-#[derive(Debug)]
-pub struct Config {
+pub(crate) async fn send_timeout_request<Req: Request>(
     token: String,
-    connector: ConnectorConfig,
-}
-
-impl Config {
-    /// Set connector type for an `Api`.
-    pub fn connector(self, connector: Box<Connector>) -> Config {
-        Config {
-            token: self.token,
-            connector: ConnectorConfig::new(connector),
-        }
-    }
-
-    /// Create new `Api` instance.
-    pub fn build<H: Borrow<Handle>>(self, handle: H) -> Result<Api, Error> {
-        let handle = handle.borrow().clone();
-        Ok(Api {
-            inner: Rc::new(ApiInner {
-                token: self.token,
-                connector: self.connector.take(&handle)?,
-                handle: handle,
-            }),
-        })
-    }
+    request: Req,
+    duration: Duration,
+) -> Result<<Req::Response as ResponseType>::Type, Error> {
+    Timeout::new(send_request(token, request), duration).await?
 }
 
 impl Api {
-    /// Start construction of the `Api` instance.
+    ///  create a new `Api` instance.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// Using default connector.
     ///
     /// ```rust
-    /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
+    /// #![feature(async_await)]
     /// use telegram_bot::Api;
-    /// use tokio_core::reactor::Core;
     ///
     /// # fn main() {
-    /// let core = Core::new().unwrap();
     /// # let telegram_token = "token";
-    /// let api = Api::configure(telegram_token).build(core.handle()).unwrap();
+    /// let api = Api::new(telegram_token);
     /// # }
     /// ```
-    ///
-    /// Using custom connector.
-    ///
-    ///
-    /// ```rust
-    /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
-    /// # #[cfg(feature = "hyper_connector")]
-    /// # fn main() {
-    /// use telegram_bot::Api;
-    /// use telegram_bot::connector::hyper;
-    /// use tokio_core::reactor::Core;
-    ///
-    /// let core = Core::new().unwrap();
-    /// # let telegram_token = "token";
-    /// let api = Api::configure(telegram_token)
-    ///     .connector(hyper::default_connector().unwrap())
-    ///     .build(core.handle()).unwrap();
-    /// # }
-    ///
-    /// # #[cfg(not(feature = "hyper_connector"))]
-    /// # fn main() {}
-    /// ```
-    pub fn configure<T: AsRef<str>>(token: T) -> Config {
-        Config {
+    pub fn new<T: AsRef<str>>(token: T) -> Api {
+        Api {
             token: token.as_ref().to_string(),
-            connector: Default::default(),
         }
     }
 
@@ -133,50 +59,21 @@ impl Api {
     /// # Examples
     ///
     /// ```rust
-    /// # extern crate futures;
-    /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
+    /// #![feature(async_await)]
     /// # use telegram_bot::Api;
-    /// # use tokio_core::reactor::Core;
-    /// # fn main() {
-    /// # let core = Core::new().unwrap();
-    /// # let api: Api = Api::configure("token").build(core.handle()).unwrap();
-    /// use futures::Stream;
+    /// use futures::StreamExt;
     ///
-    /// let future = api.stream().for_each(|update| {
+    /// # #[tokio::main]
+    /// # async fn main() {
+    /// # let api: Api = Api::new("token");
+    ///
+    /// let mut stream = api.stream();
+    /// let update = stream.next().await;
     ///     println!("{:?}", update);
-    ///     Ok(())
-    /// });
     /// # }
     /// ```
     pub fn stream(&self) -> UpdatesStream {
-        UpdatesStream::new(self.clone(), self.inner.handle.clone())
-    }
-
-    /// Send a request to the Telegram server and do not wait for a response.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # extern crate futures;
-    /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
-    /// # use futures::Future;
-    /// # use telegram_bot::{Api, GetMe, ChatId};
-    /// # use telegram_bot::prelude::*;
-    /// # use tokio_core::reactor::Core;
-    /// #
-    /// # fn main() {
-    /// # let core = Core::new().unwrap();
-    /// # let telegram_token = "token";
-    /// # let api = Api::configure(telegram_token).build(core.handle()).unwrap();
-    /// # if false {
-    /// let chat = ChatId::new(61031);
-    /// api.spawn(chat.text("Message"))
-    /// # }
-    /// # }
-    pub fn spawn<Req: Request>(&self, request: Req) {
-        self.inner.handle.spawn(self.send(request).then(|_| Ok(())))
+        UpdatesStream::new(&self.token)
     }
 
     /// Send a request to the Telegram server and wait for a response, timing out after `duration`.
@@ -185,42 +82,26 @@ impl Api {
     /// # Examples
     ///
     /// ```rust
-    /// # extern crate futures;
-    /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
-    /// # use futures::Future;
+    /// #![feature(async_await)]
     /// # use telegram_bot::{Api, GetMe};
-    /// # use tokio_core::reactor::Core;
+    /// # use std::time::Duration;
     /// #
-    /// # fn main() {
-    /// # let core = Core::new().unwrap();
+    /// # #[tokio::main]
+    /// # async fn main() {
     /// # let telegram_token = "token";
-    /// # let api = Api::configure(telegram_token).build(core.handle()).unwrap();
+    /// # let api = Api::new(telegram_token);
     /// # if false {
-    /// use std::time::Duration;
-    ///
-    /// let future = api.send_timeout(GetMe, Duration::from_secs(5));
-    /// future.and_then(|me| Ok(assert!(me.is_some())));
+    /// let result = api.send_timeout(GetMe, Duration::from_secs(2)).await;
+    /// println!("{:?}", result);
     /// # }
     /// # }
     /// ```
-    pub fn send_timeout<Req: Request>(
+    pub async fn send_timeout<Req: Request>(
         &self,
         request: Req,
         duration: Duration,
-    ) -> TelegramFuture<Option<<Req::Response as ResponseType>::Type>> {
-        let timeout_future = result(Timeout::new(duration, &self.inner.handle))
-            .flatten()
-            .map_err(From::from)
-            .map(|()| None);
-        let send_future = self.send(request).map(|resp| Some(resp));
-
-        let future = timeout_future
-            .select(send_future)
-            .map(|(item, _next)| item)
-            .map_err(|(item, _next)| item);
-
-        TelegramFuture::new(Box::new(future))
+    ) -> Result<<Req::Response as ResponseType>::Type, Error> {
+        send_timeout_request(self.token.clone(), request, duration).await
     }
 
     /// Send a request to the Telegram server and wait for a response.
@@ -228,40 +109,23 @@ impl Api {
     /// # Examples
     ///
     /// ```rust
-    /// # extern crate futures;
-    /// # extern crate telegram_bot;
-    /// # extern crate tokio_core;
-    /// # use futures::Future;
+    /// #![feature(async_await)]
     /// # use telegram_bot::{Api, GetMe};
-    /// # use tokio_core::reactor::Core;
     /// #
-    /// # fn main() {
-    /// # let core = Core::new().unwrap();
+    /// # #[tokio::main]
+    /// # async fn main() {
     /// # let telegram_token = "token";
-    /// # let api = Api::configure(telegram_token).build(core.handle()).unwrap();
+    /// # let api = Api::new(telegram_token);
     /// # if false {
-    /// let future = api.send(GetMe);
-    /// future.and_then(|me| Ok(println!("{:?}", me)));
+    /// let result = api.send(GetMe).await;
+    /// println!("{:?}", result);
     /// # }
     /// # }
     /// ```
-    pub fn send<Req: Request>(
+    pub async fn send<Req: Request>(
         &self,
         request: Req,
-    ) -> TelegramFuture<<Req::Response as ResponseType>::Type> {
-        let request = request.serialize().map_err(From::from);
-
-        let request = result(request);
-
-        let api = self.clone();
-        let response = request.and_then(move |request| {
-            let ref token = api.inner.token;
-            api.inner.connector.request(token, request)
-        });
-
-        let future = response
-            .and_then(move |response| Req::Response::deserialize(response).map_err(From::from));
-
-        TelegramFuture::new(Box::new(future))
+    ) -> Result<<Req::Response as ResponseType>::Type, Error> {
+        send_request(self.token.clone(), request).await
     }
 }

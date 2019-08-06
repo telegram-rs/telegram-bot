@@ -77,8 +77,8 @@ pub enum ForwardFrom {
         message_id: Integer,
     },
     ChannelHiddenUser {
-        sender_name: String
-    }
+        sender_name: String,
+    },
 }
 
 /// Kind of the message.
@@ -230,7 +230,7 @@ impl Message {
             &raw.forward_from,
             &raw.forward_from_chat,
             raw.forward_from_message_id,
-            &raw.forward_sender_name
+            &raw.forward_sender_name,
         ) {
             (None, &None, &None, None, &None) => None,
             (Some(date), &Some(ref from), &None, None, &None) => Some(Forward {
@@ -246,12 +246,12 @@ impl Message {
                     },
                 })
             }
-            (Some(date), &None, &None, None, &Some(ref sender_name)) => {
-                Some(Forward {
-                    date,
-                    from: ForwardFrom::ChannelHiddenUser { sender_name: sender_name.clone() },
-                })
-            }
+            (Some(date), &None, &None, None, &Some(ref sender_name)) => Some(Forward {
+                date,
+                from: ForwardFrom::ChannelHiddenUser {
+                    sender_name: sender_name.clone(),
+                },
+            }),
             _ => return Err(format!("invalid forward fields combination")),
         };
 
@@ -369,7 +369,7 @@ impl ChannelPost {
             &raw.forward_from,
             &raw.forward_from_chat,
             raw.forward_from_message_id,
-            &raw.forward_sender_name
+            &raw.forward_sender_name,
         ) {
             (None, &None, &None, None, &None) => None,
             (Some(date), &Some(ref from), &None, None, &None) => Some(Forward {
@@ -385,12 +385,12 @@ impl ChannelPost {
                     },
                 })
             }
-            (Some(date), &None, &None, None, &Some(ref sender_name)) => {
-                Some(Forward {
-                    date,
-                    from: ForwardFrom::ChannelHiddenUser { sender_name: sender_name.clone() },
-                })
-            }
+            (Some(date), &None, &None, None, &Some(ref sender_name)) => Some(Forward {
+                date,
+                from: ForwardFrom::ChannelHiddenUser {
+                    sender_name: sender_name.clone(),
+                },
+            }),
             _ => return Err(format!("invalid forward fields combination")),
         };
 
