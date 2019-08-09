@@ -7,13 +7,11 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::Context;
 use std::task::Poll;
-// use tokio_core::reactor::{Handle, Timeout};
 
 use telegram_bot_raw::{AllowedUpdate, GetUpdates, Integer, Update};
 
 use crate::api;
 use crate::errors::Error;
-// use crate::future::{NewTelegramFuture, TelegramFuture};
 
 const TELEGRAM_LONG_POLL_TIMEOUT_SECONDS: u64 = 5;
 const TELEGRAM_LONG_POLL_LIMIT_MESSAGES: Integer = 100;

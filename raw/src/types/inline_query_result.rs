@@ -18,6 +18,8 @@ pub struct InlineQueryResultArticle {
     description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    thumb_url: Option<String>
     // TODO: Rest of the fields
 }
 
@@ -33,11 +35,17 @@ impl InlineQueryResultArticle {
             input_message_content: input_message_content.into(),
             description: None,
             reply_markup: None,
+            thumb_url: None,
         }
     }
 
     pub fn description<T: Into<String>>(&mut self, description: T) -> &mut Self {
         self.description = Some(description.into());
+        self
+    }
+
+    pub fn thumb_url<T: Into<String>>(&mut self, thumb_url: T) -> &mut Self {
+        self.thumb_url = Some(thumb_url.into());
         self
     }
 
