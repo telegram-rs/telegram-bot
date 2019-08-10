@@ -2,15 +2,16 @@ use std::cmp::max;
 use std::collections::VecDeque;
 use std::time::Duration;
 
-use futures::future;
-use futures::{Async, Future, Poll, Stream};
-use tokio_core::reactor::{Handle, Timeout};
+use futures::Stream;
+use std::future::Future;
+use std::pin::Pin;
+use std::task::Context;
+use std::task::Poll;
 
 use telegram_bot_raw::{AllowedUpdate, GetUpdates, Integer, Update};
 
-use crate::api::Api;
+use crate::api;
 use crate::errors::Error;
-use crate::future::{NewTelegramFuture, TelegramFuture};
 
 const TELEGRAM_LONG_POLL_TIMEOUT_SECONDS: u64 = 5;
 const TELEGRAM_LONG_POLL_LIMIT_MESSAGES: Integer = 100;
@@ -20,11 +21,10 @@ const TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS: u64 = 500;
 /// long polling method under the hood.
 #[must_use = "streams do nothing unless polled"]
 pub struct UpdatesStream {
-    api: Api,
-    handle: Handle,
+    token: String,
     last_update: Integer,
     buffer: VecDeque<Update>,
-    current_request: Option<TelegramFuture<Option<Vec<Update>>>>,
+    current_request: Option<Pin<Box<dyn Future<Output = Result<Vec<Update>, Error>>>>>,
     timeout: Duration,
     allowed_updates: Vec<AllowedUpdate>,
     limit: Integer,
@@ -32,75 +32,78 @@ pub struct UpdatesStream {
 }
 
 impl Stream for UpdatesStream {
-    type Item = Update;
-    type Error = Error;
+    type Item = Result<Update, Error>;
 
-    fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-        if let Some(value) = self.buffer.pop_front() {
-            return Ok(Async::Ready(Some(value)));
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
+        let ref_mut = self.get_mut();
+        if let Some(value) = ref_mut.buffer.pop_front() {
+            return Poll::Ready(Some(Ok(value)));
         }
 
-        let result = match self.current_request {
+        let result = match ref_mut.current_request {
             None => Ok(false),
             Some(ref mut current_request) => {
-                let polled_update = current_request.poll();
+                let cc = current_request.as_mut();
+                let polled_update = cc.poll(cx);
                 match polled_update {
-                    Ok(Async::NotReady) => return Ok(Async::NotReady),
-                    Ok(Async::Ready(None)) => Ok(false),
-                    Ok(Async::Ready(Some(updates))) => {
+                    Poll::Pending => return Poll::Pending,
+                    Poll::Ready(Ok(ref updates)) if updates.is_empty() => Ok(false),
+                    Poll::Ready(Ok(updates)) => {
                         for update in updates {
-                            self.last_update = max(update.id, self.last_update);
-                            self.buffer.push_back(update)
+                            ref_mut.last_update = max(update.id, ref_mut.last_update);
+                            ref_mut.buffer.push_back(update)
                         }
                         Ok(true)
                     }
-                    Err(err) => Err(err),
+                    Poll::Ready(Err(err)) => Err(err),
                 }
             }
         };
 
         match result {
             Err(err) => {
-                let timeout_future = future::result(Timeout::new(self.error_delay, &self.handle));
+                let timeout = ref_mut.timeout + Duration::from_secs(1);
+                let mut get_updates = GetUpdates::new();
+                get_updates
+                    .offset(ref_mut.last_update + 1)
+                    .timeout(ref_mut.error_delay.as_secs() as Integer)
+                    .limit(ref_mut.limit)
+                    .allowed_updates(&ref_mut.allowed_updates);
 
-                let timeout_future = timeout_future
-                    .map_err(From::from)
-                    .and_then(|timeout| timeout.map_err(From::from).map(|()| None));
+                let request =
+                    api::send_timeout_request(ref_mut.token.clone(), get_updates, timeout);
 
-                self.current_request = Some(TelegramFuture::new(Box::new(timeout_future)));
-                return Err(err);
+                ref_mut.current_request = Some(Box::pin(request));
+                return Poll::Ready(Some(Err(err)));
             }
             Ok(false) => {
-                let timeout = self.timeout + Duration::from_secs(1);
-                let request = self.api.send_timeout(
-                    GetUpdates::new()
-                        .offset(self.last_update + 1)
-                        .timeout(self.timeout.as_secs() as Integer)
-                        .limit(self.limit)
-                        .allowed_updates(&self.allowed_updates),
-                    timeout,
-                );
+                let timeout = ref_mut.timeout + Duration::from_secs(1);
+                let mut get_updates = GetUpdates::new();
+                get_updates
+                    .offset(ref_mut.last_update + 1)
+                    .timeout(ref_mut.error_delay.as_secs() as Integer)
+                    .limit(ref_mut.limit)
+                    .allowed_updates(&ref_mut.allowed_updates);
 
-                self.current_request = Some(request);
-                self.poll()
+                let request =
+                    api::send_timeout_request(ref_mut.token.clone(), get_updates, timeout);
+
+                ref_mut.current_request = Some(Box::pin(request));
+                Pin::new(ref_mut).poll_next(cx)
             }
             Ok(true) => {
-                self.current_request = None;
-                self.poll()
+                ref_mut.current_request = None;
+                Pin::new(ref_mut).poll_next(cx)
             }
         }
     }
 }
 
-pub trait NewUpdatesStream {
-    fn new(api: Api, handle: Handle) -> Self;
-}
-
-impl NewUpdatesStream for UpdatesStream {
-    fn new(api: Api, handle: Handle) -> Self {
+impl UpdatesStream {
+    ///  create a new `UpdatesStream` instance.
+    pub fn new(token: &str) -> Self {
         UpdatesStream {
-            api: api,
-            handle: handle,
+            token: token.to_string(),
             last_update: 0,
             buffer: VecDeque::new(),
             current_request: None,
@@ -110,9 +113,7 @@ impl NewUpdatesStream for UpdatesStream {
             error_delay: Duration::from_millis(TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS),
         }
     }
-}
 
-impl UpdatesStream {
     /// Set timeout for long polling requests, this corresponds with `timeout` field
     /// in [getUpdates](https://core.telegram.org/bots/api#getupdates) method,
     /// also this stream sets an additional request timeout for `timeout + 1 second`
