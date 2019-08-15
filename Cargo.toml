@@ -1,16 +1,5 @@
 [workspace]
 members = ["lib", "raw"]
 
-[patch."https://github.com/tokio-rs/tokio"]
-tokio = { git = "https://github.com/tokio-rs/tokio.git", rev = "6cbe3d4f82f2c10be108366ece63e1fb180c90b9" }
-tokio-executor = { git = "https://github.com/tokio-rs/tokio.git", rev = "6cbe3d4f82f2c10be108366ece63e1fb180c90b9" }
-tokio-io = { git = "https://github.com/tokio-rs/tokio.git", rev = "6cbe3d4f82f2c10be108366ece63e1fb180c90b9" }
-tokio-reactor = { git = "https://github.com/tokio-rs/tokio.git", rev = "6cbe3d4f82f2c10be108366ece63e1fb180c90b9" }
-tokio-sync = { git = "https://github.com/tokio-rs/tokio.git", rev = "6cbe3d4f82f2c10be108366ece63e1fb180c90b9" }
-tokio-tcp = { git = "https://github.com/tokio-rs/tokio.git", rev = "6cbe3d4f82f2c10be108366ece63e1fb180c90b9" }
-tokio-timer = { git = "https://github.com/tokio-rs/tokio.git", rev = "6cbe3d4f82f2c10be108366ece63e1fb180c90b9" }
-tokio-threadpool = { git = "https://github.com/tokio-rs/tokio.git", rev = "6cbe3d4f82f2c10be108366ece63e1fb180c90b9" }
-tokio-tls = { git = "https://github.com/tokio-rs/tokio.git", rev = "6cbe3d4f82f2c10be108366ece63e1fb180c90b9" }
-
 [patch."https://github.com/hyperium/hyper"]
-hyper = { git = "https://github.com/hyperium/hyper.git", rev = "a543c8eef2046999b54978cfc91be2663b743b23" }
+hyper = { git = "https://github.com/hyperium/hyper.git", rev = "a503f8b3369ff24ce39ccf1a1da0d1d56366dabb" }
