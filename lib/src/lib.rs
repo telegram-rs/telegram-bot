@@ -1,7 +1,5 @@
 //! This crate helps writing bots for the messenger Telegram.
 //! See [readme](https://github.com/telegram-rs/telegram-bot) for details.
-#![feature(async_await)]
-
 #[macro_use]
 extern crate error_chain;
 

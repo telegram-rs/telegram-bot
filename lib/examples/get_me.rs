@@ -1,4 +1,3 @@
-#![feature(async_await, async_closure)]
 use std::env;
 
 use telegram_bot::{Api, Error, GetMe};

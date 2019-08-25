@@ -40,7 +40,6 @@ impl Api {
     /// Using default connector.
     ///
     /// ```rust
-    /// #![feature(async_await)]
     /// use telegram_bot::Api;
     ///
     /// # fn main() {
@@ -59,7 +58,6 @@ impl Api {
     /// # Examples
     ///
     /// ```rust
-    /// #![feature(async_await)]
     /// # use telegram_bot::Api;
     /// use futures::StreamExt;
     ///
@@ -82,7 +80,6 @@ impl Api {
     /// # Examples
     ///
     /// ```rust
-    /// #![feature(async_await)]
     /// # use telegram_bot::{Api, GetMe};
     /// # use std::time::Duration;
     /// #
@@ -109,7 +106,6 @@ impl Api {
     /// # Examples
     ///
     /// ```rust
-    /// #![feature(async_await)]
     /// # use telegram_bot::{Api, GetMe};
     /// #
     /// # #[tokio::main]
