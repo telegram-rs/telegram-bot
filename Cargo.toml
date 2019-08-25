@@ -2,4 +2,4 @@
 members = ["lib", "raw"]
 
 [patch."https://github.com/hyperium/hyper"]
-hyper = { git = "https://github.com/hyperium/hyper.git", rev = "a503f8b3369ff24ce39ccf1a1da0d1d56366dabb" }
+hyper = { git = "https://github.com/hyperium/hyper.git", rev = "79c32f89530e47735155eb9bd19466bcb6aec90d" }

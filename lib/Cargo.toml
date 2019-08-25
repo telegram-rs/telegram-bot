@@ -17,7 +17,7 @@ license = "MIT"
 [dependencies]
 antidote = "1.0"
 
-tokio = "0.2.0-alpha.1"
+tokio = "0.2.0-alpha.2"
 
 error-chain = "0.11.0"
 
@@ -26,6 +26,6 @@ tokio-curl = {version = "0.1", optional = true}
 
 telegram-bot-raw = { version = "=0.6.3", path = "../raw" }
 
-hyper = { git = "https://github.com/hyperium/hyper.git", rev = "a503f8b3369ff24ce39ccf1a1da0d1d56366dabb" }
-hyper-tls = { git = "https://github.com/hyperium/hyper-tls.git", rev = "4b9ed650add2471e04de90bb888146f89468dd08" }
-futures-preview = "=0.3.0-alpha.17"
+hyper = { git = "https://github.com/hyperium/hyper.git", rev = "79c32f89530e47735155eb9bd19466bcb6aec90d" }
+hyper-tls = { git = "https://github.com/hyperium/hyper-tls.git", rev = "36ef8bfd529d5586ff3b4c36a70141e74c1277cc" }
+futures-preview = "=0.3.0-alpha.18"
