@@ -1,5 +1,2 @@
 [workspace]
 members = ["lib", "raw"]
-
-[patch."https://github.com/hyperium/hyper"]
-hyper = { git = "https://github.com/hyperium/hyper.git", rev = "a503f8b3369ff24ce39ccf1a1da0d1d56366dabb" }

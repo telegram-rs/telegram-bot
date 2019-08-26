@@ -1,4 +1,3 @@
-#![feature(async_await)]
 use std::env;
 use std::time::{Duration, Instant};
 

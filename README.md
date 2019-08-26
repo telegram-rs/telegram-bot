@@ -20,7 +20,6 @@ A library for writing your own [Telegram](https://telegram.org/) bots. More info
 Here is a simple example (see [`example/simple.rs`](https://github.com/telegram-rs/telegram-bot/blob/master/lib/examples/simple.rs)):
 
 ``` rust
-#![feature(async_await)]
 use std::env;
 
 use futures::StreamExt;
