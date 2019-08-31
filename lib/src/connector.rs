@@ -34,7 +34,7 @@ pub(crate) async fn request(token: &str, req: HttpRequest) -> Result<HttpRespons
         body => panic!("Unknown body type {:?}", body),
     };
 
-    let connector = HttpsConnector::new(1).map_err(|err| {
+    let connector = HttpsConnector::new().map_err(|err| {
         ::std::io::Error::new(::std::io::ErrorKind::Other, format!("tls error: {}", err))
     })?;
 
