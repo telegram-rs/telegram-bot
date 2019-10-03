@@ -19,6 +19,10 @@ A library for writing your own [Telegram](https://telegram.org/) bots. More info
 ## Example
 Here is a simple example (see [`example/simple.rs`](https://github.com/telegram-rs/telegram-bot/blob/master/lib/examples/simple.rs)):
 
+**Note:** 
+1. Examples provided are **only** for the master branch.
+2. The master branch is unstable.
+
 ``` rust
 use std::env;
 
