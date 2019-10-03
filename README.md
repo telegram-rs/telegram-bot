@@ -65,3 +65,7 @@ The library allows you to do E2E-testing of your bot easily: just specify `TELEG
 
 ## Collaboration
 Yes please! Every type of contribution is welcome: Create issues, hack some code or make suggestions. Don't know where to start? Good first issues are tagged with [up for grab](https://github.com/telegram-rs/telegram-bot/issues?q=is%3Aissue+is%3Aopen+label%3A%22up+for+grab%22).
+
+## Notes
+1. The master branch is unstable.
+2. Examples shown are **only** for the master branch.
