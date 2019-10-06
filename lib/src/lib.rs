@@ -10,6 +10,7 @@ mod stream;
 
 pub mod connector;
 pub mod prelude;
+pub mod traits;
 pub mod types;
 
 pub use self::api::Api;
