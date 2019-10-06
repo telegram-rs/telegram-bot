@@ -21,3 +21,5 @@ pub use telegram_bot_raw::{CanReplySendMessage, CanSendMessage};
 pub use telegram_bot_raw::{CanReplySendVenue, CanSendVenue};
 pub use telegram_bot_raw::{CanUnbanChatMemberForChat, CanUnbanChatMemberForUser};
 pub use telegram_bot_raw::{ToReplyRequest, ToRequest};
+
+pub use crate::util::messages::{MessageText, MessageGetFiles};

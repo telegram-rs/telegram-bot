@@ -11,6 +11,7 @@ mod stream;
 pub mod connector;
 pub mod prelude;
 pub mod types;
+pub mod util;
 
 pub use self::api::Api;
 pub use self::errors::{Error, ErrorKind};
