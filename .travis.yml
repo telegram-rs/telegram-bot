@@ -1,22 +1,47 @@
 language: rust
-rust:
-  - stable
-  - beta
-  - nightly
 
-script:
-  - cargo build --verbose -p telegram-bot-raw
-  - cargo test --verbose -p telegram-bot-raw
-  - cargo build --verbose -p telegram-bot
-  - cargo test --verbose -p telegram-bot
+script: skip
 
-after_success:
-  - |
-        test ${TRAVIS_PULL_REQUEST} == "false" && \
-        test ${TRAVIS_BRANCH} == "master" && \
-        test "${TRAVIS_BUILD_NUMBER}.1" == "${TRAVIS_JOB_NUMBER}" && \
-        bash deploy.sh
+jobs:
+  include:
+    - stage: toolchain-test
+      name: "Test toolchain"
+      script: cargo test --verbose -p telegram-bot
+    - stage: deploy
+      name: "Deploy docs"
+      rust: stable
+      if: branch = master
+      script: cargo doc --all
+      deploy:
+        provider: pages
+        local_dir: target/doc
+        skip_cleanup: true
+        github_token: $GH_TOKEN
+        keep_history: false
+        on:
+          branch: master
+#    - stage: test
+#      name: "Test stable"
+#      rust: stable
+#      env:
+#        - RUSTUP_TOOLCHAIN=stable
+#      script:
+#        - cargo test --verbose -p telegram-bot
+    - stage: test
+      name: "Test beta"
+      rust: stable
+      env:
+        - RUSTUP_TOOLCHAIN=beta
+      script:
+        - cargo test --verbose -p telegram-bot
+    - stage: test
+      name: "Test nightly"
+      rust: stable
+      env:
+        - RUSTUP_TOOLCHAIN=nightly
+      script:
+        - cargo test --verbose -p telegram-bot
 
 notifications:
-    webhooks:
-        - http://heimdallr.thesharp.org/travis
+  webhooks:
+    - https://heimdallr.mournival.net/travis
