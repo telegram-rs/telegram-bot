@@ -1,35 +1,22 @@
+use std::sync::Arc;
 use std::time::Duration;
 
+use futures::Future;
 use tokio::timer::Timeout;
 
-use telegram_bot_raw::{Request, ResponseType};
+use telegram_bot_raw::{HttpRequest, Request, ResponseType};
 
-use crate::connector;
+use crate::connector::{default_connector, Connector};
 use crate::errors::Error;
 use crate::stream::UpdatesStream;
 
 /// Main type for sending requests to the Telegram bot API.
 #[derive(Clone)]
-pub struct Api {
-    pub token: String,
-}
+pub struct Api(Arc<ApiInner>);
 
-pub(crate) async fn send_request<Req: Request>(
+struct ApiInner {
     token: String,
-    request: Req,
-) -> Result<<Req::Response as ResponseType>::Type, Error> {
-    let request = request.serialize()?;
-    let response = connector::request(token.as_ref(), request).await?;
-
-    Req::Response::deserialize(response).map_err(From::from)
-}
-
-pub(crate) async fn send_timeout_request<Req: Request>(
-    token: String,
-    request: Req,
-    duration: Duration,
-) -> Result<<Req::Response as ResponseType>::Type, Error> {
-    Timeout::new(send_request(token, request), duration).await?
+    connector: Box<dyn Connector>,
 }
 
 impl Api {
@@ -48,9 +35,10 @@ impl Api {
     /// # }
     /// ```
     pub fn new<T: AsRef<str>>(token: T) -> Api {
-        Api {
+        Api(Arc::new(ApiInner {
             token: token.as_ref().to_string(),
-        }
+            connector: default_connector(),
+        }))
     }
 
     /// Create a stream which produces updates from the Telegram server.
@@ -71,7 +59,7 @@ impl Api {
     /// # }
     /// ```
     pub fn stream(&self) -> UpdatesStream {
-        UpdatesStream::new(&self.token)
+        UpdatesStream::new(&self)
     }
 
     /// Send a request to the Telegram server and wait for a response, timing out after `duration`.
@@ -93,12 +81,21 @@ impl Api {
     /// # }
     /// # }
     /// ```
-    pub async fn send_timeout<Req: Request>(
+    pub fn send_timeout<Req: Request>(
         &self,
         request: Req,
         duration: Duration,
-    ) -> Result<<Req::Response as ResponseType>::Type, Error> {
-        send_timeout_request(self.token.clone(), request, duration).await
+    ) -> impl Future<Output = Result<Option<<Req::Response as ResponseType>::Type>, Error>> + Send
+    {
+        let api = self.clone();
+        let request = request.serialize();
+        async move {
+            match Timeout::new(api.send_http_request::<Req::Response>(request?), duration).await {
+                Err(_) => Ok(None),
+                Ok(Ok(result)) => Ok(Some(result)),
+                Ok(Err(error)) => Err(error),
+            }
+        }
     }
 
     /// Send a request to the Telegram server and wait for a response.
@@ -118,10 +115,21 @@ impl Api {
     /// # }
     /// # }
     /// ```
-    pub async fn send<Req: Request>(
+    pub fn send<Req: Request>(
         &self,
         request: Req,
-    ) -> Result<<Req::Response as ResponseType>::Type, Error> {
-        send_request(self.token.clone(), request).await
+    ) -> impl Future<Output = Result<<Req::Response as ResponseType>::Type, Error>> + Send {
+        let api = self.clone();
+        let request = request.serialize();
+        async move { api.send_http_request::<Req::Response>(request?).await }
+    }
+
+    async fn send_http_request<Resp: ResponseType>(
+        &self,
+        request: HttpRequest,
+    ) -> Result<Resp::Type, Error> {
+        let http_response = self.0.connector.request(&self.0.token, request).await?;
+        let response = Resp::deserialize(http_response)?;
+        Ok(response)
     }
 }

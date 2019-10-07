@@ -10,7 +10,7 @@ use std::task::Poll;
 
 use telegram_bot_raw::{AllowedUpdate, GetUpdates, Integer, Update};
 
-use crate::api;
+use crate::api::Api;
 use crate::errors::Error;
 
 const TELEGRAM_LONG_POLL_TIMEOUT_SECONDS: u64 = 5;
@@ -21,10 +21,10 @@ const TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS: u64 = 500;
 /// long polling method under the hood.
 #[must_use = "streams do nothing unless polled"]
 pub struct UpdatesStream {
-    token: String,
+    api: Api,
     last_update: Integer,
     buffer: VecDeque<Update>,
-    current_request: Option<Pin<Box<dyn Future<Output = Result<Vec<Update>, Error>>>>>,
+    current_request: Option<Pin<Box<dyn Future<Output = Result<Option<Vec<Update>>, Error>>>>>,
     timeout: Duration,
     allowed_updates: Vec<AllowedUpdate>,
     limit: Integer,
@@ -47,8 +47,9 @@ impl Stream for UpdatesStream {
                 let polled_update = cc.poll(cx);
                 match polled_update {
                     Poll::Pending => return Poll::Pending,
-                    Poll::Ready(Ok(ref updates)) if updates.is_empty() => Ok(false),
-                    Poll::Ready(Ok(updates)) => {
+                    Poll::Ready(Ok(None)) => Ok(false),
+                    Poll::Ready(Ok(Some(ref updates))) if updates.is_empty() => Ok(false),
+                    Poll::Ready(Ok(Some(updates))) => {
                         for update in updates {
                             ref_mut.last_update = max(update.id, ref_mut.last_update);
                             ref_mut.buffer.push_back(update)
@@ -70,9 +71,7 @@ impl Stream for UpdatesStream {
                     .limit(ref_mut.limit)
                     .allowed_updates(&ref_mut.allowed_updates);
 
-                let request =
-                    api::send_timeout_request(ref_mut.token.clone(), get_updates, timeout);
-
+                let request = ref_mut.api.send_timeout(get_updates, timeout);
                 ref_mut.current_request = Some(Box::pin(request));
                 return Poll::Ready(Some(Err(err)));
             }
@@ -85,9 +84,7 @@ impl Stream for UpdatesStream {
                     .limit(ref_mut.limit)
                     .allowed_updates(&ref_mut.allowed_updates);
 
-                let request =
-                    api::send_timeout_request(ref_mut.token.clone(), get_updates, timeout);
-
+                let request = ref_mut.api.send_timeout(get_updates, timeout);
                 ref_mut.current_request = Some(Box::pin(request));
                 Pin::new(ref_mut).poll_next(cx)
             }
@@ -101,9 +98,9 @@ impl Stream for UpdatesStream {
 
 impl UpdatesStream {
     ///  create a new `UpdatesStream` instance.
-    pub fn new(token: &str) -> Self {
+    pub fn new(api: &Api) -> Self {
         UpdatesStream {
-            token: token.to_string(),
+            api: api.clone(),
             last_update: 0,
             buffer: VecDeque::new(),
             current_request: None,
