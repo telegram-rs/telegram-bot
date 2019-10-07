@@ -22,5 +22,5 @@ error-chain = "0.11.0"
 telegram-bot-raw = { version = "=0.6.3", path = "../raw" }
 
 hyper = { version = "=0.13.0-alpha.4", features=["unstable-stream"]}
-hyper-tls = { git = "https://github.com/hyperium/hyper-tls.git", rev = "0ec7bf4"}
+hyper-tls = "=0.4.0-alpha.4"
 futures-preview = "=0.3.0-alpha.19"
