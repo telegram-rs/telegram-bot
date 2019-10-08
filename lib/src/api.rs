@@ -62,6 +62,33 @@ impl Api {
         UpdatesStream::new(&self)
     }
 
+    /// Send a request to the Telegram server and do not wait for a response.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use telegram_bot::{Api, ChatId, prelude::*};
+    /// # use std::time::Duration;
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() {
+    /// # let telegram_token = "token";
+    /// # let api = Api::new(telegram_token);
+    /// # if false {
+    /// let chat = ChatId::new(61031);
+    /// api.spawn(chat.text("Message"));
+    /// # }
+    /// # }
+    /// ```
+    pub fn spawn<Req: Request>(&self, request: Req) {
+        let api = self.clone();
+        if let Ok(request) = request.serialize() {
+            tokio::spawn(async move {
+                let _ = api.send_http_request::<Req::Response>(request).await;
+            });
+        }
+    }
+
     /// Send a request to the Telegram server and wait for a response, timing out after `duration`.
     /// Future will resolve to `None` if timeout fired.
     ///
