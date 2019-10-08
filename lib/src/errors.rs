@@ -5,7 +5,6 @@ error_chain! {
         Url(::hyper::http::uri::InvalidUri);
         Hyper(::hyper::Error);
         Io(::std::io::Error);
-        Timeout(::tokio::timer::timeout::Elapsed);
     }
 
     links {

@@ -1,5 +1,7 @@
 use crate::prelude::CanGetFile;
-use crate::types::{requests::get_file::GetFile, ChannelPost, Message, MessageKind, MessageOrChannelPost};
+use crate::types::{
+    requests::get_file::GetFile, ChannelPost, Message, MessageKind, MessageOrChannelPost,
+};
 
 /// A trait to obtain text from a message.
 ///
