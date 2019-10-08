@@ -66,6 +66,7 @@ impl MessageText for ChannelPost {
 ///
 /// Many message kinds such as `Sticker` return a single `GetFile`.
 /// Message kinds like `Photo` might return more if an album is posted.
+/// A video, video note or document returns any thumbnail as well.
 pub trait MessageGetFiles {
     /// Obtain files from a message if available.
     fn get_files<'a>(&'a self) -> Option<Vec<GetFile>>;
@@ -91,14 +92,32 @@ impl MessageGetFiles for MessageKind {
         match self {
             MessageKind::Text { .. } => None,
             MessageKind::Audio { data } => Some(vec![data.get_file()]),
-            MessageKind::Document { data, .. } => Some(vec![data.get_file()]),
+            MessageKind::Document { data, .. } => {
+                let mut files = vec![data.get_file()];
+                if let Some(thumb) = &data.thumb {
+                    files.push(thumb.get_file());
+                }
+                Some(files)
+            },
             MessageKind::Photo { data, .. } => {
                 Some(data.into_iter().map(|f| f.get_file()).collect())
             }
             MessageKind::Sticker { data } => Some(vec![data.get_file()]),
-            MessageKind::Video { data, .. } => Some(vec![data.get_file()]),
+            MessageKind::Video { data, .. } => {
+                let mut files = vec![data.get_file()];
+                if let Some(thumb) = &data.thumb {
+                    files.push(thumb.get_file());
+                }
+                Some(files)
+            },
             MessageKind::Voice { data } => Some(vec![data.get_file()]),
-            MessageKind::VideoNote { data } => Some(vec![data.get_file()]),
+            MessageKind::VideoNote { data, .. } => {
+                let mut files = vec![data.get_file()];
+                if let Some(thumb) = &data.thumb {
+                    files.push(thumb.get_file());
+                }
+                Some(files)
+            },
             MessageKind::Contact { .. } => None,
             MessageKind::Location { .. } => None,
             MessageKind::Venue { .. } => None,
