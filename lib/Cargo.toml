@@ -18,9 +18,14 @@ license = "MIT"
 tokio = "0.2.0-alpha.5"
 
 error-chain = "0.11.0"
+tracing = "0.1.9"
+tracing-futures = { version = "0.1.0", features = ["std-future"] }
 
 telegram-bot-raw = { version = "=0.7.0-alpha.0", path = "../raw" }
 
 hyper = { version = "=0.13.0-alpha.4", features=["unstable-stream"]}
 hyper-tls = "=0.4.0-alpha.4"
 futures-preview = "=0.3.0-alpha.19"
+
+[dev-dependencies]
+tracing-subscriber = "0.1.5"

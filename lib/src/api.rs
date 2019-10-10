@@ -1,8 +1,12 @@
-use std::sync::Arc;
+use std::sync::{
+    atomic::{AtomicUsize, Ordering},
+    Arc,
+};
 use std::time::Duration;
 
-use futures::Future;
+use futures::{Future, FutureExt};
 use tokio::timer::Timeout;
+use tracing_futures::Instrument;
 
 use telegram_bot_raw::{HttpRequest, Request, ResponseType};
 
@@ -17,6 +21,7 @@ pub struct Api(Arc<ApiInner>);
 struct ApiInner {
     token: String,
     connector: Box<dyn Connector>,
+    next_request_id: AtomicUsize,
 }
 
 impl Api {
@@ -38,6 +43,7 @@ impl Api {
         Api(Arc::new(ApiInner {
             token: token.as_ref().to_string(),
             connector: default_connector(),
+            next_request_id: AtomicUsize::new(0),
         }))
     }
 
@@ -155,8 +161,32 @@ impl Api {
         &self,
         request: HttpRequest,
     ) -> Result<Resp::Type, Error> {
-        let http_response = self.0.connector.request(&self.0.token, request).await?;
-        let response = Resp::deserialize(http_response)?;
-        Ok(response)
+        let request_id = self.0.next_request_id.fetch_add(1, Ordering::Relaxed);
+        let span = tracing::trace_span!("send_http_request", request_id = request_id);
+        async {
+            tracing::trace!(name = %request.name(), body = %request.body, "sending request");
+            let http_response = self.0.connector.request(&self.0.token, request).await?;
+            tracing::trace!(
+                response = %match http_response.body {
+                    Some(ref vec) => match std::str::from_utf8(vec) {
+                        Ok(str) => str,
+                        Err(_) => "<invalid utf-8 string>"
+                    },
+                    None => "<empty body>",
+                }, "response received"
+            );
+
+            let response = Resp::deserialize(http_response)?;
+            tracing::trace!("response deserialized");
+            Ok(response)
+        }
+            .map(|result| {
+                if let Err(ref error) = result {
+                    tracing::error!(error = %error);
+                }
+                result
+            })
+            .instrument(span)
+            .await
     }
 }

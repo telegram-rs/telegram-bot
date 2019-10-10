@@ -1,12 +1,12 @@
 use std::cmp::max;
 use std::collections::VecDeque;
-use std::time::Duration;
-
-use futures::Stream;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::Context;
 use std::task::Poll;
+use std::time::Duration;
+
+use futures::Stream;
 
 use telegram_bot_raw::{AllowedUpdate, GetUpdates, Integer, Update};
 
@@ -29,6 +29,7 @@ pub struct UpdatesStream {
     allowed_updates: Vec<AllowedUpdate>,
     limit: Integer,
     error_delay: Duration,
+    next_poll_id: usize,
 }
 
 impl Stream for UpdatesStream {
@@ -36,27 +37,54 @@ impl Stream for UpdatesStream {
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
         let ref_mut = self.get_mut();
+        let poll_id = ref_mut.next_poll_id;
+        ref_mut.next_poll_id += 1;
+        let span = tracing::trace_span!("stream", poll_id = poll_id);
+        let _enter = span.enter();
+
+        tracing::trace!("start stream polling");
+
         if let Some(value) = ref_mut.buffer.pop_front() {
+            tracing::trace!(update = ?value, "returning buffered update");
             return Poll::Ready(Some(Ok(value)));
         }
+        tracing::trace!("processing request");
 
         let result = match ref_mut.current_request {
-            None => Ok(false),
+            None => {
+                tracing::trace!("there is no current request");
+                Ok(false)
+            }
             Some(ref mut current_request) => {
                 let cc = current_request.as_mut();
                 let polled_update = cc.poll(cx);
                 match polled_update {
-                    Poll::Pending => return Poll::Pending,
-                    Poll::Ready(Ok(None)) => Ok(false),
-                    Poll::Ready(Ok(Some(ref updates))) if updates.is_empty() => Ok(false),
+                    Poll::Pending => {
+                        tracing::trace!("request is pending");
+                        return Poll::Pending;
+                    }
+                    Poll::Ready(Ok(None)) => {
+                        tracing::trace!("request timed out");
+                        Ok(false)
+                    }
+                    Poll::Ready(Ok(Some(ref updates))) if updates.is_empty() => {
+                        tracing::trace!("request resolved to empty update list");
+                        Ok(false)
+                    }
                     Poll::Ready(Ok(Some(updates))) => {
                         for update in updates {
+                            tracing::trace!(update = ?update, "processing update");
                             ref_mut.last_update = max(update.id, ref_mut.last_update);
+                            tracing::trace!(last_update = ref_mut.last_update);
                             ref_mut.buffer.push_back(update)
                         }
+
                         Ok(true)
                     }
-                    Poll::Ready(Err(err)) => Err(err),
+                    Poll::Ready(Err(err)) => {
+                        tracing::error!(error = %err, "request error");
+                        Err(err)
+                    }
                 }
             }
         };
@@ -70,6 +98,7 @@ impl Stream for UpdatesStream {
                     .timeout(ref_mut.error_delay.as_secs() as Integer)
                     .limit(ref_mut.limit)
                     .allowed_updates(&ref_mut.allowed_updates);
+                tracing::trace!(request = ?get_updates, timeout=?timeout, "preparing new request");
 
                 let request = ref_mut.api.send_timeout(get_updates, timeout);
                 ref_mut.current_request = Some(Box::pin(request));
@@ -83,13 +112,18 @@ impl Stream for UpdatesStream {
                     .timeout(ref_mut.error_delay.as_secs() as Integer)
                     .limit(ref_mut.limit)
                     .allowed_updates(&ref_mut.allowed_updates);
+                tracing::trace!(request = ?get_updates, timeout=?timeout, "preparing new request");
 
                 let request = ref_mut.api.send_timeout(get_updates, timeout);
                 ref_mut.current_request = Some(Box::pin(request));
+
+                tracing::trace!("executing recursive call");
                 Pin::new(ref_mut).poll_next(cx)
             }
             Ok(true) => {
+                tracing::trace!("dropping request");
                 ref_mut.current_request = None;
+                tracing::trace!("executing recursive call");
                 Pin::new(ref_mut).poll_next(cx)
             }
         }
@@ -108,6 +142,7 @@ impl UpdatesStream {
             allowed_updates: Vec::new(),
             limit: TELEGRAM_LONG_POLL_LIMIT_MESSAGES,
             error_delay: Duration::from_millis(TELEGRAM_LONG_POLL_ERROR_DELAY_MILLISECONDS),
+            next_poll_id: 0,
         }
     }
 
