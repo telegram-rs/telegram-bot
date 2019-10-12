@@ -1,11 +1,12 @@
+use std::fmt;
 use std::ops::Deref;
 
 use serde::ser::{Serialize, Serializer};
 
-use types::*;
+use crate::types::*;
 
 macro_rules! integer_id_impls {
-    ($name:ident) => {
+    ($name: ident) => {
         impl $name {
             pub fn new(inner: Integer) -> Self {
                 $name(inner)
@@ -146,6 +147,9 @@ impl ToChatRef for ForwardFrom {
         match *self {
             ForwardFrom::User { ref user, .. } => user.to_chat_ref(),
             ForwardFrom::Channel { ref channel, .. } => channel.to_chat_ref(),
+            ForwardFrom::ChannelHiddenUser { ref sender_name } => {
+                ChatRef::ChannelUsername(sender_name.clone())
+            }
         }
     }
 }
@@ -168,8 +172,8 @@ impl Serialize for ChatRef {
     }
 }
 
-impl ::std::fmt::Display for ChatRef {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+impl fmt::Display for ChatRef {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             ChatRef::Id(id) => write!(f, "{}", id),
             ChatRef::ChannelUsername(ref username) => write!(f, "{}", username),
@@ -178,7 +182,7 @@ impl ::std::fmt::Display for ChatRef {
 }
 
 macro_rules! chat_id_impls {
-    ($id:ident) => {
+    ($id: ident) => {
         integer_id_impls!($id);
 
         impl ToChatRef for $id {
@@ -190,7 +194,7 @@ macro_rules! chat_id_impls {
 }
 
 macro_rules! specific_chat_id_impls {
-    ($id:ident, $typ:ident) => {
+    ($id: ident, $typ: ident) => {
         chat_id_impls!($id);
 
         impl From<$id> for ChatId {
@@ -328,7 +332,7 @@ where
 }
 
 macro_rules! file_id_impls {
-    ($name:ident) => {
+    ($name: ident) => {
         impl ToFileRef for $name {
             fn to_file_ref(&self) -> FileRef {
                 self.file_id.clone().into()
@@ -396,26 +400,8 @@ impl ToCallbackQueryId for CallbackQuery {
 }
 
 /// Unique identifier for CallbackQuery.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct CallbackQueryId {
-    inner: String,
-}
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub struct CallbackQueryId(String);
 
-impl<'de> ::serde::de::Deserialize<'de> for CallbackQueryId {
-    fn deserialize<D>(deserializer: D) -> Result<CallbackQueryId, D::Error>
-    where
-        D: ::serde::de::Deserializer<'de>,
-    {
-        let inner = ::serde::de::Deserialize::deserialize(deserializer)?;
-        Ok(Self { inner })
-    }
-}
-
-impl Serialize for CallbackQueryId {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.inner)
-    }
-}
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub struct InlineQueryId(String);

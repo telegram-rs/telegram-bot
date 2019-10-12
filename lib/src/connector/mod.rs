@@ -1,36 +1,23 @@
-//! IO backend.
-//!
-//! `CurlConnector` is default connector unless feature `curl_connector` is disabled and
-//! feature `hyper_connector` is enabled. This behaviour will change after hyper release.
+//! Connector with hyper backend.
 
-mod _base;
-#[cfg(feature = "curl_connector")]
-pub mod curl;
-#[cfg(feature = "hyper_connector")]
 pub mod hyper;
 
-use tokio_core::reactor::Handle;
+use std::fmt::Debug;
+use std::pin::Pin;
 
-pub use self::_base::Connector;
-#[cfg(feature = "curl_connector")]
-pub use self::curl::CurlConnector;
-#[cfg(feature = "hyper_connector")]
-pub use self::hyper::HyperConnector;
+use futures::Future;
+use telegram_bot_raw::{HttpRequest, HttpResponse};
 
-use errors::Error;
+use crate::errors::Error;
 
-/// Returns default connector.
-///
-/// See module level documentation for details.
-#[cfg(feature = "curl_connector")]
-pub fn default_connector(handle: &Handle) -> Result<Box<Connector>, Error> {
-    curl::default_connector(handle)
+pub trait Connector: Debug + Send + Sync {
+    fn request(
+        &self,
+        token: &str,
+        req: HttpRequest,
+    ) -> Pin<Box<dyn Future<Output = Result<HttpResponse, Error>> + Send>>;
 }
 
-/// Returns default connector.
-///
-/// See module level documentation for details.
-#[cfg(all(not(feature = "curl_connector"), all(feature = "hyper_connector")))]
-pub fn default_connector(handle: &Handle) -> Result<Box<Connector>, Error> {
-    hyper::default_connector(handle)
+pub fn default_connector() -> Box<dyn Connector> {
+    hyper::default_connector().unwrap()
 }

@@ -1,7 +1,7 @@
 use serde::Serialize;
 use serde_json;
 
-use requests::*;
+use crate::requests::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash, Serialize, Deserialize)]
 pub struct JsonRequestType<Request> {
@@ -13,7 +13,7 @@ impl<Request: Serialize> RequestType for JsonRequestType<Request> {
     type Request = Request;
 
     fn serialize(url: Self::Options, request: &Self::Request) -> Result<HttpRequest, Error> {
-        let body = serde_json::to_vec(&request)?;
+        let body = serde_json::to_string(&request)?;
         Ok(HttpRequest {
             url: url,
             method: Method::Post,

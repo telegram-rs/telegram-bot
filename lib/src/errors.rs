@@ -2,11 +2,8 @@ use telegram_bot_raw;
 
 error_chain! {
     foreign_links {
-        Url(::hyper::error::UriError) #[cfg(feature = "hyper_connector")];
-        Hyper(::hyper::Error) #[cfg(feature = "hyper_connector")];
-        Curl(::curl::Error) #[cfg(feature = "curl_connector")];
-        CurlFormError(::curl::FormError) #[cfg(feature = "curl_connector")];
-        CurlPerformError(::tokio_curl::PerformError) #[cfg(feature = "curl_connector")];
+        Url(::hyper::http::uri::InvalidUri);
+        Hyper(::hyper::Error);
         Io(::std::io::Error);
     }
 

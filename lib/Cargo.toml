@@ -1,7 +1,8 @@
 [package]
 name = "telegram-bot"
-version = "0.6.1"
-authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
+version = "0.7.0-alpha.0"
+authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>", "Gustavo Aguiar <gustavo.h.o.aguiar@gmail.com>"]
+edition = "2018"
 
 description = "A library for creating Telegram bots"
 
@@ -14,31 +15,18 @@ categories = ["api-bindings", "asynchronous"]
 license = "MIT"
 
 [dependencies]
-antidote = "1.0"
-tokio-core = "0.1"
+tokio = "0.2.0-alpha.5"
+
 error-chain = "0.11.0"
-futures = "0.1"
+tracing = "0.1.9"
+tracing-futures = { version = "0.1.0", features = ["std-future"] }
+multipart = "0.16"
 
-curl = {version = "0.4.6", optional = true}
-tokio-curl = {version = "0.1.9", optional = true}
+telegram-bot-raw = { version = "=0.7.0-alpha.0", path = "../raw" }
 
-telegram-bot-raw = { version = "=0.6.1", path = "../raw" }
+hyper = { version = "=0.13.0-alpha.4", features=["unstable-stream"]}
+hyper-tls = "=0.4.0-alpha.4"
+futures-preview = "=0.3.0-alpha.19"
 
-[dependencies.hyper]
-version = "0.11"
-optional = true
-
-[dependencies.hyper-tls]
-version = "0.1"
-optional = true
-
-[dependencies.multipart]
-version = "0.14"
-features = ["client", "hyper"]
-optional = true
-
-[features]
-default = ["hyper_connector"]
-
-curl_connector = ["curl", "tokio-curl"]
-hyper_connector = ["hyper", "hyper-tls", "multipart"]
+[dev-dependencies]
+tracing-subscriber = "0.1.5"

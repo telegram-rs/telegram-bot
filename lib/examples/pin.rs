@@ -1,39 +1,38 @@
-extern crate futures;
-extern crate telegram_bot;
-extern crate tokio_core;
-
 use std::env;
 
-use futures::Stream;
-use tokio_core::reactor::Core;
+use futures::StreamExt;
 use telegram_bot::*;
 
-fn process(api: Api, message: Message) {
+async fn process(api: Api, message: Message) -> Result<(), Error> {
     if let MessageKind::Text { ref data, .. } = message.kind {
         match data.as_str() {
-            "/pin" => message.reply_to_message.map(|message| api.spawn(message.pin())).unwrap_or(()),
-            "/unpin" => {
-                api.spawn(message.chat.unpin_message())
-            },
-            _ => ()
+            "/pin" => {
+                if let Some(reply) = message.reply_to_message {
+                    api.send(reply.pin()).await?;
+                }
+            }
+            "/unpin" => api.send(message.chat.unpin_message()).await?,
+
+            _ => (),
         }
     }
+    Ok(())
 }
 
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
 
-fn main() {
-    let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
+    let api = Api::new(token);
+    let mut stream = api.stream();
 
-    let mut core = Core::new().unwrap();
-
-    let api = Api::configure(token).build(core.handle()).unwrap();
-
-    let future = api.stream().for_each(|update| {
+    // Fetch new updates via long poll method
+    while let Some(update) = stream.next().await {
+        let update = update?;
         if let UpdateKind::Message(message) = update.kind {
-            process(api.clone(), message)
+            process(api.clone(), message).await?
         }
-        Ok(())
-    });
+    }
 
-    core.run(future).unwrap();
+    Ok(())
 }

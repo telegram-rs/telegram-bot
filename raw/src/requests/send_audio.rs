@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 use std::path::Path;
 
-use requests::*;
-use types::*;
+use crate::requests::*;
+use crate::types::*;
 
 /// Use this method to send an audio
 #[derive(Debug, Clone, PartialEq, PartialOrd)]

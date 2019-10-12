@@ -1,10 +1,9 @@
 use std::ops::Not;
 
-use serde::ser::{Serialize, Serializer};
+use crate::types::*;
 
-use types::*;
-
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[serde(untagged)]
 pub enum ReplyMarkup {
     InlineKeyboardMarkup(InlineKeyboardMarkup),
     ReplyKeyboardMarkup(ReplyKeyboardMarkup),
@@ -15,6 +14,12 @@ pub enum ReplyMarkup {
 impl From<InlineKeyboardMarkup> for ReplyMarkup {
     fn from(value: InlineKeyboardMarkup) -> ReplyMarkup {
         ReplyMarkup::InlineKeyboardMarkup(value)
+    }
+}
+
+impl From<Vec<Vec<InlineKeyboardButton>>> for ReplyMarkup {
+    fn from(value: Vec<Vec<InlineKeyboardButton>>) -> ReplyMarkup {
+        ReplyMarkup::InlineKeyboardMarkup(value.into())
     }
 }
 
@@ -36,17 +41,6 @@ impl From<ForceReply> for ReplyMarkup {
     }
 }
 
-impl Serialize for ReplyMarkup {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-        match *self {
-            ReplyMarkup::InlineKeyboardMarkup(ref value) => value.serialize(serializer),
-            ReplyMarkup::ReplyKeyboardMarkup(ref value) => value.serialize(serializer),
-            ReplyMarkup::ReplyKeyboardRemove(ref value) => value.serialize(serializer),
-            ReplyMarkup::ForceReply(ref value) => value.serialize(serializer),
-        }
-    }
-}
-
 /// This object represents a custom keyboard with reply options.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct ReplyKeyboardMarkup {
@@ -56,7 +50,7 @@ pub struct ReplyKeyboardMarkup {
     #[serde(skip_serializing_if = "Not::not")]
     one_time_keyboard: bool,
     #[serde(skip_serializing_if = "Not::not")]
-    selective: bool
+    selective: bool,
 }
 
 impl ReplyKeyboardMarkup {
@@ -114,7 +108,9 @@ impl ReplyKeyboardMarkup {
 }
 
 impl From<Vec<Vec<KeyboardButton>>> for ReplyKeyboardMarkup {
-    fn from(value: Vec<Vec<KeyboardButton>>) -> Self { Self::init(value) }
+    fn from(value: Vec<Vec<KeyboardButton>>) -> Self {
+        Self::init(value)
+    }
 }
 
 /// This object represents one button of the reply keyboard.
@@ -198,7 +194,7 @@ impl ReplyKeyboardRemove {
 /// This object represents an inline keyboard that appears right next to the message it belongs to.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct InlineKeyboardMarkup {
-    inline_keyboard: Vec<Vec<InlineKeyboardButton>>
+    inline_keyboard: Vec<Vec<InlineKeyboardButton>>,
 }
 
 impl InlineKeyboardMarkup {
@@ -209,9 +205,7 @@ impl InlineKeyboardMarkup {
     }
 
     fn init(inline_keyboard: Vec<Vec<InlineKeyboardButton>>) -> Self {
-        Self {
-            inline_keyboard,
-        }
+        Self { inline_keyboard }
     }
 
     pub fn add_row(&mut self, row: Vec<InlineKeyboardButton>) -> &mut Vec<InlineKeyboardButton> {
@@ -225,14 +219,17 @@ impl InlineKeyboardMarkup {
 }
 
 impl From<Vec<Vec<InlineKeyboardButton>>> for InlineKeyboardMarkup {
-    fn from(value: Vec<Vec<InlineKeyboardButton>>) -> Self { Self::init(value) }
+    fn from(value: Vec<Vec<InlineKeyboardButton>>) -> Self {
+        Self::init(value)
+    }
 }
 
 /// This object represents one button of an inline keyboard.
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct InlineKeyboardButton {
     text: String,
-    kind: InlineKeyboardButtonKind
+    #[serde(flatten)]
+    kind: InlineKeyboardButtonKind,
 }
 
 impl InlineKeyboardButton {
@@ -240,43 +237,27 @@ impl InlineKeyboardButton {
     pub fn callback<T: AsRef<str>, C: AsRef<str>>(text: T, callback: C) -> Self {
         Self {
             text: text.as_ref().to_string(),
-            kind: InlineKeyboardButtonKind::CallbackData(callback.as_ref().to_string())
+            kind: InlineKeyboardButtonKind::CallbackData(callback.as_ref().to_string()),
+        }
+    }
+
+    pub fn url<T: AsRef<str>, U: AsRef<str>>(text: T, url: U) -> Self {
+        Self {
+            text: text.as_ref().to_string(),
+            kind: InlineKeyboardButtonKind::Url(url.as_ref().to_string()),
         }
     }
 }
 
-impl Serialize for InlineKeyboardButton {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-        use self::InlineKeyboardButtonKind::*;
-
-        let mut raw = InlineKeyboardButtonRaw {
-            text: &self.text,
-            url: None,
-            callback_data: None,
-            switch_inline_query: None,
-            switch_inline_query_current_chat: None,
-//            callback_game: None,
-        };
-
-        match self.kind {
-//            Url(ref data) => raw.url = Some(data),
-            CallbackData(ref data) => raw.callback_data = Some(data),
-//            SwitchInlineQuery(ref data) => raw.switch_inline_query = Some(data),
-//            SwitchInlineQueryCurrentChat(ref data) => raw.switch_inline_query_current_chat = Some(data),
-//            CallbackGame(ref data) => raw.callback_game = Some(data),
-        }
-
-        Serialize::serialize(&raw, serializer)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum InlineKeyboardButtonKind {
-//    Url(String), // TODO(knsd): Url?
-    CallbackData(String),  //TODO(knsd) Validate size?
-//    SwitchInlineQuery(String),
-//    SwitchInlineQueryCurrentChat(String),
-//    CallbackGame(CallbackGame),
+    #[serde(rename = "url")]
+    Url(String), // TODO(knsd): Url?
+    #[serde(rename = "callback_data")]
+    CallbackData(String), // TODO(knsd) Validate size?
+                          //  SwitchInlineQuery(String),
+                          //  SwitchInlineQueryCurrentChat(String),
+                          //  CallbackGame(CallbackGame),
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
@@ -290,7 +271,7 @@ struct InlineKeyboardButtonRaw<'a> {
     switch_inline_query: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     switch_inline_query_current_chat: Option<&'a str>,
-//    callback_game: Option<CallbackGame>,
+    //    callback_game: Option<CallbackGame>,
 }
 
 /// Upon receiving a message with this object, Telegram clients will

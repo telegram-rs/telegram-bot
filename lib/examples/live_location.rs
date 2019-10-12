@@ -1,48 +1,46 @@
-extern crate futures;
-extern crate telegram_bot;
-extern crate tokio_core;
-
 use std::env;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
-use futures::{Future, Stream};
-use tokio_core::reactor::{Handle, Core, Timeout};
+use futures::StreamExt;
 use telegram_bot::*;
+use tokio::timer::delay;
 
-fn test(api: Api, message: Message, handle: Handle) {
-    let timeout = |n| Timeout::new(Duration::from_secs(n), &handle).unwrap().map_err(From::from);
-    let api_future = || Ok(api.clone());
+async fn test(api: Api, message: Message) -> Result<(), Error> {
+    let when = Instant::now() + Duration::from_secs(2);
 
-    let future = api.send(message.location_reply(0.0, 0.0).live_period(60))
-        .join(api_future()).join(timeout(2))
-        .and_then(|((message, api), _)| api.send(message.edit_live_location(10.0, 10.0)))
-        .join(api_future()).join(timeout(4))
-        .and_then(|((message, api), _)| api.send(message.edit_live_location(20.0, 20.0)))
-        .join(api_future()).join(timeout(6))
-        .and_then(|((message, api), _)| api.send(message.edit_live_location(30.0, 30.0)));
+    let mut reply = message.location_reply(0.0, 0.0);
+    api.send(reply.live_period(60)).await?;
+    delay(when).await;
 
-    handle.spawn(future.then(|_| Ok(())))
+    api.send(message.edit_live_location(10.0, 10.0)).await?;
+    delay(when).await;
+
+    api.send(message.edit_live_location(20.0, 20.0)).await?;
+    delay(when).await;
+
+    api.send(message.edit_live_location(30.0, 30.0)).await?;
+    delay(when).await;
+
+    Ok(())
 }
 
-fn main() {
-    let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
 
-    let mut core = Core::new().unwrap();
-    let handle = core.handle();
+    let api = Api::new(token);
+    let mut stream = api.stream();
 
-    let api = Api::configure(token).build(core.handle()).unwrap();
-
-    let future = api.stream().for_each(|update| {
+    while let Some(update) = stream.next().await {
+        let update = update?;
         if let UpdateKind::Message(message) = update.kind {
-            if let MessageKind::Text {ref data, ..} = message.kind {
+            if let MessageKind::Text { ref data, .. } = message.kind {
                 match data.as_str() {
-                    "/livelocation" => test(api.clone(), message.clone(), handle.clone()),
+                    "/livelocation" => test(api.clone(), message.clone()).await?,
                     _ => (),
                 }
             }
         }
-        Ok(())
-    });
-
-    core.run(future).unwrap();
+    }
+    Ok(())
 }
