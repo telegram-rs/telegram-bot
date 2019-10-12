@@ -28,8 +28,13 @@ pub enum Method {
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum MultipartValue {
     Text(String),
-    File { path: String },
-    Data { file_name: Option<String>, data: Vec<u8> }
+    File {
+        path: String,
+    },
+    Data {
+        file_name: Option<String>,
+        data: Vec<u8>,
+    },
 }
 
 pub type Multipart = Vec<(String, MultipartValue)>;

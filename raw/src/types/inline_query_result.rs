@@ -19,8 +19,7 @@ pub struct InlineQueryResultArticle {
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    thumb_url: Option<String>
-    // TODO: Rest of the fields
+    thumb_url: Option<String>, // TODO: Rest of the fields
 }
 
 impl InlineQueryResultArticle {

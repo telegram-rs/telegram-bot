@@ -53,20 +53,22 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
                     http_request.body(Into::<hyper::Body>::into(body))
                 }
                 TelegramBody::Multipart(parts) => {
-                     let mut adapter = multipart::Adapter::from(parts);
+                    let mut adapter = multipart::Adapter::from(parts);
                     let boundary = adapter.prepared.boundary();
 
                     http_request.headers_mut().map(|headers| {
-                        headers.insert(CONTENT_TYPE, format!("multipart/form-data;boundary={bound}", bound = boundary).parse().unwrap());
-                        if let Some(len) = adapter.prepared.content_len() {
-                            headers.insert(CONTENT_LENGTH, len.into());
-                        }
+                        headers.insert(
+                            CONTENT_TYPE,
+                            format!("multipart/form-data;boundary={bound}", bound = boundary)
+                                .parse()
+                                .unwrap(),
+                        );
                     });
 
                     let mut bytes = Vec::new();
                     adapter.prepared.read_to_end(&mut bytes).unwrap();
                     http_request.body(bytes.into())
-                 }
+                }
                 body => panic!("Unknown body type {:?}", body),
             };
 
