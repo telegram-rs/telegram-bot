@@ -4,6 +4,8 @@ error_chain! {
     foreign_links {
         Url(::hyper::http::uri::InvalidUri);
         Hyper(::hyper::Error);
+        Http(::hyper::http::Error);
+        InvalidHeaderValue(::hyper::http::header::InvalidHeaderValue);
         Io(::std::io::Error);
     }
 
