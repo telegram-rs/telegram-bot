@@ -1,5 +1,8 @@
 use std::fmt;
 
+use bytes::Bytes;
+
+use crate::types::Text;
 use crate::url::telegram_api_url;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
@@ -27,17 +30,12 @@ pub enum Method {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum MultipartValue {
-    Text(String),
-    File {
-        path: String,
-    },
-    Data {
-        file_name: Option<String>,
-        data: Vec<u8>,
-    },
+    Text(Text),
+    Path { path: Text, file_name: Option<Text> },
+    Data { file_name: Text, data: Bytes },
 }
 
-pub type Multipart = Vec<(String, MultipartValue)>;
+pub type Multipart = Vec<(&'static str, MultipartValue)>;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Body {
@@ -52,7 +50,7 @@ impl fmt::Display for Body {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match self {
             Body::Empty => "<empty body>".fmt(f),
-            Body::Multipart(_) => unimplemented!("FIXME(knsd)"),
+            Body::Multipart(multipart) => write!(f, "{:?}", multipart),
             Body::Json(s) => s.fmt(f),
             Body::__Nonexhaustive => unreachable!(),
         }

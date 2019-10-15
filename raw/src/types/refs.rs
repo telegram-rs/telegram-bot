@@ -352,7 +352,7 @@ file_id_impls!(VideoNote);
 /// Unique file identifier reference.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FileRef {
-    inner: String,
+    pub(crate) inner: String,
 }
 
 impl<'a> From<&'a str> for FileRef {

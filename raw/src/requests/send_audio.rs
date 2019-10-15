@@ -1,5 +1,4 @@
 use std::borrow::Cow;
-use std::path::Path;
 
 use crate::requests::*;
 use crate::types::*;
@@ -9,7 +8,7 @@ use crate::types::*;
 #[must_use = "requests do nothing unless sent"]
 pub struct SendAudio<'c, 'p, 't> {
     chat_id: ChatRef,
-    audio: MultipartValue,
+    audio: InputFile,
     caption: Option<Cow<'c, str>>,
     parse_mode: Option<ParseMode>,
     duration: Option<i64>,
@@ -21,7 +20,7 @@ pub struct SendAudio<'c, 'p, 't> {
 }
 
 impl<'c, 'p, 't> ToMultipart for SendAudio<'c, 'p, 't> {
-    fn to_multipart(&self) -> Multipart {
+    fn to_multipart(&self) -> Result<Multipart, Error> {
         multipart_map! {
             self,
             (chat_id (text));
@@ -48,54 +47,14 @@ impl<'c, 'p, 't> Request for SendAudio<'c, 'p, 't> {
 }
 
 impl<'c, 'p, 't> SendAudio<'c, 'p, 't> {
-    pub fn with_url<C, T>(chat: C, url: T) -> Self
+    pub fn new<C, V>(chat: C, audio: V) -> Self
     where
         C: ToChatRef,
-        T: AsRef<str>,
+        V: Into<InputFile>,
     {
         Self {
             chat_id: chat.to_chat_ref(),
-            audio: MultipartValue::Text(url.as_ref().into()),
-            caption: None,
-            parse_mode: None,
-            duration: None,
-            performer: None,
-            title: None,
-            reply_to_message_id: None,
-            reply_markup: None,
-            disable_notification: false,
-        }
-    }
-
-    pub fn with_file<C, P>(chat: C, path: P) -> Self
-    where
-        C: ToChatRef,
-        P: AsRef<Path>,
-    {
-        let path = path.as_ref().to_string_lossy().into();
-        Self {
-            chat_id: chat.to_chat_ref(),
-            audio: MultipartValue::File { path },
-            caption: None,
-            parse_mode: None,
-            duration: None,
-            performer: None,
-            title: None,
-            reply_to_message_id: None,
-            reply_markup: None,
-            disable_notification: false,
-        }
-    }
-
-    pub fn with_file_content<C, T>(chat: C, data: Vec<u8>, file_name: Option<T>) -> Self
-    where
-        C: ToChatRef,
-        T: AsRef<str>,
-    {
-        let file_name = file_name.map(|x| x.as_ref().into());
-        Self {
-            chat_id: chat.to_chat_ref(),
-            audio: MultipartValue::Data { file_name, data },
+            audio: audio.into(),
             caption: None,
             parse_mode: None,
             duration: None,
@@ -160,50 +119,20 @@ impl<'c, 'p, 't> SendAudio<'c, 'p, 't> {
 
 /// Can reply with an audio
 pub trait CanReplySendAudio {
-    fn audio_url_reply<'c, 'p, 't, T>(&self, url: T) -> SendAudio<'c, 'p, 't>
+    fn audio_reply<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
     where
-        T: AsRef<str>;
-    fn audio_file_reply<'c, 'p, 't, P>(&self, file: P) -> SendAudio<'c, 'p, 't>
-    where
-        P: AsRef<Path>;
-    fn audio_file_content_reply<'c, 'p, 't, T>(
-        &self,
-        data: Vec<u8>,
-        file_name: Option<T>,
-    ) -> SendAudio<'c, 'p, 't>
-    where
-        T: AsRef<str>;
+        T: Into<InputFile>;
 }
 
 impl<M> CanReplySendAudio for M
 where
     M: ToMessageId + ToSourceChat,
 {
-    fn audio_url_reply<'c, 'p, 't, T>(&self, url: T) -> SendAudio<'c, 'p, 't>
+    fn audio_reply<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
     where
-        T: AsRef<str>,
+        T: Into<InputFile>,
     {
-        let mut req = SendAudio::with_url(self.to_source_chat(), url);
-        req.reply_to(self);
-        req
-    }
-    fn audio_file_reply<'c, 'p, 't, P>(&self, path: P) -> SendAudio<'c, 'p, 't>
-    where
-        P: AsRef<Path>,
-    {
-        let mut req = SendAudio::with_file(self.to_source_chat(), path);
-        req.reply_to(self);
-        req
-    }
-    fn audio_file_content_reply<'c, 'p, 't, T>(
-        &self,
-        data: Vec<u8>,
-        file_name: Option<T>,
-    ) -> SendAudio<'c, 'p, 't>
-    where
-        T: AsRef<str>,
-    {
-        let mut req = SendAudio::with_file_content(self.to_source_chat(), data, file_name);
+        let mut req = SendAudio::new(self.to_source_chat(), audio);
         req.reply_to(self);
         req
     }
@@ -211,45 +140,19 @@ where
 
 /// Send an audio
 pub trait CanSendAudio {
-    fn audio_url<'c, 'p, 't, T>(&self, url: T) -> SendAudio<'c, 'p, 't>
+    fn audio<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
     where
-        T: AsRef<str>;
-    fn audio_file<'c, 'p, 't, P>(&self, file: P) -> SendAudio<'c, 'p, 't>
-    where
-        P: AsRef<Path>;
-    fn audio_file_content<'c, 'p, 't, T>(
-        &self,
-        data: Vec<u8>,
-        file_name: Option<T>,
-    ) -> SendAudio<'c, 'p, 't>
-    where
-        T: AsRef<str>;
+        T: Into<InputFile>;
 }
 
 impl<M> CanSendAudio for M
 where
     M: ToChatRef,
 {
-    fn audio_url<'c, 'p, 't, T>(&self, url: T) -> SendAudio<'c, 'p, 't>
+    fn audio<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
     where
-        T: AsRef<str>,
+        T: Into<InputFile>,
     {
-        SendAudio::with_url(self.to_chat_ref(), url)
-    }
-    fn audio_file<'c, 'p, 't, P>(&self, file: P) -> SendAudio<'c, 'p, 't>
-    where
-        P: AsRef<Path>,
-    {
-        SendAudio::with_file(self.to_chat_ref(), file)
-    }
-    fn audio_file_content<'c, 'p, 't, T>(
-        &self,
-        data: Vec<u8>,
-        file_name: Option<T>,
-    ) -> SendAudio<'c, 'p, 't>
-    where
-        T: AsRef<str>,
-    {
-        SendAudio::with_file_content(self.to_chat_ref(), data, file_name)
+        SendAudio::new(self.to_chat_ref(), audio)
     }
 }

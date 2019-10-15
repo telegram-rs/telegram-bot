@@ -5,8 +5,12 @@ pub struct MultipartRequestType<Request> {
     phantom: ::std::marker::PhantomData<Request>,
 }
 
+pub trait ToMultipartValue {
+    fn to_multipart_value(&self) -> MultipartValue;
+}
+
 pub trait ToMultipart {
-    fn to_multipart(&self) -> Multipart;
+    fn to_multipart(&self) -> Result<Multipart, Error>;
 }
 
 impl<Request: ToMultipart> RequestType for MultipartRequestType<Request> {
@@ -14,7 +18,7 @@ impl<Request: ToMultipart> RequestType for MultipartRequestType<Request> {
     type Request = Request;
 
     fn serialize(url: Self::Options, request: &Self::Request) -> Result<HttpRequest, Error> {
-        let multipart = request.to_multipart();
+        let multipart = request.to_multipart()?;
 
         Ok(HttpRequest {
             url: url,
@@ -31,7 +35,7 @@ macro_rules! multipart_map {
         $(
             multipart_field!($self, result, $($opts)*);
         )*
-        result
+        Ok(result)
     }
 }
 
@@ -54,8 +58,8 @@ macro_rules! multipart_field {
 
     ($self:expr, $result:expr, $field:ident($type:ident) => $val:expr,optional) => {{
         let value = $val.as_ref();
-        if value.is_some() {
-            multipart_field!($self, $result, $field ($type) => value.unwrap());
+        if let Some(value) = value {
+            multipart_field!($self, $result, $field ($type) => value);
         }
     }};
 
@@ -65,33 +69,17 @@ macro_rules! multipart_field {
     }};
 
     ($self:expr, $result:expr, $field:ident(text) => $val:expr) => {{
-        let value = MultipartValue::Text($val.to_string());
-        $result.push((stringify!($field).into(), value));
+        let value = MultipartValue::Text($val.to_string().into());
+        $result.push((stringify!($field), value));
     }};
 
     ($self:expr, $result:expr, $field:ident(json) => $val:expr) => {{
-        let stringified = ::serde_json::to_string($val).unwrap();
-        let value = MultipartValue::Text(stringified);
-        $result.push((stringify!($field).into(), value));
+        let s = ::serde_json::to_string($val)?;
+        let value = MultipartValue::Text(s.into());
+        $result.push((stringify!($field), value));
     }};
-
-    ($self:expr, $result:expr, $field:ident(file) => $val:expr) => {{
-        use std::ffi::OsStr;
-        use std::path::Path;
-        let file_name = Path::new(&$val.to_string())
-            .file_name()
-            .unwrap_or(OsStr::new(""))
-            .to_string_lossy()
-            .into();
-        let value = MultipartValue::File {
-            file_name,
-            path: $val.to_string(),
-        };
-        $result.push((stringify!($field).into(), value));
-    }};
-
     ($self:expr, $result:expr, $field:ident(raw) => $val:expr) => {{
-        let value = $val.clone();
-        $result.push((stringify!($field).into(), value));
+        let value = $val.to_multipart_value();
+        $result.push((stringify!($field), value));
     }};
 }

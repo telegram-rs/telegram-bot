@@ -1,7 +1,9 @@
 use std::io::{Cursor, Read};
+use std::path::Path;
 use std::pin::Pin;
 use std::str::FromStr;
 
+use bytes::Bytes;
 use futures::{Future, FutureExt, TryStreamExt};
 use hyper::{
     client::{connect::Connect, Client},
@@ -11,14 +13,19 @@ use hyper::{
 use hyper_tls::HttpsConnector;
 use multipart::client::lazy::Multipart;
 use telegram_bot_raw::{
-    Body as TelegramBody, HttpRequest, HttpResponse, Method as TelegramMethod, MultipartValue,
+    Body as TelegramBody, HttpRequest, HttpResponse, Method as TelegramMethod, MultipartValue, Text,
 };
 
 use super::Connector;
-use crate::errors::Error;
+use crate::errors::{Error, ErrorKind};
 
 #[derive(Debug)]
 pub struct HyperConnector<C>(Client<C>);
+
+enum MultipartTemporaryValue {
+    Text(Text),
+    Data { file_name: Text, data: Bytes },
+}
 
 impl<C> HyperConnector<C> {
     pub fn new(client: Client<C>) -> Self {
@@ -56,18 +63,59 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
                     http_request.body(Into::<hyper::Body>::into(body))
                 }
                 TelegramBody::Multipart(parts) => {
+                    let mut fields = Vec::new();
+                    for (key, value) in parts {
+                        match value {
+                            MultipartValue::Text(text) => {
+                                fields.push((key, MultipartTemporaryValue::Text(text)))
+                            }
+                            MultipartValue::Path { file_name, path } => {
+                                let file_name = match file_name {
+                                    Some(file_name) => file_name,
+                                    None => {
+                                        match AsRef::<Path>::as_ref(&path)
+                                            .file_name()
+                                            .and_then(|s| s.to_str())
+                                            .map(Into::into)
+                                        {
+                                            None => {
+                                                return Err(
+                                                    ErrorKind::InvalidMultipartFilename.into()
+                                                )
+                                            }
+                                            Some(file_name) => file_name,
+                                        }
+                                    }
+                                };
+
+                                let data = tokio::fs::read(path).await?;
+                                fields.push((
+                                    key,
+                                    MultipartTemporaryValue::Data {
+                                        file_name,
+                                        data: data.into(),
+                                    },
+                                ))
+                            }
+                            MultipartValue::Data { file_name, data } => fields
+                                .push((key, MultipartTemporaryValue::Data { file_name, data })),
+                        }
+                    }
+
                     let mut prepared = {
                         let mut part = Multipart::new();
-                        for (key, value) in parts.into_iter() {
+                        for (key, value) in &fields {
                             match value {
-                                MultipartValue::Text(text) => {
-                                    part.add_text(key, text);
+                                MultipartTemporaryValue::Text(text) => {
+                                    part.add_text(*key, text.as_str());
                                 }
-                                MultipartValue::File { path } => {
-                                    part.add_file(key, path);
-                                }
-                                MultipartValue::Data { file_name, data } => {
-                                    part.add_stream(key, Cursor::new(data), file_name, None);
+                                MultipartTemporaryValue::Data { file_name, data } => {
+                                    part.add_stream(
+                                        *key,
+                                        Cursor::new(data),
+                                        Some(file_name.as_str()),
+                                        None,
+                                    );
                                 }
                             }
                         }

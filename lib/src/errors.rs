@@ -12,4 +12,8 @@ error_chain! {
     links {
         Raw(telegram_bot_raw::Error, telegram_bot_raw::ErrorKind);
     }
+
+    errors {
+        InvalidMultipartFilename
+    }
 }
