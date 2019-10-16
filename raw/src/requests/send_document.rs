@@ -1,30 +1,41 @@
 use std::borrow::Cow;
-use std::ops::Not;
 
 use crate::requests::*;
 use crate::types::*;
 
 /// Use this method to send general files. On success, the sent Message is returned.
 /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendDocument<'s, 'c> {
+pub struct SendDocument<'c> {
     chat_id: ChatRef,
-    document: Cow<'s, str>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    document: InputFile,
+    thumb: Option<InputFile>,
     caption: Option<Cow<'c, str>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     parse_mode: Option<ParseMode>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     reply_to_message_id: Option<MessageId>,
-    #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'s, 'c> Request for SendDocument<'s, 'c> {
-    type Type = JsonRequestType<Self>;
+impl<'c> ToMultipart for SendDocument<'c> {
+    fn to_multipart(&self) -> Result<Multipart, Error> {
+        multipart_map! {
+            self,
+            (chat_id (text));
+            (document (raw));
+            (thumb (raw), optional);
+            (caption (text), optional);
+            (parse_mode (text), optional);
+            (reply_to_message_id (text), optional);
+            (disable_notification (text), when_true);
+            (reply_markup (json), optional);
+        }
+    }
+}
+
+impl<'c> Request for SendDocument<'c> {
+    type Type = MultipartRequestType<Self>;
     type Response = JsonTrueToUnitResponse;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
@@ -32,21 +43,27 @@ impl<'s, 'c> Request for SendDocument<'s, 'c> {
     }
 }
 
-impl<'s, 'c> SendDocument<'s, 'c> {
-    pub fn with_url<C, T>(chat: C, url: T) -> Self
+impl<'c> SendDocument<'c> {
+    pub fn new<C, V>(chat: C, document: V) -> Self
     where
         C: ToChatRef,
-        T: Into<Cow<'s, str>>,
+        V: Into<InputFile>,
     {
         Self {
             chat_id: chat.to_chat_ref(),
-            document: url.into(),
+            document: document.into(),
+            thumb: None,
             caption: None,
             parse_mode: None,
             reply_to_message_id: None,
             reply_markup: None,
             disable_notification: false,
         }
+    }
+
+    pub fn thumb<V>(&mut self, thumb: V) -> &mut Self where V: Into<InputFile> {
+        self.thumb = Some(thumb.into());
+        self
     }
 
     pub fn caption<T>(&mut self, caption: T) -> &mut Self
@@ -70,6 +87,11 @@ impl<'s, 'c> SendDocument<'s, 'c> {
         self
     }
 
+    pub fn disable_notification(&mut self) -> &mut Self {
+        self.disable_notification = true;
+        self
+    }
+
     pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self
     where
         R: Into<ReplyMarkup>,
@@ -79,42 +101,34 @@ impl<'s, 'c> SendDocument<'s, 'c> {
     }
 }
 
-/// Can reply with a document
+/// Can reply with a dcoument
 pub trait CanReplySendDocument {
-    fn document_url_reply<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
-    where
-        T: Into<Cow<'s, str>>;
+    fn document_reply<'c, T>(&self, document: T) -> SendDocument<'c> where T: Into<InputFile>;
 }
 
 impl<M> CanReplySendDocument for M
 where
     M: ToMessageId + ToSourceChat,
 {
-    fn document_url_reply<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
-    where
-        T: Into<Cow<'s, str>>,
+    fn document_reply<'c, T>(&self, document: T) -> SendDocument<'c> where T: Into<InputFile>
     {
-        let mut req = SendDocument::with_url(self.to_source_chat(), url);
-        req.reply_to(self.to_message_id());
+        let mut req = SendDocument::new(self.to_source_chat(), document);
+        req.reply_to(self);
         req
     }
 }
 
-/// Send an audio
+/// Send a document
 pub trait CanSendDocument {
-    fn document_url<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
-    where
-        T: Into<Cow<'s, str>>;
+    fn document<'c, T>(&self, document: T) -> SendDocument<'c> where T: Into<InputFile>;
 }
 
 impl<M> CanSendDocument for M
 where
     M: ToChatRef,
 {
-    fn document_url<'s, 'c, T>(&self, url: T) -> SendDocument<'s, 'c>
-    where
-        T: Into<Cow<'s, str>>,
+    fn document<'c, T>(&self, document: T) -> SendDocument<'c> where T: Into<InputFile>
     {
-        SendDocument::with_url(self.to_chat_ref(), url)
+        SendDocument::new(self.to_chat_ref(), document)
     }
 }
