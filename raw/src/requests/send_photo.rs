@@ -3,14 +3,12 @@ use std::borrow::Cow;
 use crate::requests::*;
 use crate::types::*;
 
-/// Use this method to send general files. On success, the sent Message is returned.
-/// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
+/// Use this method to send photos
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendDocument<'c> {
+pub struct SendPhoto<'c> {
     chat_id: ChatRef,
-    document: InputFile,
-    thumb: Option<InputFile>,
+    photo: InputFile,
     caption: Option<Cow<'c, str>>,
     parse_mode: Option<ParseMode>,
     reply_to_message_id: Option<MessageId>,
@@ -18,13 +16,12 @@ pub struct SendDocument<'c> {
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'c> ToMultipart for SendDocument<'c> {
+impl<'c> ToMultipart for SendPhoto<'c> {
     fn to_multipart(&self) -> Result<Multipart, Error> {
         multipart_map! {
             self,
             (chat_id (text));
-            (document (raw));
-            (thumb (raw), optional);
+            (photo (raw));
             (caption (text), optional);
             (parse_mode (text), optional);
             (reply_to_message_id (text), optional);
@@ -34,39 +31,30 @@ impl<'c> ToMultipart for SendDocument<'c> {
     }
 }
 
-impl<'c> Request for SendDocument<'c> {
+impl<'c> Request for SendPhoto<'c> {
     type Type = MultipartRequestType<Self>;
     type Response = JsonIdResponse<Message>;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
-        Self::Type::serialize(RequestUrl::method("sendDocument"), self)
+        Self::Type::serialize(RequestUrl::method("sendPhoto"), self)
     }
 }
 
-impl<'c> SendDocument<'c> {
-    pub fn new<C, V>(chat: C, document: V) -> Self
+impl<'c> SendPhoto<'c> {
+    pub fn new<C, V>(chat: C, photo: V) -> Self
     where
         C: ToChatRef,
         V: Into<InputFile>,
     {
         Self {
             chat_id: chat.to_chat_ref(),
-            document: document.into(),
-            thumb: None,
+            photo: photo.into(),
             caption: None,
             parse_mode: None,
             reply_to_message_id: None,
             reply_markup: None,
             disable_notification: false,
         }
-    }
-
-    pub fn thumb<V>(&mut self, thumb: V) -> &mut Self
-    where
-        V: Into<InputFile>,
-    {
-        self.thumb = Some(thumb.into());
-        self
     }
 
     pub fn caption<T>(&mut self, caption: T) -> &mut Self
@@ -104,42 +92,42 @@ impl<'c> SendDocument<'c> {
     }
 }
 
-/// Can reply with a dcoument
-pub trait CanReplySendDocument {
-    fn document_reply<'c, T>(&self, document: T) -> SendDocument<'c>
+/// Can reply with an photo
+pub trait CanReplySendPhoto {
+    fn photo_reply<'c, T>(&self, photo: T) -> SendPhoto<'c>
     where
         T: Into<InputFile>;
 }
 
-impl<M> CanReplySendDocument for M
+impl<M> CanReplySendPhoto for M
 where
     M: ToMessageId + ToSourceChat,
 {
-    fn document_reply<'c, T>(&self, document: T) -> SendDocument<'c>
+    fn photo_reply<'c, T>(&self, photo: T) -> SendPhoto<'c>
     where
         T: Into<InputFile>,
     {
-        let mut req = SendDocument::new(self.to_source_chat(), document);
+        let mut req = SendPhoto::new(self.to_source_chat(), photo);
         req.reply_to(self);
         req
     }
 }
 
-/// Send a document
-pub trait CanSendDocument {
-    fn document<'c, T>(&self, document: T) -> SendDocument<'c>
+/// Send an photo
+pub trait CanSendPhoto {
+    fn photo<'c, T>(&self, photo: T) -> SendPhoto<'c>
     where
         T: Into<InputFile>;
 }
 
-impl<M> CanSendDocument for M
+impl<M> CanSendPhoto for M
 where
     M: ToChatRef,
 {
-    fn document<'c, T>(&self, document: T) -> SendDocument<'c>
+    fn photo<'c, T>(&self, photo: T) -> SendPhoto<'c>
     where
         T: Into<InputFile>,
     {
-        SendDocument::new(self.to_chat_ref(), document)
+        SendPhoto::new(self.to_chat_ref(), photo)
     }
 }
