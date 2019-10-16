@@ -63,9 +63,9 @@ impl<'c> SendDocument<'c> {
 
     pub fn thumb<V>(&mut self, thumb: V) -> &mut Self
     where
-        V: Into<InputFile>,
+        V: Into<InputFileUpload>,
     {
-        self.thumb = Some(thumb.into());
+        self.thumb = Some(thumb.into().into());
         self
     }
 
