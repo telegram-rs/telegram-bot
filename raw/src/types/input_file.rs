@@ -25,18 +25,20 @@ impl InputFile {
         })
     }
 
-    pub fn with_path_and_name(path: impl Into<Text>, file_name: impl Into<Text>) -> Self {
-        InputFile(InputFileImpl::Path {
-            path: path.into(),
-            file_name: Some(file_name.into()),
-        })
-    }
-
     pub fn with_data(data: impl Into<Bytes>, file_name: impl Into<Text>) -> Self {
         InputFile(InputFileImpl::Data {
             file_name: file_name.into(),
             data: data.into(),
         })
+    }
+
+    pub fn file_name(&mut self, new_file_name: impl Into<Text>) -> &mut Self {
+        match &mut self.0 {
+            InputFileImpl::Ref(_) => (),
+            InputFileImpl::Path { file_name, .. } => *file_name = Some(new_file_name.into()),
+            InputFileImpl::Data { file_name, .. } => *file_name = new_file_name.into(),
+        };
+        self
     }
 }
 
@@ -49,6 +51,18 @@ impl From<FileRef> for InputFile {
 impl<'a> From<&'a FileRef> for InputFile {
     fn from(value: &'a FileRef) -> Self {
         InputFile::with_ref(value.inner.as_str())
+    }
+}
+
+impl<'a> From<&'a InputFile> for InputFile {
+    fn from(value: &'a InputFile) -> Self {
+        value.clone()
+    }
+}
+
+impl<'a> From<&'a mut InputFile> for InputFile {
+    fn from(value: &'a mut InputFile) -> Self {
+        value.clone()
     }
 }
 
