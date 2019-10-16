@@ -36,7 +36,7 @@ impl<'c> ToMultipart for SendDocument<'c> {
 
 impl<'c> Request for SendDocument<'c> {
     type Type = MultipartRequestType<Self>;
-    type Response = JsonTrueToUnitResponse;
+    type Response = JsonIdResponse<Message>;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
         Self::Type::serialize(RequestUrl::method("sendDocument"), self)

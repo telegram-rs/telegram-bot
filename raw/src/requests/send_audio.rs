@@ -39,7 +39,7 @@ impl<'c, 'p, 't> ToMultipart for SendAudio<'c, 'p, 't> {
 
 impl<'c, 'p, 't> Request for SendAudio<'c, 'p, 't> {
     type Type = MultipartRequestType<Self>;
-    type Response = JsonTrueToUnitResponse;
+    type Response = JsonIdResponse<Message>;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
         Self::Type::serialize(RequestUrl::method("sendAudio"), self)
