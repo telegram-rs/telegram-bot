@@ -46,12 +46,13 @@ impl InputFileUpload {
         })
     }
 
-    pub fn file_name(&mut self, new_file_name: impl Into<Text>) -> &mut Self {
-        match &mut self.0 {
+    pub fn file_name(&self, new_file_name: impl Into<Text>) -> Self {
+        let mut this = self.clone();
+        match &mut this.0 {
             InputFileUploadImpl::Path { file_name, .. } => *file_name = Some(new_file_name.into()),
             InputFileUploadImpl::Data { file_name, .. } => *file_name = new_file_name.into(),
         };
-        self
+        this
     }
 }
 
