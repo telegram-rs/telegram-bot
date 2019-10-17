@@ -47,14 +47,14 @@ async fn run_test(api: Api, message: Message) -> Result<(), Error> {
             .await?;
     }
 
-    // Send an audio by url
+    // Send an image by url
     api.send(chat.photo(InputFileRef::new("https://telegram.org/img/t_logo.png")))
         .await?;
 
     Ok(())
 }
 
-#[tokio::main] /**/
+#[tokio::main]
 async fn main() -> Result<(), Error> {
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
 
