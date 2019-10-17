@@ -104,7 +104,7 @@ impl<'c> SendDocument<'c> {
     }
 }
 
-/// Can reply with a dcoument
+/// Can reply with a document
 pub trait CanReplySendDocument {
     fn document_reply<'c, T>(&self, document: T) -> SendDocument<'c>
     where
