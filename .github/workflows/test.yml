@@ -22,11 +22,24 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v1
 
+      - uses: GenesisSam/get-simple-file-action@v1.0.4
+        if: matrix.rust == 'toolchain-file'
+        id: read-toolchain-file
+        with:
+          file-name: 'rust-toolchain'
+
       - name: Install toolchain
         if: matrix.rust != 'toolchain-file'
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
+          override: true
+
+      - name: Install msrv toolchain
+        if: matrix.rust == 'toolchain-file'
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ steps.read-toolchain-file.outputs.data }}
           override: true
 
       - name: Run cargo check
