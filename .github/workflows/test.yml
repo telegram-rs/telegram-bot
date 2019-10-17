@@ -23,7 +23,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v1
 
-      - uses: GenesisSam/get-simple-file-action@v1.0.4
+      - name: Read MSRV toolchain
+        uses: GenesisSam/get-simple-file-action@v1.0.4
         if: matrix.rust == 'toolchain-file'
         id: read-toolchain-file
         with:
@@ -36,7 +37,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
 
-      - name: Install msrv toolchain
+      - name: Install MSRV toolchain
         if: matrix.rust == 'toolchain-file'
         uses: actions-rs/toolchain@v1
         with:
