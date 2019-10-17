@@ -3,7 +3,7 @@ use std::path::Path;
 use bytes::Bytes;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Ord, Eq, Hash)]
-pub struct Text(pub(crate) Bytes);
+pub struct Text(Bytes);
 
 impl Text {
     pub fn as_str(&self) -> &str {
