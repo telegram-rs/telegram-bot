@@ -70,23 +70,14 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
                                 fields.push((key, MultipartTemporaryValue::Text(text)))
                             }
                             MultipartValue::Path { file_name, path } => {
-                                let file_name = match file_name {
-                                    Some(file_name) => file_name,
-                                    None => {
-                                        match AsRef::<Path>::as_ref(&path)
+                                let file_name = file_name
+                                    .or_else(|| {
+                                        AsRef::<Path>::as_ref(&path)
                                             .file_name()
                                             .and_then(|s| s.to_str())
                                             .map(Into::into)
-                                        {
-                                            None => {
-                                                return Err(
-                                                    ErrorKind::InvalidMultipartFilename.into()
-                                                )
-                                            }
-                                            Some(file_name) => file_name,
-                                        }
-                                    }
-                                };
+                                    })
+                                    .ok_or(ErrorKind::InvalidMultipartFilename)?;
 
                                 let data = tokio::fs::read(path).await?;
                                 fields.push((
