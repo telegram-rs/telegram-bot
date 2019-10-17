@@ -3,6 +3,7 @@ name: Rust
 on: [push, pull_request]
 
 jobs:
+
   test:
     name: Test
     runs-on: ${{ matrix.os }}
@@ -32,8 +33,10 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
+          args: --all
 
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --all
