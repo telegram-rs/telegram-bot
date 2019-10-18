@@ -1,3 +1,4 @@
+use std::fmt;
 use std::ops::Deref;
 
 use serde::ser::{Serialize, Serializer};
@@ -167,6 +168,15 @@ impl Serialize for ChatRef {
         match *self {
             ChatRef::Id(id) => serializer.serialize_i64(id.into()),
             ChatRef::ChannelUsername(ref username) => serializer.serialize_str(&username),
+        }
+    }
+}
+
+impl fmt::Display for ChatRef {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            ChatRef::Id(id) => write!(f, "{}", id),
+            ChatRef::ChannelUsername(ref username) => write!(f, "{}", username),
         }
     }
 }
@@ -342,7 +352,7 @@ file_id_impls!(VideoNote);
 /// Unique file identifier reference.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FileRef {
-    inner: String,
+    pub(crate) inner: String,
 }
 
 impl<'a> From<&'a str> for FileRef {

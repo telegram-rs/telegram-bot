@@ -1,51 +1,60 @@
 use std::borrow::Cow;
-use std::ops::Not;
 
 use crate::requests::*;
 use crate::types::*;
 
 /// Use this method to send an audio
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendAudio<'s, 'c, 'p, 't> {
+pub struct SendAudio<'c, 'p, 't> {
     chat_id: ChatRef,
-    audio: Cow<'s, str>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    audio: InputFile,
     caption: Option<Cow<'c, str>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     parse_mode: Option<ParseMode>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     duration: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     performer: Option<Cow<'p, str>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     title: Option<Cow<'t, str>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     reply_to_message_id: Option<MessageId>,
-    #[serde(skip_serializing_if = "Not::not")]
     disable_notification: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'s, 'c, 'p, 't> Request for SendAudio<'s, 'c, 'p, 't> {
-    type Type = JsonRequestType<Self>;
-    type Response = JsonTrueToUnitResponse;
+impl<'c, 'p, 't> ToMultipart for SendAudio<'c, 'p, 't> {
+    fn to_multipart(&self) -> Result<Multipart, Error> {
+        multipart_map! {
+            self,
+            (chat_id (text));
+            (audio (raw));
+            (caption (text), optional);
+            (parse_mode (text), optional);
+            (duration (text), optional);
+            (performer (text), optional);
+            (title (text), optional);
+            (reply_to_message_id (text), optional);
+            (disable_notification (text), when_true);
+            (reply_markup (json), optional);
+        }
+    }
+}
+
+impl<'c, 'p, 't> Request for SendAudio<'c, 'p, 't> {
+    type Type = MultipartRequestType<Self>;
+    type Response = JsonIdResponse<Message>;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
         Self::Type::serialize(RequestUrl::method("sendAudio"), self)
     }
 }
 
-impl<'s, 'c, 'p, 't> SendAudio<'s, 'c, 'p, 't> {
-    pub fn with_url<C, T>(chat: C, url: T) -> Self
+impl<'c, 'p, 't> SendAudio<'c, 'p, 't> {
+    pub fn new<C, V>(chat: C, audio: V) -> Self
     where
         C: ToChatRef,
-        T: Into<Cow<'s, str>>,
+        V: Into<InputFile>,
     {
         Self {
             chat_id: chat.to_chat_ref(),
-            audio: url.into(),
+            audio: audio.into(),
             caption: None,
             parse_mode: None,
             duration: None,
@@ -110,20 +119,20 @@ impl<'s, 'c, 'p, 't> SendAudio<'s, 'c, 'p, 't> {
 
 /// Can reply with an audio
 pub trait CanReplySendAudio {
-    fn audio_url_reply<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn audio_reply<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
     where
-        T: Into<Cow<'s, str>>;
+        T: Into<InputFile>;
 }
 
 impl<M> CanReplySendAudio for M
 where
     M: ToMessageId + ToSourceChat,
 {
-    fn audio_url_reply<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn audio_reply<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
     where
-        T: Into<Cow<'s, str>>,
+        T: Into<InputFile>,
     {
-        let mut req = SendAudio::with_url(self.to_source_chat(), url);
+        let mut req = SendAudio::new(self.to_source_chat(), audio);
         req.reply_to(self);
         req
     }
@@ -131,19 +140,19 @@ where
 
 /// Send an audio
 pub trait CanSendAudio {
-    fn audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn audio<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
     where
-        T: Into<Cow<'s, str>>;
+        T: Into<InputFile>;
 }
 
 impl<M> CanSendAudio for M
 where
     M: ToChatRef,
 {
-    fn audio_url<'s, 'c, 'p, 't, T>(&self, url: T) -> SendAudio<'s, 'c, 'p, 't>
+    fn audio<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
     where
-        T: Into<Cow<'s, str>>,
+        T: Into<InputFile>,
     {
-        SendAudio::with_url(self.to_chat_ref(), url)
+        SendAudio::new(self.to_chat_ref(), audio)
     }
 }

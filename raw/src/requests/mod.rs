@@ -1,3 +1,4 @@
+#[macro_use]
 pub mod _base;
 pub mod answer_callback_query;
 pub mod answer_inline_query;
@@ -24,6 +25,7 @@ pub mod send_contact;
 pub mod send_document;
 pub mod send_location;
 pub mod send_message;
+pub mod send_photo;
 pub mod send_venue;
 pub mod stop_message_live_location;
 pub mod unban_chat_member;
@@ -55,6 +57,7 @@ pub use self::send_contact::*;
 pub use self::send_document::*;
 pub use self::send_location::*;
 pub use self::send_message::*;
+pub use self::send_photo::*;
 pub use self::send_venue::*;
 pub use self::stop_message_live_location::*;
 pub use self::unban_chat_member::*;

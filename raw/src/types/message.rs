@@ -881,3 +881,12 @@ pub enum ParseMode {
     #[serde(rename = "HTML")]
     Html,
 }
+
+impl ::std::fmt::Display for ParseMode {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        match *self {
+            ParseMode::Markdown => write!(f, "Markdown"),
+            ParseMode::Html => write!(f, "HTML"),
+        }
+    }
+}

@@ -104,7 +104,7 @@ impl MessageGetFiles for MessageKind {
                     files.push(thumb.get_file());
                 }
                 Some(files)
-            },
+            }
             MessageKind::Photo { data, .. } => {
                 Some(data.into_iter().map(|f| f.get_file()).collect())
             }
@@ -115,7 +115,7 @@ impl MessageGetFiles for MessageKind {
                     files.push(thumb.get_file());
                 }
                 Some(files)
-            },
+            }
             MessageKind::Voice { data } => Some(vec![data.get_file()]),
             MessageKind::VideoNote { data, .. } => {
                 let mut files = vec![data.get_file()];
@@ -123,7 +123,7 @@ impl MessageGetFiles for MessageKind {
                     files.push(thumb.get_file());
                 }
                 Some(files)
-            },
+            }
             MessageKind::Contact { .. } => None,
             MessageKind::Location { .. } => None,
             MessageKind::Venue { .. } => None,
