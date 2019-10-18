@@ -1,25 +1,25 @@
 use std::env;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use futures::StreamExt;
 use telegram_bot::*;
-use tokio::timer::delay;
+use tokio::timer::delay_for;
+
+const DELAY_DURATION: Duration = Duration::from_secs(2);
 
 async fn test(api: Api, message: Message) -> Result<(), Error> {
-    let when = Instant::now() + Duration::from_secs(2);
+    let reply = api
+        .send(message.location_reply(0.0, 0.0).live_period(60))
+        .await?;
 
-    let mut reply = message.location_reply(0.0, 0.0);
-    api.send(reply.live_period(60)).await?;
-    delay(when).await;
+    delay_for(DELAY_DURATION).await;
+    api.send(reply.edit_live_location(10.0, 10.0)).await?;
 
-    api.send(message.edit_live_location(10.0, 10.0)).await?;
-    delay(when).await;
+    delay_for(DELAY_DURATION).await;
+    api.send(reply.edit_live_location(20.0, 20.0)).await?;
 
-    api.send(message.edit_live_location(20.0, 20.0)).await?;
-    delay(when).await;
-
-    api.send(message.edit_live_location(30.0, 30.0)).await?;
-    delay(when).await;
+    delay_for(DELAY_DURATION).await;
+    api.send(reply.edit_live_location(30.0, 30.0)).await?;
 
     Ok(())
 }
