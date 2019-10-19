@@ -74,7 +74,7 @@ macro_rules! multipart_field {
     }};
 
     ($self:expr, $result:expr, $field:ident(json) => $val:expr) => {{
-        let s = ::serde_json::to_string($val)?;
+        let s = ::serde_json::to_string($val).map_err(ErrorKind::from)?;
         let value = MultipartValue::Text(s.into());
         $result.push((stringify!($field), value));
     }};

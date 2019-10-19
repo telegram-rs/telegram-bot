@@ -43,15 +43,15 @@ where
 
     fn deserialize(resp: HttpResponse) -> Result<Self::Type, Error> {
         if let Some(body) = resp.body.as_ref() {
-            let raw = serde_json::from_slice(body)?;
+            let raw = serde_json::from_slice(body).map_err(ErrorKind::from)?;
             match raw {
                 ResponseWrapper::Success { result } => Ok(<Self as JsonResponse>::map(result)),
                 ResponseWrapper::Error {
                     description,
                     parameters,
                 } => Err(ErrorKind::TelegramError {
-                    description: description,
-                    parameters: parameters,
+                    description,
+                    parameters,
                 }
                 .into()),
             }

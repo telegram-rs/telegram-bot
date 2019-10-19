@@ -11,7 +11,7 @@ use tracing_futures::Instrument;
 use telegram_bot_raw::{HttpRequest, Request, ResponseType};
 
 use crate::connector::{default_connector, Connector};
-use crate::errors::Error;
+use crate::errors::{Error, ErrorKind};
 use crate::stream::UpdatesStream;
 
 /// Main type for sending requests to the Telegram bot API.
@@ -123,7 +123,12 @@ impl Api {
         let api = self.clone();
         let request = request.serialize();
         async move {
-            match Timeout::new(api.send_http_request::<Req::Response>(request?), duration).await {
+            match Timeout::new(
+                api.send_http_request::<Req::Response>(request.map_err(ErrorKind::from)?),
+                duration,
+            )
+            .await
+            {
                 Err(_) => Ok(None),
                 Ok(Ok(result)) => Ok(Some(result)),
                 Ok(Err(error)) => Err(error),
@@ -154,7 +159,10 @@ impl Api {
     ) -> impl Future<Output = Result<<Req::Response as ResponseType>::Type, Error>> + Send {
         let api = self.clone();
         let request = request.serialize();
-        async move { api.send_http_request::<Req::Response>(request?).await }
+        async move {
+            api.send_http_request::<Req::Response>(request.map_err(ErrorKind::from)?)
+                .await
+        }
     }
 
     async fn send_http_request<Resp: ResponseType>(
@@ -176,7 +184,7 @@ impl Api {
                 }, "response received"
             );
 
-            let response = Resp::deserialize(http_response)?;
+            let response = Resp::deserialize(http_response).map_err(ErrorKind::from)?;
             tracing::trace!("response deserialized");
             Ok(response)
         }

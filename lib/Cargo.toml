@@ -18,7 +18,6 @@ license = "MIT"
 bytes = "0.4.12"
 tokio = "0.2.0-alpha.5"
 
-error-chain = "0.11.0"
 tracing = "0.1.9"
 tracing-futures = { version = "0.1.0", features = ["std-future"] }
 multipart = { version = "0.16", default-features = false, features = ["client"] }
