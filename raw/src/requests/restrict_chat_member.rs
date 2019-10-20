@@ -1,10 +1,8 @@
 use crate::requests::*;
 use crate::types::*;
 
-/// Use this method to kick a user from a group or a supergroup.
-/// In the case of supergroups, the user will not be able to return to the group on
-/// their own using invite links, etc., unless unbanned first.
-/// The bot must be an administrator in the group for this to work.
+/// Use this method to restrict a user in a supergroup. The bot must be an administrator in
+/// the supergroup for this to work and must have the appropriate admin rights.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
 pub struct RestrictChatMember {
@@ -69,7 +67,7 @@ impl RestrictChatMember {
     }
 }
 
-/// Restrict a user from a group or a supergroup.
+/// Restrict a user in a supergroup.
 pub trait CanRestrictChatMemberForChat {
     fn restrict<O>(&self, other: O) -> RestrictChatMember
     where
@@ -88,9 +86,9 @@ where
     }
 }
 
-/// Restrict a user from a group or a supergroup.
+/// Restrict a user in a supergroup.
 pub trait CanRestrictChatMemberForUser {
-    fn restrict_from<O>(&self, other: O) -> RestrictChatMember
+    fn restrict_in<O>(&self, other: O) -> RestrictChatMember
     where
         O: ToChatRef;
 }
@@ -99,7 +97,7 @@ impl<U> CanRestrictChatMemberForUser for U
 where
     U: ToUserId,
 {
-    fn restrict_from<O>(&self, other: O) -> RestrictChatMember
+    fn restrict_in<O>(&self, other: O) -> RestrictChatMember
     where
         O: ToChatRef,
     {
