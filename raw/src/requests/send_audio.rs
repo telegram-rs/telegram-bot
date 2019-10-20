@@ -14,6 +14,7 @@ pub struct SendAudio<'c, 'p, 't> {
     duration: Option<i64>,
     performer: Option<Cow<'p, str>>,
     title: Option<Cow<'t, str>>,
+    thumb: Option<InputFile>,
     reply_to_message_id: Option<MessageId>,
     disable_notification: bool,
     reply_markup: Option<ReplyMarkup>,
@@ -30,6 +31,7 @@ impl<'c, 'p, 't> ToMultipart for SendAudio<'c, 'p, 't> {
             (duration (text), optional);
             (performer (text), optional);
             (title (text), optional);
+            (thumb (raw), optional);
             (reply_to_message_id (text), optional);
             (disable_notification (text), when_true);
             (reply_markup (json), optional);
@@ -60,10 +62,19 @@ impl<'c, 'p, 't> SendAudio<'c, 'p, 't> {
             duration: None,
             performer: None,
             title: None,
+            thumb: None,
             reply_to_message_id: None,
             reply_markup: None,
             disable_notification: false,
         }
+    }
+
+    pub fn thumb<V>(&mut self, thumb: V) -> &mut Self
+    where
+        V: Into<InputFileUpload>,
+    {
+        self.thumb = Some(thumb.into().into());
+        self
     }
 
     pub fn caption<T>(&mut self, caption: T) -> &mut Self
