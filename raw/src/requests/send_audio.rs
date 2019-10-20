@@ -11,7 +11,7 @@ pub struct SendAudio<'c, 'p, 't> {
     audio: InputFile,
     caption: Option<Cow<'c, str>>,
     parse_mode: Option<ParseMode>,
-    duration: Option<i64>,
+    duration: Option<Integer>,
     performer: Option<Cow<'p, str>>,
     title: Option<Cow<'t, str>>,
     thumb: Option<InputFile>,
@@ -90,7 +90,7 @@ impl<'c, 'p, 't> SendAudio<'c, 'p, 't> {
         self
     }
 
-    pub fn duration(&mut self, duration: i64) -> &mut Self {
+    pub fn duration(&mut self, duration: Integer) -> &mut Self {
         self.duration = Some(duration);
         self
     }
