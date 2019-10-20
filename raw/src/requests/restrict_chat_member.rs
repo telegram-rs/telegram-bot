@@ -1,5 +1,5 @@
-use types::*;
-use requests::*;
+use crate::requests::*;
+use crate::types::*;
 
 /// Use this method to kick a user from a group or a supergroup.
 /// In the case of supergroups, the user will not be able to return to the group on
@@ -27,7 +27,11 @@ impl Request for RestrictChatMember {
 }
 
 impl RestrictChatMember {
-    pub fn new<C, U>(chat: C, user: U) -> Self where C: ToChatRef, U: ToUserId {
+    pub fn new<C, U>(chat: C, user: U) -> Self
+    where
+        C: ToChatRef,
+        U: ToUserId,
+    {
         RestrictChatMember {
             chat_id: chat.to_chat_ref(),
             user_id: user.to_user_id(),
@@ -67,22 +71,38 @@ impl RestrictChatMember {
 
 /// Restrict a user from a group or a supergroup.
 pub trait CanRestrictChatMemberForChat {
-    fn restrict<O>(&self, other: O) -> RestrictChatMember where O: ToUserId;
+    fn restrict<O>(&self, other: O) -> RestrictChatMember
+    where
+        O: ToUserId;
 }
 
-impl<C> CanRestrictChatMemberForChat for C where C: ToChatRef {
-    fn restrict<O>(&self, other: O) -> RestrictChatMember where O: ToUserId {
+impl<C> CanRestrictChatMemberForChat for C
+where
+    C: ToChatRef,
+{
+    fn restrict<O>(&self, other: O) -> RestrictChatMember
+    where
+        O: ToUserId,
+    {
         RestrictChatMember::new(self, other)
     }
 }
 
 /// Restrict a user from a group or a supergroup.
 pub trait CanRestrictChatMemberForUser {
-    fn restrict_from<O>(&self, other: O) -> RestrictChatMember where O: ToChatRef;
+    fn restrict_from<O>(&self, other: O) -> RestrictChatMember
+    where
+        O: ToChatRef;
 }
 
-impl<U> CanRestrictChatMemberForUser for U where U: ToUserId {
-    fn restrict_from<O>(&self, other: O) -> RestrictChatMember where O: ToChatRef {
+impl<U> CanRestrictChatMemberForUser for U
+where
+    U: ToUserId,
+{
+    fn restrict_from<O>(&self, other: O) -> RestrictChatMember
+    where
+        O: ToChatRef,
+    {
         RestrictChatMember::new(other, self)
     }
 }

@@ -1,38 +1,31 @@
-extern crate futures;
-extern crate telegram_bot;
-extern crate tokio_core;
-
 use std::env;
 
-use futures::Stream;
-use tokio_core::reactor::Core;
+use futures::StreamExt;
 use telegram_bot::*;
 
-fn main() {
-    let mut core = Core::new().unwrap();
-
-    let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
-    let api = Api::configure(token).build(core.handle()).unwrap();
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
+    let api = Api::new(token);
 
     // Fetch new updates via long poll method
-    let future = api.stream().for_each(|update| {
-
+    let mut stream = api.stream();
+    while let Some(update) = stream.next().await {
         // If the received update contains a new message...
+        let update = update?;
         if let UpdateKind::Message(message) = update.kind {
-
-            if let MessageKind::Text {ref data, ..} = message.kind {
+            if let MessageKind::Text { ref data, .. } = message.kind {
                 // Print received text message to stdout.
                 println!("<{}>: {}", &message.from.first_name, data);
 
                 // Answer message with "Hi".
-                api.spawn(message.text_reply(
-                    format!("Hi, {}! You just wrote '{}'", &message.from.first_name, data)
-                ));
+                api.send(message.text_reply(format!(
+                    "Hi, {}! You just wrote '{}'",
+                    &message.from.first_name, data
+                )))
+                .await?;
             }
         }
-
-        Ok(())
-    });
-
-    core.run(future).unwrap();
+    }
+    Ok(())
 }

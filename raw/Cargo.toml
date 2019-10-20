@@ -1,7 +1,8 @@
 [package]
 name = "telegram-bot-raw"
-version = "0.6.1"
-authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>"]
+version = "0.7.0-alpha.0"
+authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>", "Gustavo Aguiar <gustavo.h.o.aguiar@gmail.com>"]
+edition = "2018"
 
 description = "Telegram Bot API types"
 
@@ -14,8 +15,9 @@ categories = ["api-bindings"]
 license = "MIT"
 
 [dependencies]
-serde = "1.0"
-serde_derive = "1.0"
-serde_json = "1.0"
+bytes = "0.4.12"
+serde = { version = "1", features = ["derive"] }
+serde_derive = "1"
+serde_json = "1"
 serde-value = "0.5.2"
 error-chain = "0.11.0"

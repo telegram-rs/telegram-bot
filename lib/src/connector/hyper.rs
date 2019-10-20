@@ -1,91 +1,156 @@
-//! Connector with hyper backend.
-
-use std::fmt;
+use std::io::{Cursor, Read};
+use std::path::Path;
+use std::pin::Pin;
 use std::str::FromStr;
-use std::rc::Rc;
 
-use futures::{Future, Stream};
-use futures::future::result;
-use hyper;
-use hyper::{Method, Uri};
-use hyper::client::{Client, Connect};
-use hyper::header::ContentType;
+use bytes::Bytes;
+use futures::{Future, FutureExt, TryStreamExt};
+use hyper::{
+    client::{connect::Connect, Client},
+    header::CONTENT_TYPE,
+    Method, Request, Uri,
+};
 use hyper_tls::HttpsConnector;
-use tokio_core::reactor::Handle;
+use multipart::client::lazy::Multipart;
+use telegram_bot_raw::{
+    Body as TelegramBody, HttpRequest, HttpResponse, Method as TelegramMethod, MultipartValue, Text,
+};
 
-use telegram_bot_raw::{HttpRequest, HttpResponse, Method as TelegramMethod, Body as TelegramBody};
+use super::Connector;
+use crate::errors::{Error, ErrorKind};
 
-use errors::Error;
-use future::{TelegramFuture, NewTelegramFuture};
+#[derive(Debug)]
+pub struct HyperConnector<C>(Client<C>);
 
-use super::_base::Connector;
-
-/// This connector uses `hyper` backend.
-pub struct HyperConnector<C> {
-    inner: Rc<Client<C>>
-}
-
-impl<C> fmt::Debug for HyperConnector<C> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        "hyper connector".fmt(formatter)
-    }
+enum MultipartTemporaryValue {
+    Text(Text),
+    Data { file_name: Text, data: Bytes },
 }
 
 impl<C> HyperConnector<C> {
     pub fn new(client: Client<C>) -> Self {
-        HyperConnector {
-            inner: Rc::new(client)
-        }
+        HyperConnector(client)
     }
 }
 
-impl<C: Connect> Connector for HyperConnector<C> {
-    fn request(&self, token: &str, req: HttpRequest) -> TelegramFuture<HttpResponse> {
-        let uri = result(Uri::from_str(&req.url.url(token))).map_err(From::from);
+impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
+    fn request(
+        &self,
+        token: &str,
+        req: HttpRequest,
+    ) -> Pin<Box<dyn Future<Output = Result<HttpResponse, Error>> + Send>> {
+        let uri = Uri::from_str(&req.url.url(token));
+        let client = self.0.clone();
 
-        let client = self.inner.clone();
-        let request = uri.and_then(move |uri| {
+        let future = async move {
+            let uri = uri?;
+
             let method = match req.method {
-                TelegramMethod::Get => Method::Get,
-                TelegramMethod::Post => Method::Post,
+                TelegramMethod::Get => Method::GET,
+                TelegramMethod::Post => Method::POST,
             };
-            let mut http_request = hyper::client::Request::new(method, uri);
 
-            match req.body {
-                TelegramBody::Empty => (),
+            let mut http_request = Request::builder();
+            http_request.method(method).uri(uri);
+
+            let request = match req.body {
+                TelegramBody::Empty => http_request.body(Into::<hyper::Body>::into(vec![])),
                 TelegramBody::Json(body) => {
-                    http_request.set_body(body);
-                    http_request.headers_mut().set(ContentType::json());
+                    let content_type = "application/json".parse()?;
+                    http_request
+                        .headers_mut()
+                        .map(move |headers| headers.insert(CONTENT_TYPE, content_type));
+                    http_request.body(Into::<hyper::Body>::into(body))
                 }
-                body => panic!("Unknown body type {:?}", body)
-            }
+                TelegramBody::Multipart(parts) => {
+                    let mut fields = Vec::new();
+                    for (key, value) in parts {
+                        match value {
+                            MultipartValue::Text(text) => {
+                                fields.push((key, MultipartTemporaryValue::Text(text)))
+                            }
+                            MultipartValue::Path { file_name, path } => {
+                                let file_name = file_name
+                                    .or_else(|| {
+                                        AsRef::<Path>::as_ref(&path)
+                                            .file_name()
+                                            .and_then(|s| s.to_str())
+                                            .map(Into::into)
+                                    })
+                                    .ok_or(ErrorKind::InvalidMultipartFilename)?;
 
-            client.request(http_request).map_err(From::from)
-        });
+                                let data = tokio::fs::read(path).await?;
+                                fields.push((
+                                    key,
+                                    MultipartTemporaryValue::Data {
+                                        file_name,
+                                        data: data.into(),
+                                    },
+                                ))
+                            }
+                            MultipartValue::Data { file_name, data } => fields
+                                .push((key, MultipartTemporaryValue::Data { file_name, data })),
+                        }
+                    }
 
-        let future = request.and_then(move |response| {
-            response.body().map_err(From::from)
-                .fold(vec![], |mut result, chunk| -> Result<Vec<u8>, Error> {
-                    result.extend_from_slice(&chunk);
-                    Ok(result)
-            })
-        });
+                    let mut prepared = {
+                        let mut part = Multipart::new();
+                        for (key, value) in &fields {
+                            match value {
+                                MultipartTemporaryValue::Text(text) => {
+                                    part.add_text(*key, text.as_str());
+                                }
+                                MultipartTemporaryValue::Data { file_name, data } => {
+                                    part.add_stream(
+                                        *key,
+                                        Cursor::new(data),
+                                        Some(file_name.as_str()),
+                                        None,
+                                    );
+                                }
+                            }
+                        }
+                        part.prepare().map_err(|err| err.error)
+                    }?;
 
-        let future = future.and_then(|body| {
-            Ok(HttpResponse {
-                body: Some(body),
-            })
-        });
+                    let boundary = prepared.boundary();
 
-        TelegramFuture::new(Box::new(future))
+                    let content_type =
+                        format!("multipart/form-data;boundary={bound}", bound = boundary)
+                            .parse()?;
+                    http_request.headers_mut().map(move |headers| {
+                        headers.insert(CONTENT_TYPE, content_type);
+                    });
+
+                    let mut bytes = Vec::new();
+                    prepared.read_to_end(&mut bytes)?;
+                    http_request.body(bytes.into())
+                }
+                body => panic!("Unknown body type {:?}", body),
+            }?;
+
+            let response = client.request(request).await?;
+            let whole_chunk = response.into_body().try_concat().await;
+
+            let body = whole_chunk
+                .iter()
+                .fold(vec![], |mut acc, chunk| -> Vec<u8> {
+                    acc.extend_from_slice(&chunk);
+                    acc
+                });
+
+            Ok::<HttpResponse, Error>(HttpResponse { body: Some(body) })
+        };
+
+        future.boxed()
     }
 }
 
-/// Returns default hyper connector. Uses one resolve thread and `HttpsConnector`.
-pub fn default_connector(handle: &Handle) -> Result<Box<Connector>, Error> {
-    let connector = HttpsConnector::new(1, handle).map_err(|err| {
+pub fn default_connector() -> Result<Box<dyn Connector>, Error> {
+    let connector = HttpsConnector::new().map_err(|err| {
         ::std::io::Error::new(::std::io::ErrorKind::Other, format!("tls error: {}", err))
     })?;
-    let config = Client::configure().connector(connector);
-    Ok(Box::new(HyperConnector::new(config.build(handle))))
+    Ok(Box::new(HyperConnector::new(
+        Client::builder().build(connector),
+    )))
 }

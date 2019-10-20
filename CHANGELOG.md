@@ -1,6 +1,22 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 0.6.3 - 2019-07-17
+
+### Fixes
+- Fix InlineQueryResultArticle serialization
+
+## 0.6.2 - 2018-09-30
+
+### Refactor
+- telegram-bot and telegram-bot-raw now uses rust edition 2019
+- Updated hyper to 0.12
+- Updated hyper-tls to 0.3
+
+### Features
+- `TELEGRAM_API_URL` environment variable allowing to do E2E-testing of the bot.
+- Bots can now answer inline queries, audios and documents
+
 ## 0.6.1 - 2018-02-17
 
 ### Fixes

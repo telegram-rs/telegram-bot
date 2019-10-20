@@ -119,6 +119,9 @@ macro_rules! reply_markup {
     (_inline_keyboard_button, callback, $text:expr, $callback:expr) => (
         $crate::InlineKeyboardButton::callback($text, $callback)
     );
+    (_inline_keyboard_button, url, $text:expr, $url:expr) => (
+        $crate::InlineKeyboardButton::url($text, $url)
+    );
 }
 
 #[cfg(test)]
@@ -159,7 +162,10 @@ mod tests {
             let row = keyboard.add_empty_row();
             row.push(KeyboardButton::new("baz"));
         }
-        assert_eq!(keyboard, reply_markup!(reply_keyboard, [], ["foo", "bar"], ["baz"]));
+        assert_eq!(
+            keyboard,
+            reply_markup!(reply_keyboard, [], ["foo", "bar"], ["baz"])
+        );
 
         {
             let row = keyboard.add_empty_row();
@@ -172,41 +178,56 @@ mod tests {
             location_button.request_location();
             row.push(location_button)
         }
-        assert_eq!(keyboard, reply_markup!(
-            reply_keyboard, [], ["foo", "bar"], ["baz"],
-            ["contact" contact, "location" location]
-        ));
+        assert_eq!(
+            keyboard,
+            reply_markup!(
+                reply_keyboard, [], ["foo", "bar"], ["baz"],
+                ["contact" contact, "location" location]
+            )
+        );
 
         {
             let row = keyboard.add_empty_row();
             row.push(KeyboardButton::new("spam"));
         }
-        assert_eq!(keyboard, reply_markup!(
-            reply_keyboard, [], ["foo", "bar"], ["baz"],
-            ["contact" contact, "location" location],
-            ["spam"]
-        ));
+        assert_eq!(
+            keyboard,
+            reply_markup!(
+                reply_keyboard, [], ["foo", "bar"], ["baz"],
+                ["contact" contact, "location" location],
+                ["spam"]
+            )
+        );
 
         keyboard.selective();
-        assert_eq!(keyboard, reply_markup!(
-            reply_keyboard, selective, [], ["foo", "bar"], ["baz"],
-            ["contact" contact, "location" location],
-            ["spam"]
-        ));
+        assert_eq!(
+            keyboard,
+            reply_markup!(
+                reply_keyboard, selective, [], ["foo", "bar"], ["baz"],
+                ["contact" contact, "location" location],
+                ["spam"]
+            )
+        );
 
         keyboard.resize_keyboard();
-        assert_eq!(keyboard, reply_markup!(
-            reply_keyboard, resize, selective, [], ["foo", "bar"], ["baz"],
-            ["contact" contact, "location" location],
-            ["spam"]
-        ));
+        assert_eq!(
+            keyboard,
+            reply_markup!(
+                reply_keyboard, resize, selective, [], ["foo", "bar"], ["baz"],
+                ["contact" contact, "location" location],
+                ["spam"]
+            )
+        );
 
         keyboard.one_time_keyboard();
-        assert_eq!(keyboard, reply_markup!(
-            reply_keyboard, resize, selective, one_time, [], ["foo", "bar"], ["baz"],
-            ["contact" contact, "location" location],
-            ["spam"]
-        ));
+        assert_eq!(
+            keyboard,
+            reply_markup!(
+                reply_keyboard, resize, selective, one_time, [], ["foo", "bar"], ["baz"],
+                ["contact" contact, "location" location],
+                ["spam"]
+            )
+        );
     }
 
     #[test]
@@ -222,6 +243,9 @@ mod tests {
             row.push(InlineKeyboardButton::callback("foo", "bar"));
             row.push(InlineKeyboardButton::callback("baz", "quux"));
         }
-        assert_eq!(markup, reply_markup!(inline_keyboard, [], ["foo" callback "bar", "baz" callback "quux"]));
+        assert_eq!(
+            markup,
+            reply_markup!(inline_keyboard, [], ["foo" callback "bar", "baz" callback "quux"])
+        );
     }
 }

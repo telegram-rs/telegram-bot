@@ -20,43 +20,36 @@ A library for writing your own [Telegram](https://telegram.org/) bots. More info
 Here is a simple example (see [`example/simple.rs`](https://github.com/telegram-rs/telegram-bot/blob/master/lib/examples/simple.rs)):
 
 ``` rust
-extern crate futures;
-extern crate telegram_bot;
-extern crate tokio_core;
-
 use std::env;
 
-use futures::Stream;
-use tokio_core::reactor::Core;
+use futures::StreamExt;
 use telegram_bot::*;
 
-fn main() {
-    let mut core = Core::new().unwrap();
-
-    let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
-    let api = Api::configure(token).build(core.handle()).unwrap();
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
+    let api = Api::new(token);
 
     // Fetch new updates via long poll method
-    let future = api.stream().for_each(|update| {
-
+    let mut stream = api.stream();
+    while let Some(update) = stream.next().await {
         // If the received update contains a new message...
+        let update = update?;
         if let UpdateKind::Message(message) = update.kind {
-
-            if let MessageKind::Text {ref data, ..} = message.kind {
+            if let MessageKind::Text { ref data, .. } = message.kind {
                 // Print received text message to stdout.
                 println!("<{}>: {}", &message.from.first_name, data);
 
                 // Answer message with "Hi".
-                api.spawn(message.text_reply(
-                    format!("Hi, {}! You just wrote '{}'", &message.from.first_name, data)
-                ));
+                api.send(message.text_reply(format!(
+                    "Hi, {}! You just wrote '{}'",
+                    &message.from.first_name, data
+                )))
+                .await?;
             }
         }
-
-        Ok(())
-    });
-
-    core.run(future).unwrap();
+    }
+    Ok(())
 }
 ```
 You can find a bigger examples in the `examples`.
@@ -67,6 +60,9 @@ This library is available via `crates.io`. In order to use it, just add this to 
 ```
 telegram-bot = "0.6"
 ```
+
+The library allows you to do E2E-testing of your bot easily: just specify `TELEGRAM_API_URL` environment variable to point to your fake Telegram test server.
+A lot of diagnostic information can be collected with [tracing](https://crates.io/crates/tracing) framework, see [`example/tracing.rs`](https://github.com/telegram-rs/telegram-bot/blob/master/lib/examples/tracing.rs)).
 
 ## Collaboration
 Yes please! Every type of contribution is welcome: Create issues, hack some code or make suggestions. Don't know where to start? Good first issues are tagged with [up for grab](https://github.com/telegram-rs/telegram-bot/issues?q=is%3Aissue+is%3Aopen+label%3A%22up+for+grab%22).
