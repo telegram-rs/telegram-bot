@@ -126,6 +126,11 @@ impl<'c, 'p, 't> SendAudio<'c, 'p, 't> {
         self.reply_markup = Some(reply_markup.into());
         self
     }
+
+    pub fn disable_notification(&mut self) -> &mut Self {
+        self.disable_notification = true;
+        self
+    }
 }
 
 /// Can reply with an audio
