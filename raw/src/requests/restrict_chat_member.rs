@@ -8,7 +8,7 @@ use crate::types::*;
 pub struct RestrictChatMember {
     chat_id: ChatRef,
     user_id: UserId,
-    until_date: Option<i32>,
+    until_date: Option<Integer>,
     can_send_messages: Option<bool>,
     can_send_media_messages: Option<bool>,
     can_send_other_messages: Option<bool>,
@@ -41,7 +41,7 @@ impl RestrictChatMember {
         }
     }
 
-    pub fn until_date(&mut self, value: i32) -> &mut Self {
+    pub fn until_date(&mut self, value: Integer) -> &mut Self {
         self.until_date = Some(value);
         self
     }
