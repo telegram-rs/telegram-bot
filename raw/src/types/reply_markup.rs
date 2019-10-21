@@ -241,10 +241,36 @@ impl InlineKeyboardButton {
         }
     }
 
+    /// HTTP or tg:// url to be opened when button is pressed
     pub fn url<T: AsRef<str>, U: AsRef<str>>(text: T, url: U) -> Self {
         Self {
             text: text.as_ref().to_string(),
             kind: InlineKeyboardButtonKind::Url(url.as_ref().to_string()),
+        }
+    }
+
+    /// Pressing the button will prompt the user to select one of their chats, open that chat and
+    /// insert the bot‘s username and the specified inline query in the input field. Can be empty,
+    /// in which case just the bot’s username will be inserted.
+    pub fn switch_inline_query<T: AsRef<str>, Q: AsRef<str>>(text: T, query: Q) -> Self {
+        Self {
+            text: text.as_ref().to_string(),
+            kind: InlineKeyboardButtonKind::SwitchInlineQuery(query.as_ref().to_string()),
+        }
+    }
+
+    /// Pressing the button will insert the bot‘s username and the specified inline query in the
+    /// current chat's input field. Can be empty, in which case just the bot’s username will be
+    /// inserted.
+    pub fn switch_inline_query_current_chat<T: AsRef<str>, Q: AsRef<str>>(
+        text: T,
+        query: Q,
+    ) -> Self {
+        Self {
+            text: text.as_ref().to_string(),
+            kind: InlineKeyboardButtonKind::SwitchInlineQueryCurrentChat(
+                query.as_ref().to_string(),
+            ),
         }
     }
 }
@@ -255,23 +281,16 @@ pub enum InlineKeyboardButtonKind {
     Url(String), // TODO(knsd): Url?
     #[serde(rename = "callback_data")]
     CallbackData(String), // TODO(knsd) Validate size?
-                          //  SwitchInlineQuery(String),
-                          //  SwitchInlineQueryCurrentChat(String),
-                          //  CallbackGame(CallbackGame),
-}
-
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
-struct InlineKeyboardButtonRaw<'a> {
-    text: &'a str,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<&'a str>, // TODO(knsd): Url?
-    #[serde(skip_serializing_if = "Option::is_none")]
-    callback_data: Option<&'a str>, //TODO(knsd) Validate size?
-    #[serde(skip_serializing_if = "Option::is_none")]
-    switch_inline_query: Option<&'a str>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    switch_inline_query_current_chat: Option<&'a str>,
-    //    callback_game: Option<CallbackGame>,
+    #[serde(rename = "switch_inline_query")]
+    SwitchInlineQuery(String),
+    #[serde(rename = "switch_inline_query_current_chat")]
+    SwitchInlineQueryCurrentChat(String),
+    // #[serde(rename = "callback_game")]
+    //  CallbackGame(CallbackGame),
+    // #[serde(rename = "pay")]
+    //  Pay,
+    // #[serde(rename = "login_url")]
+    //  LoginUrl(LoginUrl),
 }
 
 /// Upon receiving a message with this object, Telegram clients will
