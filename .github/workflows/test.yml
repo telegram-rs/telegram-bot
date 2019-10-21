@@ -1,0 +1,57 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          - windows-latest
+        rust:
+#          - stable
+          - beta
+          - nightly
+          - toolchain-file
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v1
+
+      - name: Read MSRV toolchain
+        uses: GenesisSam/get-simple-file-action@v1.0.4
+        if: matrix.rust == 'toolchain-file'
+        id: read-toolchain-file
+        with:
+          file-name: 'rust-toolchain'
+
+      - name: Install toolchain
+        if: matrix.rust != 'toolchain-file'
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+
+      - name: Install MSRV toolchain
+        if: matrix.rust == 'toolchain-file'
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ steps.read-toolchain-file.outputs.data }}
+          override: true
+
+      - name: Run cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --all
+
+      - name: Run cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all
