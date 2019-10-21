@@ -29,11 +29,30 @@ pub enum UpdateKind {
     EditedChannelPost(ChannelPost),
     #[serde(rename = "inline_query")]
     InlineQuery(InlineQuery),
-    //    ChosenInlineResult(ChosenInlineResult),
+    #[serde(rename = "chosen_inline_result")]
+    ChosenInlineResult(ChosenInlineResult),
     #[serde(rename = "callback_query")]
     CallbackQuery(CallbackQuery),
+    #[serde(rename = "shipping_query")]
+    ShippingQuery(ShippingQuery),
+    #[serde(rename = "pre_checkout_query")]
+    PreCheckoutQuery(PreCheckoutQuery),
+    #[serde(rename = "poll")]
+    Poll(Poll),
     #[doc(hidden)]
     Error(String),
     #[doc(hidden)]
     Unknown,
 }
+
+// TODO
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct ShippingQuery {}
+
+// TODO
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct PreCheckoutQuery {}
+
+// TODO
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct Poll {}
