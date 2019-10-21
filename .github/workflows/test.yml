@@ -1,4 +1,4 @@
-name: Rust
+name: Tests
 
 on: [push, pull_request]
 
@@ -55,19 +55,3 @@ jobs:
         with:
           command: test
           args: --all
-
-  fmt:
-    name: Fmt
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v1
-
-      - name: Install rustfmt
-        run: rustup component add rustfmt
-
-      - name: Run cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
