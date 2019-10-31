@@ -28,6 +28,10 @@ pub struct Group {
     pub title: String,
     /// True if a group has ‘All Members Are Admins’ enabled.
     pub all_members_are_administrators: bool,
+    /// Invite link for this group, specific to this bot.
+    /// You can generate a new invite link by using the
+    /// export_invite_link method.
+    pub invite_link: Option<String>,
 }
 
 /// This object represents a supergroup.
@@ -39,6 +43,10 @@ pub struct Supergroup {
     pub title: String,
     /// Username for supergroup.
     pub username: Option<String>,
+    /// Invite link for this supergroup, specific to this bot.
+    /// You can generate a new invite link by using the
+    /// export_invite_link method.
+    pub invite_link: Option<String>,
 }
 
 /// This object represents a channel.
@@ -50,6 +58,10 @@ pub struct Channel {
     pub title: String,
     /// Username for channel.
     pub username: Option<String>,
+    /// Invite link for this channel, specific to this bot.
+    /// You can generate a new invite link by using the
+    /// export_invite_link method.
+    pub invite_link: Option<String>,
 }
 
 /// This object represents a private, group or supergroup.
@@ -125,16 +137,19 @@ impl<'de> Deserialize<'de> for Chat {
                 id: raw.id.into(),
                 title: required_field!(title),
                 all_members_are_administrators: required_field!(all_members_are_administrators),
+                invite_link: raw.invite_link,
             }),
             "supergroup" => Chat::Supergroup(Supergroup {
                 id: raw.id.into(),
                 title: required_field!(title),
                 username: raw.username,
+                invite_link: raw.invite_link,
             }),
             "channel" => Chat::Channel(Channel {
                 id: raw.id.into(),
                 title: required_field!(title),
                 username: raw.username,
+                invite_link: raw.invite_link,
             }),
             _ => Chat::Unknown(raw),
         })
@@ -157,6 +172,9 @@ pub struct RawChat {
     pub first_name: Option<String>,
     /// Last name of the other party in a private chat
     pub last_name: Option<String>,
+    /// Invite link for this chat, specific to this bot.
+    /// Does not apply to private chats.
+    pub invite_link: Option<String>,
     /// IETF language tag of the other party in a private chat
     pub language_code: Option<String>,
     /// True if a group has ‘All Members Are Admins’ enabled.
