@@ -10,6 +10,9 @@ use hyper::{
     header::CONTENT_TYPE,
     Method, Request, Uri,
 };
+#[cfg(feature = "rustls")]
+use hyper_rustls::HttpsConnector;
+#[cfg(feature = "openssl")]
 use hyper_tls::HttpsConnector;
 use multipart::client::lazy::Multipart;
 use telegram_bot_raw::{
@@ -147,6 +150,10 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
 }
 
 pub fn default_connector() -> Result<Box<dyn Connector>, Error> {
+    #[cfg(feature = "rustls")]
+    let connector = HttpsConnector::new();
+
+    #[cfg(feature = "openssl")]
     let connector = HttpsConnector::new().map_err(|err| {
         ::std::io::Error::new(::std::io::ErrorKind::Other, format!("tls error: {}", err))
     })?;
