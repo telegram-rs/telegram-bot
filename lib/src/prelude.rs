@@ -22,6 +22,7 @@ pub use telegram_bot_raw::{CanReplySendLocation, CanSendLocation};
 pub use telegram_bot_raw::{CanReplySendMessage, CanSendMessage};
 pub use telegram_bot_raw::{CanReplySendPhoto, CanSendPhoto};
 pub use telegram_bot_raw::{CanReplySendVenue, CanSendVenue};
+pub use telegram_bot_raw::{CanReplySendVideo, CanSendVideo};
 pub use telegram_bot_raw::{CanUnbanChatMemberForChat, CanUnbanChatMemberForUser};
 pub use telegram_bot_raw::{ToReplyRequest, ToRequest};
 
