@@ -3,34 +3,36 @@ use std::borrow::Cow;
 use crate::requests::*;
 use crate::types::*;
 
-/// Use this method to send an audio
+/// Use this method to send an video
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 #[must_use = "requests do nothing unless sent"]
-pub struct SendAudio<'c, 'p, 't> {
+pub struct SendVideo<'c> {
     chat_id: ChatRef,
-    audio: InputFile,
+    video: InputFile,
     caption: Option<Cow<'c, str>>,
     parse_mode: Option<ParseMode>,
     duration: Option<Integer>,
-    performer: Option<Cow<'p, str>>,
-    title: Option<Cow<'t, str>>,
+    width: Option<Integer>,
+    height: Option<Integer>,
+    supports_streaming: bool,
     thumb: Option<InputFile>,
     reply_to_message_id: Option<MessageId>,
     disable_notification: bool,
     reply_markup: Option<ReplyMarkup>,
 }
 
-impl<'c, 'p, 't> ToMultipart for SendAudio<'c, 'p, 't> {
+impl<'c> ToMultipart for SendVideo<'c> {
     fn to_multipart(&self) -> Result<Multipart, Error> {
         multipart_map! {
             self,
             (chat_id (text));
-            (audio (raw));
+            (video (raw));
             (caption (text), optional);
             (parse_mode (text), optional);
             (duration (text), optional);
-            (performer (text), optional);
-            (title (text), optional);
+            (width (text), optional);
+            (height (text), optional);
+            (supports_streaming (text), when_true);
             (thumb (raw), optional);
             (reply_to_message_id (text), optional);
             (disable_notification (text), when_true);
@@ -39,29 +41,30 @@ impl<'c, 'p, 't> ToMultipart for SendAudio<'c, 'p, 't> {
     }
 }
 
-impl<'c, 'p, 't> Request for SendAudio<'c, 'p, 't> {
+impl<'c> Request for SendVideo<'c> {
     type Type = MultipartRequestType<Self>;
     type Response = JsonIdResponse<Message>;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
-        Self::Type::serialize(RequestUrl::method("sendAudio"), self)
+        Self::Type::serialize(RequestUrl::method("sendVideo"), self)
     }
 }
 
-impl<'c, 'p, 't> SendAudio<'c, 'p, 't> {
-    pub fn new<C, V>(chat: C, audio: V) -> Self
+impl<'c> SendVideo<'c> {
+    pub fn new<C, V>(chat: C, video: V) -> Self
     where
         C: ToChatRef,
         V: Into<InputFile>,
     {
         Self {
             chat_id: chat.to_chat_ref(),
-            audio: audio.into(),
+            video: video.into(),
             caption: None,
             parse_mode: None,
             duration: None,
-            performer: None,
-            title: None,
+            width: None,
+            height: None,
+            supports_streaming: false,
             thumb: None,
             reply_to_message_id: None,
             reply_markup: None,
@@ -95,19 +98,18 @@ impl<'c, 'p, 't> SendAudio<'c, 'p, 't> {
         self
     }
 
-    pub fn performer<T>(&mut self, performer: T) -> &mut Self
-    where
-        T: Into<Cow<'p, str>>,
-    {
-        self.performer = Some(performer.into());
+    pub fn width(&mut self, width: Integer) -> &mut Self {
+        self.width = Some(width);
         self
     }
 
-    pub fn title<T>(&mut self, title: T) -> &mut Self
-    where
-        T: Into<Cow<'t, str>>,
-    {
-        self.title = Some(title.into());
+    pub fn height(&mut self, height: Integer) -> &mut Self {
+        self.height = Some(height);
+        self
+    }
+
+    pub fn supports_streaming(&mut self) -> &mut Self {
+        self.supports_streaming = true;
         self
     }
 
@@ -133,42 +135,42 @@ impl<'c, 'p, 't> SendAudio<'c, 'p, 't> {
     }
 }
 
-/// Can reply with an audio
-pub trait CanReplySendAudio {
-    fn audio_reply<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
+/// Can reply with an video
+pub trait CanReplySendVideo {
+    fn video_reply<'c, T>(&self, video: T) -> SendVideo<'c>
     where
         T: Into<InputFile>;
 }
 
-impl<M> CanReplySendAudio for M
+impl<M> CanReplySendVideo for M
 where
     M: ToMessageId + ToSourceChat,
 {
-    fn audio_reply<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
+    fn video_reply<'c, T>(&self, video: T) -> SendVideo<'c>
     where
         T: Into<InputFile>,
     {
-        let mut req = SendAudio::new(self.to_source_chat(), audio);
+        let mut req = SendVideo::new(self.to_source_chat(), video);
         req.reply_to(self);
         req
     }
 }
 
-/// Send an audio
-pub trait CanSendAudio {
-    fn audio<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
+/// Send an video
+pub trait CanSendVideo {
+    fn video<'c, T>(&self, video: T) -> SendVideo<'c>
     where
         T: Into<InputFile>;
 }
 
-impl<M> CanSendAudio for M
+impl<M> CanSendVideo for M
 where
     M: ToChatRef,
 {
-    fn audio<'c, 'p, 't, T>(&self, audio: T) -> SendAudio<'c, 'p, 't>
+    fn video<'c, T>(&self, video: T) -> SendVideo<'c>
     where
         T: Into<InputFile>,
     {
-        SendAudio::new(self.to_chat_ref(), audio)
+        SendVideo::new(self.to_chat_ref(), video)
     }
 }

@@ -1,6 +1,8 @@
 Rust Telegram Bot Library
 =========================
 [![Build Status](https://img.shields.io/travis/telegram-rs/telegram-bot/master.svg)](https://travis-ci.org/telegram-rs/telegram-bot)
+[![Tests](https://github.com/telegram-rs/telegram-bot/workflows/Tests/badge.svg)](https://github.com/telegram-rs/telegram-bot/actions?workflow=Tests)
+[![Tests](https://github.com/telegram-rs/telegram-bot/workflows/Fmt/badge.svg)](https://github.com/telegram-rs/telegram-bot/actions?workflow=Fmt)
 [![License](https://img.shields.io/github/license/telegram-rs/telegram-bot.svg)]()
 [![Crates.io](https://img.shields.io/crates/v/telegram-bot.svg)](https://crates.io/crates/telegram-bot)
 

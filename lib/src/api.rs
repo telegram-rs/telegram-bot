@@ -25,7 +25,7 @@ struct ApiInner {
 }
 
 impl Api {
-    ///  create a new `Api` instance.
+    /// Create a new `Api` instance.
     ///
     /// # Example
     ///
@@ -39,10 +39,15 @@ impl Api {
     /// let api = Api::new(telegram_token);
     /// # }
     /// ```
-    pub fn new<T: AsRef<str>>(token: T) -> Api {
+    pub fn new<T: AsRef<str>>(token: T) -> Self {
+        Self::with_connector(token, default_connector())
+    }
+
+    /// Create a new `Api` instance wtih custom connector.
+    pub fn with_connector<T: AsRef<str>>(token: T, connector: Box<dyn Connector>) -> Self {
         Api(Arc::new(ApiInner {
             token: token.as_ref().to_string(),
-            connector: default_connector(),
+            connector,
             next_request_id: AtomicUsize::new(0),
         }))
     }
