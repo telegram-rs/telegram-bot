@@ -8,6 +8,7 @@ use futures::{Future, FutureExt, TryStreamExt};
 use hyper::{
     client::{connect::Connect, Client},
     header::CONTENT_TYPE,
+    http::Error as HttpError,
     Method, Request, Uri,
 };
 #[cfg(feature = "rustls")]
@@ -46,7 +47,7 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
         let client = self.0.clone();
 
         let future = async move {
-            let uri = uri?;
+            let uri = uri.map_err(HttpError::from).map_err(ErrorKind::from)?;
 
             let method = match req.method {
                 TelegramMethod::Get => Method::GET,
@@ -59,7 +60,10 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
             let request = match req.body {
                 TelegramBody::Empty => http_request.body(Into::<hyper::Body>::into(vec![])),
                 TelegramBody::Json(body) => {
-                    let content_type = "application/json".parse()?;
+                    let content_type = "application/json"
+                        .parse()
+                        .map_err(HttpError::from)
+                        .map_err(ErrorKind::from)?;
                     http_request
                         .headers_mut()
                         .map(move |headers| headers.insert(CONTENT_TYPE, content_type));
@@ -82,7 +86,7 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
                                     })
                                     .ok_or(ErrorKind::InvalidMultipartFilename)?;
 
-                                let data = tokio::fs::read(path).await?;
+                                let data = tokio::fs::read(path).await.map_err(ErrorKind::from)?;
                                 fields.push((
                                     key,
                                     MultipartTemporaryValue::Data {
@@ -114,25 +118,29 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
                             }
                         }
                         part.prepare().map_err(|err| err.error)
-                    }?;
+                    }
+                    .map_err(ErrorKind::from)?;
 
                     let boundary = prepared.boundary();
 
                     let content_type =
                         format!("multipart/form-data;boundary={bound}", bound = boundary)
-                            .parse()?;
+                            .parse()
+                            .map_err(HttpError::from)
+                            .map_err(ErrorKind::from)?;
                     http_request.headers_mut().map(move |headers| {
                         headers.insert(CONTENT_TYPE, content_type);
                     });
 
                     let mut bytes = Vec::new();
-                    prepared.read_to_end(&mut bytes)?;
+                    prepared.read_to_end(&mut bytes).map_err(ErrorKind::from)?;
                     http_request.body(bytes.into())
                 }
                 body => panic!("Unknown body type {:?}", body),
-            }?;
+            }
+            .map_err(ErrorKind::from)?;
 
-            let response = client.request(request).await?;
+            let response = client.request(request).await.map_err(ErrorKind::from)?;
             let whole_chunk = response.into_body().try_concat().await;
 
             let body = whole_chunk
@@ -156,7 +164,9 @@ pub fn default_connector() -> Result<Box<dyn Connector>, Error> {
     #[cfg(feature = "openssl")]
     let connector = HttpsConnector::new().map_err(|err| {
         ::std::io::Error::new(::std::io::ErrorKind::Other, format!("tls error: {}", err))
-    })?;
+    })
+      .map_err(ErrorKind::from)?;
+
     Ok(Box::new(HyperConnector::new(
         Client::builder().build(connector),
     )))
