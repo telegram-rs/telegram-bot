@@ -162,10 +162,11 @@ pub fn default_connector() -> Result<Box<dyn Connector>, Error> {
     let connector = HttpsConnector::new();
 
     #[cfg(feature = "openssl")]
-    let connector = HttpsConnector::new().map_err(|err| {
-        ::std::io::Error::new(::std::io::ErrorKind::Other, format!("tls error: {}", err))
-    })
-      .map_err(ErrorKind::from)?;
+    let connector = HttpsConnector::new()
+        .map_err(|err| {
+            ::std::io::Error::new(::std::io::ErrorKind::Other, format!("tls error: {}", err))
+        })
+        .map_err(ErrorKind::from)?;
 
     Ok(Box::new(HyperConnector::new(
         Client::builder().build(connector),

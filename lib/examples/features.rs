@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 
 use futures::StreamExt;
 use telegram_bot::prelude::*;
-use telegram_bot::{Api, Error, Message, MessageKind, ParseMode, UpdateKind, reply_markup};
+use telegram_bot::{reply_markup, Api, Error, Message, MessageKind, ParseMode, UpdateKind};
 use tokio::timer::delay;
 
 async fn test_message(api: Api, message: Message) -> Result<(), Error> {
@@ -17,14 +17,17 @@ async fn test_message(api: Api, message: Message) -> Result<(), Error> {
     api.send(reply.parse_mode(ParseMode::Html)).await?;
 
     let inline_keyboard = reply_markup!(inline_keyboard,
-        ["button 1" callback "0,0", "button 2" callback "0,1"],
-        ["button 3" callback "1,0", "button 4" callback "1,1"]
-      );
-    
-      api
-        .send(message.chat.text("With buttons")
-        .reply_markup(inline_keyboard))
-        .await?;
+      ["button 1" callback "0,0", "button 2" callback "0,1"],
+      ["button 3" callback "1,0", "button 4" callback "1,1"]
+    );
+
+    api.send(
+        message
+            .chat
+            .text("With buttons")
+            .reply_markup(inline_keyboard),
+    )
+    .await?;
 
     Ok(())
 }
