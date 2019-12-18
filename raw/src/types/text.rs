@@ -19,7 +19,7 @@ impl From<String> for Text {
 
 impl<'a> From<&'a str> for Text {
     fn from(value: &'a str) -> Self {
-        Text(value.into())
+        Text(value.to_owned().into())
     }
 }
 
