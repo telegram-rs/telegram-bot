@@ -31,6 +31,6 @@ telegram-bot-raw = { version = "0.7.0", path = "../raw" }
 hyper = "0.13"
 hyper-tls = { version = "0.4", optional = true  }
 futures = "0.3"
-hyper-rustls = { version = "0.18", optional = true }
+hyper-rustls = { version = "0.19", optional = true }
 [dev-dependencies]
 tracing-subscriber = "0.1.5"
