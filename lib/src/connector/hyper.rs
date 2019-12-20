@@ -4,8 +4,9 @@ use std::pin::Pin;
 use std::str::FromStr;
 
 use bytes::Bytes;
-use futures::{Future, FutureExt, TryStreamExt};
+use futures::{Future, FutureExt};
 use hyper::{
+    body::to_bytes,
     client::{connect::Connect, Client},
     header::CONTENT_TYPE,
     http::Error as HttpError,
@@ -37,7 +38,7 @@ impl<C> HyperConnector<C> {
     }
 }
 
-impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
+impl<C: Connect + std::fmt::Debug + 'static + Clone + Send + Sync> Connector for HyperConnector<C> {
     fn request(
         &self,
         token: &str,
@@ -54,8 +55,7 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
                 TelegramMethod::Post => Method::POST,
             };
 
-            let mut http_request = Request::builder();
-            http_request.method(method).uri(uri);
+            let mut http_request = Request::builder().method(method).uri(uri);
 
             let request = match req.body {
                 TelegramBody::Empty => http_request.body(Into::<hyper::Body>::into(vec![])),
@@ -141,7 +141,7 @@ impl<C: Connect + std::fmt::Debug + 'static> Connector for HyperConnector<C> {
             .map_err(ErrorKind::from)?;
 
             let response = client.request(request).await.map_err(ErrorKind::from)?;
-            let whole_chunk = response.into_body().try_concat().await;
+            let whole_chunk = to_bytes(response.into_body()).await;
 
             let body = whole_chunk
                 .iter()
@@ -162,10 +162,7 @@ pub fn default_connector() -> Result<Box<dyn Connector>, Error> {
     let connector = HttpsConnector::new();
 
     #[cfg(feature = "openssl")]
-    let connector = HttpsConnector::new().map_err(|err| {
-        ::std::io::Error::new(::std::io::ErrorKind::Other, format!("tls error: {}", err))
-    })
-      .map_err(ErrorKind::from)?;
+    let connector = HttpsConnector::new();
 
     Ok(Box::new(HyperConnector::new(
         Client::builder().build(connector),

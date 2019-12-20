@@ -5,7 +5,7 @@ use std::sync::{
 use std::time::Duration;
 
 use futures::{Future, FutureExt};
-use tokio::timer::Timeout;
+use tokio::time::timeout;
 use tracing_futures::Instrument;
 
 use telegram_bot_raw::{HttpRequest, Request, ResponseType};
@@ -128,9 +128,9 @@ impl Api {
         let api = self.clone();
         let request = request.serialize();
         async move {
-            match Timeout::new(
-                api.send_http_request::<Req::Response>(request.map_err(ErrorKind::from)?),
+            match timeout(
                 duration,
+                api.send_http_request::<Req::Response>(request.map_err(ErrorKind::from)?),
             )
             .await
             {
@@ -193,13 +193,13 @@ impl Api {
             tracing::trace!("response deserialized");
             Ok(response)
         }
-        .map(|result| {
-            if let Err(ref error) = result {
-                tracing::error!(error = %error);
-            }
-            result
-        })
-        .instrument(span)
-        .await
+            .map(|result| {
+                if let Err(ref error) = result {
+                    tracing::error!(error = %error);
+                }
+                result
+            })
+            .instrument(span)
+            .await
     }
 }

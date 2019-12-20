@@ -1,6 +1,6 @@
 [package]
 name = "telegram-bot"
-version = "0.7.0-alpha.0"
+version = "0.7.0"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>", "Gustavo Aguiar <gustavo.h.o.aguiar@gmail.com>"]
 edition = "2018"
 
@@ -19,18 +19,19 @@ openssl = ["hyper-tls"]
 rustls = ["hyper-rustls"]
 default = ["openssl"]
 [dependencies]
-bytes = "0.4.12"
-tokio = "0.2.0-alpha.6"
+bytes = "0.5"
+tokio = { version = "0.2", features = ["fs"]}
 
 tracing = "0.1.9"
-tracing-futures = { version = "0.1.0", features = ["std-future"] }
+tracing-futures = "0.2"
 multipart = { version = "0.16", default-features = false, features = ["client"] }
 
-telegram-bot-raw = { version = "=0.7.0-alpha.0", path = "../raw" }
+telegram-bot-raw = { version = "0.7.0", path = "../raw" }
 
-hyper = { version = "=0.13.0-alpha.4", features=["unstable-stream"]}
-hyper-tls = { version = "=0.4.0-alpha.4", optional = true  }
-futures-preview = "=0.3.0-alpha.19"
-hyper-rustls = { version = "=0.18.0-alpha.2", optional = true }
+hyper = "0.13"
+hyper-tls = { version = "0.4", optional = true  }
+futures = "0.3"
+hyper-rustls = { version = "0.19", optional = true }
 [dev-dependencies]
 tracing-subscriber = "0.1.5"
+tokio = { version = "0.2", features = ["macros", "time", "fs"] }

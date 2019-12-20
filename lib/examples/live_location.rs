@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use futures::StreamExt;
 use telegram_bot::*;
-use tokio::timer::delay_for;
+use tokio::time::delay_for;
 
 const DELAY_DURATION: Duration = Duration::from_secs(2);
 
