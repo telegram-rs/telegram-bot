@@ -20,10 +20,10 @@ rustls = ["hyper-rustls"]
 default = ["openssl"]
 [dependencies]
 bytes = "0.5"
-tokio = { version = "0.2", features = ["macros", "time", "fs"] }
+tokio = { version = "0.2", features = ["fs"]}
 
 tracing = "0.1.9"
-tracing-futures = { version = "0.1.0", features = ["std-future"] }
+tracing-futures = "0.2"
 multipart = { version = "0.16", default-features = false, features = ["client"] }
 
 telegram-bot-raw = { version = "0.7.0", path = "../raw" }
@@ -34,3 +34,4 @@ futures = "0.3"
 hyper-rustls = { version = "0.19", optional = true }
 [dev-dependencies]
 tracing-subscriber = "0.1.5"
+tokio = { version = "0.2", features = ["macros", "time", "fs"] }
