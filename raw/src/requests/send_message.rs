@@ -24,7 +24,7 @@ pub struct SendMessage<'s> {
 
 impl<'c, 's> Request for SendMessage<'s> {
     type Type = JsonRequestType<Self>;
-    type Response = JsonIdResponse<Message>;
+    type Response = JsonIdResponse<MessageOrChannelPost>;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
         Self::Type::serialize(RequestUrl::method("sendMessage"), self)
