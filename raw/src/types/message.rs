@@ -949,9 +949,9 @@ impl File {
 /// See [documentation](https://core.telegram.org/bots/api#formatting-options) for details.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize)]
 pub enum ParseMode {
-    /// Use markdown formatting.
+    /// Use legacy markdown formatting.
     Markdown,
-    /// Use markdownV2 formatting.
+    /// Use MarkdownV2 formatting.
     MarkdownV2,
     /// Use HTML formatting.
     #[serde(rename = "HTML")]
