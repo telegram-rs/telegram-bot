@@ -875,8 +875,10 @@ impl File {
 /// See [documentation](https://core.telegram.org/bots/api#formatting-options) for details.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize)]
 pub enum ParseMode {
-    /// Use markdown formatting.
+    /// Use legacy markdown formatting.
     Markdown,
+    /// Use MarkdownV2 formatting.
+    MarkdownV2,
     /// Use HTML formatting.
     #[serde(rename = "HTML")]
     Html,
@@ -886,6 +888,7 @@ impl ::std::fmt::Display for ParseMode {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         match *self {
             ParseMode::Markdown => write!(f, "Markdown"),
+            ParseMode::MarkdownV2 => write!(f, "MarkdownV2"),
             ParseMode::Html => write!(f, "HTML"),
         }
     }
