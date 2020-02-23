@@ -193,13 +193,13 @@ impl Api {
             tracing::trace!("response deserialized");
             Ok(response)
         }
-            .map(|result| {
-                if let Err(ref error) = result {
-                    tracing::error!(error = %error);
-                }
-                result
-            })
-            .instrument(span)
-            .await
+        .map(|result| {
+            if let Err(ref error) = result {
+                tracing::error!(error = %error);
+            }
+            result
+        })
+        .instrument(span)
+        .await
     }
 }
