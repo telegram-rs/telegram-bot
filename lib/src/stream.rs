@@ -24,7 +24,8 @@ pub struct UpdatesStream {
     api: Api,
     last_update: Integer,
     buffer: VecDeque<Update>,
-    current_request: Option<Pin<Box<dyn Future<Output = Result<Option<Vec<Update>>, Error>>>>>,
+    current_request:
+        Option<Pin<Box<dyn Future<Output = Result<Option<Vec<Update>>, Error>> + Send>>>,
     timeout: Duration,
     allowed_updates: Vec<AllowedUpdate>,
     limit: Integer,
