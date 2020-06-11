@@ -13,7 +13,7 @@ pub struct StopPoll {
 
 impl Request for StopPoll {
     type Type = JsonRequestType<Self>;
-    type Response = JsonIdResponse<MessageOrChannelPost>;
+    type Response = JsonIdResponse<Poll>;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
         Self::Type::serialize(RequestUrl::method("stopPoll"), self)
