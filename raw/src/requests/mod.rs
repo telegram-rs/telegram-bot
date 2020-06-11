@@ -31,6 +31,7 @@ pub mod send_poll;
 pub mod send_venue;
 pub mod send_video;
 pub mod stop_message_live_location;
+pub mod stop_poll;
 pub mod unban_chat_member;
 pub mod unpin_chat_message;
 
@@ -66,5 +67,6 @@ pub use self::send_poll::*;
 pub use self::send_venue::*;
 pub use self::send_video::*;
 pub use self::stop_message_live_location::*;
+pub use self::stop_poll::*;
 pub use self::unban_chat_member::*;
 pub use self::unpin_chat_message::*;
