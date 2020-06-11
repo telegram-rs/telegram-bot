@@ -45,6 +45,7 @@ impl MessageText for MessageKind {
             MessageKind::VideoNote { .. } => None,
             MessageKind::Contact { data } => Some(data.first_name.to_owned()),
             MessageKind::Location { .. } => None,
+            MessageKind::Poll { data } => Some(data.question.to_owned()),
             MessageKind::Venue { data } => Some(data.title.to_owned()),
             MessageKind::NewChatMembers { .. } => None,
             MessageKind::LeftChatMember { .. } => None,
@@ -126,6 +127,7 @@ impl MessageGetFiles for MessageKind {
             }
             MessageKind::Contact { .. } => None,
             MessageKind::Location { .. } => None,
+            MessageKind::Poll { .. } => None,
             MessageKind::Venue { .. } => None,
             MessageKind::NewChatMembers { .. } => None,
             MessageKind::LeftChatMember { .. } => None,

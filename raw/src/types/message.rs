@@ -146,6 +146,11 @@ pub enum MessageKind {
         /// Information about the location.
         data: Location,
     },
+    /// Message is a poll.
+    Poll {
+        /// Information about the poll.
+        data: Poll,
+    },
     /// Message is a venue.
     Venue {
         /// Information about the venue.
@@ -324,6 +329,7 @@ impl Message {
         maybe_field!(video_note, VideoNote);
         maybe_field!(contact, Contact);
         maybe_field!(location, Location);
+        maybe_field!(poll, Poll);
         maybe_field!(venue, Venue);
         maybe_field!(new_chat_members, NewChatMembers);
         maybe_field!(left_chat_member, LeftChatMember);
@@ -462,6 +468,7 @@ impl ChannelPost {
         maybe_field!(video_note, VideoNote);
         maybe_field!(contact, Contact);
         maybe_field!(location, Location);
+        maybe_field!(poll, Poll);
         maybe_field!(venue, Venue);
         maybe_field!(new_chat_members, NewChatMembers);
         maybe_field!(left_chat_member, LeftChatMember);
@@ -566,6 +573,8 @@ pub struct RawMessage {
     pub contact: Option<Contact>,
     /// Message is a shared location, information about the location.
     pub location: Option<Location>,
+    /// Message is a native poll, information about the poll.
+    pub poll: Option<Poll>,
     /// Message is a venue, information about the venue.
     pub venue: Option<Venue>,
     /// New members that were added to the group or supergroup and information
@@ -842,6 +851,68 @@ pub struct Venue {
     pub address: String,
     /// Foursquare identifier of the venue.
     pub foursquare_id: Option<String>,
+}
+
+/// This object contains information about a poll.
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct Poll {
+    /// Unique poll identifier.
+    pub id: String,
+    /// Poll question.
+    pub question: String,
+    /// List of poll options.
+    pub options: Vec<PollOption>,
+    /// Total number of users that voted in the poll.
+    pub total_voter_count: Integer,
+    /// True, if the poll is closed.
+    pub is_closed: bool,
+    /// True, if the poll is anonymous.
+    pub is_anonymous: bool,
+    /// Poll type.
+    #[serde(rename = "type")]
+    pub type_: PollType,
+    /// True, if the poll allows multiple answers.
+    pub allows_multiple_answers: bool,
+    /// 0-based identifier of the correct answer option. Available only for polls in the quiz mode, 
+    /// which are closed, or was sent (not forwarded) by the bot or to the private chat with the bot.
+    pub correct_option_id: Option<Integer>,
+    /// Text that is shown when a user chooses an incorrect answer or taps on the lamp icon in a quiz-style poll.
+    pub explanation: Option<String>,
+    /// Special entities like usernames, URLs, bot commands, etc. that appear in the explanation.
+    pub explanation_entities: Option<Vec<MessageEntity>>,
+    /// Amount of time in seconds the poll will be active after creation.
+    pub open_period: Option<Integer>,
+    /// Point in time (Unix timestamp) when the poll will be automatically closed.
+    pub close_date: Option<Integer>,
+}
+
+/// This object represents an answer of a user in a non-anonymous poll.
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct PollAnswer {
+    /// Unique poll identifier.
+    pub poll_id: String,
+    /// The user, who changed the answer to the poll.
+    pub user: User,
+    /// 0-based identifiers of answer options, chosen by the user. May be empty if the user retracted their vote.
+    pub option_ids: Vec<Integer>,
+}
+
+/// This object contains information about one answer option in a poll.
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct PollOption {
+    /// Option text.
+    pub text: String,
+    /// Number of users that voted for this option.
+    pub voter_count: Integer,
+}
+
+/// Type of a poll.
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub enum PollType {
+    #[serde(rename = "regular")]
+    Regular,
+    #[serde(rename = "quiz")]
+    Quiz,
 }
 
 /// This object represent a user's profile pictures.
