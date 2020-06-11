@@ -873,7 +873,7 @@ pub struct Poll {
     pub type_: PollType,
     /// True, if the poll allows multiple answers.
     pub allows_multiple_answers: bool,
-    /// 0-based identifier of the correct answer option. Available only for polls in the quiz mode, 
+    /// 0-based identifier of the correct answer option. Available only for polls in the quiz mode,
     /// which are closed, or was sent (not forwarded) by the bot or to the private chat with the bot.
     pub correct_option_id: Option<Integer>,
     /// Text that is shown when a user chooses an incorrect answer or taps on the lamp icon in a quiz-style poll.

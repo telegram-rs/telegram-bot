@@ -1,5 +1,5 @@
-use std::clone::Clone;
 use std::borrow::Cow;
+use std::clone::Clone;
 use std::ops::Not;
 
 use crate::requests::*;
@@ -21,7 +21,7 @@ pub struct SendPoll<'q, 'o, 'e> {
     allows_multiple_answers: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     // TODO: required for quiz polls
-    correct_option_id: Option<Integer>, 
+    correct_option_id: Option<Integer>,
     #[serde(skip_serializing_if = "Option::is_none")]
     explanation: Option<Cow<'e, str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -81,7 +81,7 @@ impl<'q, 'o, 'e> SendPoll<'q, 'o, 'e> {
 
     pub fn add_option<O>(&mut self, option: O) -> &mut Self
     where
-        O: Into<Cow<'o, str>>
+        O: Into<Cow<'o, str>>,
     {
         self.options.push(option.into());
         self
@@ -114,7 +114,7 @@ impl<'q, 'o, 'e> SendPoll<'q, 'o, 'e> {
 
     pub fn explanation<E>(&mut self, text: E) -> &mut Self
     where
-        E: Into<Cow<'e, str>>
+        E: Into<Cow<'e, str>>,
     {
         self.explanation = Some(text.into());
         self
@@ -143,7 +143,7 @@ impl<'q, 'o, 'e> SendPoll<'q, 'o, 'e> {
 
     pub fn reply_to<R>(&mut self, to: R) -> &mut Self
     where
-        R: ToMessageId
+        R: ToMessageId,
     {
         self.reply_to_message_id = Some(to.to_message_id());
         self
@@ -151,7 +151,7 @@ impl<'q, 'o, 'e> SendPoll<'q, 'o, 'e> {
 
     pub fn reply_markup<R>(&mut self, reply_markup: R) -> &mut Self
     where
-        R: Into<ReplyMarkup>
+        R: Into<ReplyMarkup>,
     {
         self.reply_markup = Some(reply_markup.into());
         self
@@ -160,7 +160,7 @@ impl<'q, 'o, 'e> SendPoll<'q, 'o, 'e> {
 
 /// Send message with a poll.
 pub trait CanSendPoll {
-    fn poll<'q, 'o, 'e, Q, O>(&self, question: Q, options: Vec<O>) -> SendPoll<'q, 'o, 'e> 
+    fn poll<'q, 'o, 'e, Q, O>(&self, question: Q, options: Vec<O>) -> SendPoll<'q, 'o, 'e>
     where
         Q: Into<Cow<'q, str>>,
         O: Into<Cow<'o, str>>;
@@ -191,9 +191,9 @@ where
     M: ToMessageId + ToSourceChat,
 {
     fn poll_reply<'q, 'o, 'e, Q, O>(&self, question: Q, options: Vec<O>) -> SendPoll<'q, 'o, 'e>
-    where 
+    where
         Q: Into<Cow<'q, str>>,
-        O: Into<Cow<'o, str>> 
+        O: Into<Cow<'o, str>>,
     {
         let mut rq = self.to_source_chat().poll(question, options);
         rq.reply_to(self.to_message_id());
