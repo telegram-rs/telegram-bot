@@ -32,6 +32,12 @@ pub enum UpdateKind {
     //    ChosenInlineResult(ChosenInlineResult),
     #[serde(rename = "callback_query")]
     CallbackQuery(CallbackQuery),
+    /// New poll state. Bots receive only updates about stopped polls and polls, which are sent by the bot
+    #[serde(rename = "poll")]
+    Poll(Poll),
+    /// A user changed their answer in a non-anonymous poll. Bots receive new votes only in polls that were sent by the bot itself
+    #[serde(rename = "poll_answer")]
+    PollAnswer(PollAnswer),
     #[doc(hidden)]
     Error(String),
     #[doc(hidden)]
