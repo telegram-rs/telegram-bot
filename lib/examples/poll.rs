@@ -40,9 +40,25 @@ async fn test_quiz_poll(api: Api, message: Message) -> Result<(), Error> {
     let poll = make_test_poll(message.clone())
         .quiz()
         .correct_option_id(0)
+        .explanation("Some explanation")
         .to_owned();
 
     send_and_stop_poll(api, poll).await
+}
+
+async fn test_multiple_answers(api: Api, message: Message) -> Result<(), Error> {
+    let poll = make_test_poll(message.clone())
+        .allows_multiple_answers()
+        .to_owned();
+
+    send_and_stop_poll(api, poll).await
+}
+
+async fn test_closed_poll(api: Api, message: Message) -> Result<(), Error> {
+    let poll = make_test_poll(message.clone()).closed().to_owned();
+
+    api.send(poll).await?;
+    Ok(())
 }
 
 #[tokio::main]
@@ -61,6 +77,8 @@ async fn main() -> Result<(), Error> {
                     "/poll" => test_anonymous_poll(api.clone(), message).await?,
                     "/quiz" => test_quiz_poll(api.clone(), message).await?,
                     "/public" => test_public_poll(api.clone(), message).await?,
+                    "/multiple" => test_multiple_answers(api.clone(), message).await?,
+                    "/closed" => test_closed_poll(api.clone(), message).await?,
                     _ => (),
                 },
                 _ => (),
