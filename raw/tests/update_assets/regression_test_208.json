@@ -1,0 +1,35 @@
+{
+  "update_id": 846954218,
+  "callback_query": {
+    "id": "3869607449858959801",
+    "from": {
+      "id": 900963191,
+      "is_bot": false,
+      "first_name": "Aldis",
+      "username": "aldis_aaa",
+      "language_code": "en"
+    },
+    "message": {
+      "message_id": 58,
+      "chat": {
+        "id": -1001254477603,
+        "title": "RedditWeekly",
+        "type": "channel"
+      },
+      "date": 1593844893,
+      "text": "Select subreddit",
+      "reply_markup": {
+        "inline_keyboard": [
+          [
+            {
+              "text": "test",
+              "callback_data": "test"
+            }
+          ]
+        ]
+      }
+    },
+    "chat_instance": "-7315430269816637685",
+    "data": "test"
+  }
+}

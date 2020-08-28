@@ -46,3 +46,11 @@ make_test!(inline_query, |update: Update| {
 
     assert!(false)
 });
+
+make_test!(regression_test_208, |update: Update| {
+    if let UpdateKind::CallbackQuery(_query) = update.kind {
+        return ();
+    }
+
+    assert!(false)
+});
