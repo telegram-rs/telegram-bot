@@ -469,7 +469,6 @@ impl ChannelPost {
                     });
                 }
             }};
-
         }
         macro_rules! maybe_true_field {
             ($name:ident, $variant:ident) => {{
