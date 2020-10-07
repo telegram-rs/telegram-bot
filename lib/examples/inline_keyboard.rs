@@ -38,14 +38,15 @@ async fn main() -> Result<(), Error> {
                 MessageKind::Text { ref data, .. } => match data.as_str() {
                     "/start" => {
                         let keyboard = make_inline_keyboard_markup();
-                        api.send(message.text_reply("☢ Nuclear Bomb Targeting ☢"))
+                        let title_msg = api
+                            .send(message.text_reply("☢ Nuclear Bomb Targeting ☢"))
                             .await?;
 
                         lat = START_LAT;
                         lon = START_LON;
                         location_msg = Some(
                             api.send(
-                                message
+                                title_msg
                                     .location_reply(lat, lon)
                                     .live_period(10000)
                                     .reply_markup(keyboard),
