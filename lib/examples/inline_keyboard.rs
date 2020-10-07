@@ -60,7 +60,7 @@ async fn main() -> Result<(), Error> {
             },
             UpdateKind::CallbackQuery(cb) => {
                 if location_msg.is_none() {
-                    api.send(cb.answer("Please use /start command")).await?;
+                    let _ = api.send(cb.answer("Please use /start command")).await;
                 } else {
                     match &cb.data {
                         Some(ans) if ans == "up" => lat += COORD_STEP_LAT,
@@ -69,7 +69,7 @@ async fn main() -> Result<(), Error> {
                         Some(ans) if ans == "left" => lon -= COORD_STEP_LON,
                         _ => (),
                     };
-                    api.send(cb.answer("Moved")).await?;
+                    let _ = api.send(cb.answer("Moved")).await;
 
                     let new_keyboard = make_inline_keyboard_markup();
                     if let Some(msg) = &location_msg {
