@@ -54,6 +54,9 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 ```
+To use the above example you must add tokio 0.2 to your cargo.toml (tokio 0.3 will not work with the above example):
+`tokio = { version = "0.2", features = ["macros", "time", "fs"] }`
+
 You can find a bigger examples in the `examples`.
 
 ## Usage
