@@ -1,6 +1,7 @@
 pub mod callback_query;
 pub mod chat;
 pub mod chat_member;
+pub mod chosen_inline_result;
 pub mod inline_query;
 pub mod inline_query_result;
 pub mod input_file;
@@ -15,6 +16,7 @@ pub mod update;
 pub use self::callback_query::*;
 pub use self::chat::*;
 pub use self::chat_member::*;
+pub use self::chosen_inline_result::*;
 pub use self::inline_query::*;
 pub use self::inline_query_result::*;
 pub use self::input_file::*;

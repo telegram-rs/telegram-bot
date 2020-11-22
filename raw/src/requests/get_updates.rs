@@ -66,7 +66,7 @@ pub enum AllowedUpdate {
     EditedChannelPost,
     #[serde(rename = "inline_query")]
     InlineQuery,
-    #[serde(rename = "chosen_inline_query")]
+    #[serde(rename = "chosen_inline_result")]
     ChosenInlineResult,
     #[serde(rename = "callback_query")]
     CallbackQuery,
