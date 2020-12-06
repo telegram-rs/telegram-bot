@@ -257,6 +257,12 @@ impl Message {
                     sender_name: sender_name.clone(),
                 },
             }),
+            (Some(date), _, _, _, _) => Some(Forward {
+                date,
+                from: ForwardFrom::ChannelHiddenUser {
+                    sender_name: "unknown".to_string(),
+                },
+            }),
             _ => return Err(format!("invalid forward fields combination")),
         };
 
@@ -395,6 +401,12 @@ impl ChannelPost {
                 date,
                 from: ForwardFrom::ChannelHiddenUser {
                     sender_name: sender_name.clone(),
+                },
+            }),
+            (Some(date), _, _, _, _) => Some(Forward {
+                date,
+                from: ForwardFrom::ChannelHiddenUser {
+                    sender_name: "unknown".to_string(),
                 },
             }),
             _ => return Err(format!("invalid forward fields combination")),
