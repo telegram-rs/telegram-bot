@@ -91,6 +91,15 @@ pub enum MessageKind {
         /// Special entities like usernames, URLs, bot commands, etc. that appear in the text
         entities: Vec<MessageEntity>,
     },
+    /// Message is an animation.
+    Animation {
+        /// Information about the animation.
+        data: Animation,
+        /// Caption for the animation, 0-200 characters.
+        caption: Option<String>,
+        /// The unique identifier of a media message group this message belongs to.
+        media_group_id: Option<String>,
+    },
     /// Message is an audio file.
     Audio {
         /// Information about the file.
@@ -320,6 +329,7 @@ impl Message {
             });
         }
 
+        maybe_field_with_caption_and_group!(animation, Animation);
         maybe_field!(audio, Audio);
         maybe_field_with_caption!(document, Document);
         maybe_field_with_caption_and_group!(photo, Photo);
@@ -459,6 +469,7 @@ impl ChannelPost {
             });
         }
 
+        maybe_field_with_caption_and_group!(animation, Animation);
         maybe_field!(audio, Audio);
         maybe_field_with_caption!(document, Document);
         maybe_field_with_caption_and_group!(photo, Photo);
@@ -552,6 +563,8 @@ pub struct RawMessage {
     /// For text messages, special entities like usernames, URLs, bot commands, etc.
     /// that appear in the text.
     pub entities: Option<Vec<MessageEntity>>,
+    /// Message is an animation file, information about the file.
+    pub animation: Option<Animation>,
     /// Message is an audio file, information about the file.
     pub audio: Option<Audio>,
     /// Message is a general file, information about the file.
@@ -714,6 +727,25 @@ pub struct PhotoSize {
     pub width: Integer,
     /// Photo height.
     pub height: Integer,
+    /// File size.
+    pub file_size: Option<Integer>,
+}
+
+/// This object represents a animation file.
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct Animation {
+    /// Unique identifier for this file.
+    pub file_id: String,
+    /// Video width as defined by sender.
+    pub width: Integer,
+    /// Video height as defined by sender.
+    pub height: Integer,
+    /// Duration of the video in seconds as defined by sender.
+    pub duration: Integer,
+    /// Video thumbnail.
+    pub thumb: Option<PhotoSize>,
+    /// Mime type of a file as defined by sender.
+    pub mime_type: Option<String>,
     /// File size.
     pub file_size: Option<Integer>,
 }

@@ -342,6 +342,7 @@ macro_rules! file_id_impls {
 }
 
 file_id_impls!(PhotoSize);
+file_id_impls!(Animation);
 file_id_impls!(Audio);
 file_id_impls!(Document);
 file_id_impls!(Sticker);
