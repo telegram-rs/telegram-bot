@@ -49,9 +49,9 @@ impl SendChatAction {
     where
         C: ToChatRef,
     {
-        SendChatAction {
+        Self {
             chat_id: chat.to_chat_ref(),
-            action: action,
+            action,
         }
     }
 }
