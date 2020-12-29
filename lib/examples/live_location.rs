@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use futures::StreamExt;
 use telegram_bot::*;
-use tokio::time::delay_for;
+use tokio::time::sleep;
 
 const DELAY_DURATION: Duration = Duration::from_secs(2);
 
@@ -12,13 +12,13 @@ async fn test(api: Api, message: Message) -> Result<(), Error> {
         .send(message.location_reply(0.0, 0.0).live_period(60))
         .await?;
 
-    delay_for(DELAY_DURATION).await;
+    sleep(DELAY_DURATION).await;
     api.send(reply.edit_live_location(10.0, 10.0)).await?;
 
-    delay_for(DELAY_DURATION).await;
+    sleep(DELAY_DURATION).await;
     api.send(reply.edit_live_location(20.0, 20.0)).await?;
 
-    delay_for(DELAY_DURATION).await;
+    sleep(DELAY_DURATION).await;
     api.send(reply.edit_live_location(30.0, 30.0)).await?;
 
     Ok(())

@@ -19,8 +19,8 @@ openssl = ["hyper-tls"]
 rustls = ["hyper-rustls"]
 default = ["openssl"]
 [dependencies]
-bytes = "0.5"
-tokio = { version = "0.2", features = ["fs"]}
+bytes = "1.0.1"
+tokio = { version = "1.2", features = ["fs", "rt"]}
 
 tracing = "0.1.9"
 tracing-futures = "0.2"
@@ -34,4 +34,4 @@ futures = "0.3"
 hyper-rustls = { version = "0.19", optional = true }
 [dev-dependencies]
 tracing-subscriber = "0.1.5"
-tokio = { version = "0.2", features = ["macros", "time", "fs"] }
+tokio = { version = "1.2", features = ["macros", "time", "fs", "rt-multi-thread"] }

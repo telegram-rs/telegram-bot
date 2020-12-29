@@ -4,7 +4,7 @@ use std::time::Duration;
 use futures::StreamExt;
 use telegram_bot::prelude::*;
 use telegram_bot::{Api, Error, Message, MessageKind, ParseMode, UpdateKind};
-use tokio::time::delay_for;
+use tokio::time::sleep;
 
 async fn test_message(api: Api, message: Message) -> Result<(), Error> {
     api.send(message.text_reply("Simple message")).await?;
@@ -46,11 +46,11 @@ async fn test_forward(api: Api, message: Message) -> Result<(), Error> {
 async fn test_edit_message(api: Api, message: Message) -> Result<(), Error> {
     let message1 = api.send(message.text_reply("Round 1")).await?;
 
-    delay_for(Duration::from_secs(2)).await;
+    sleep(Duration::from_secs(2)).await;
 
     let message2 = api.send(message1.edit_text("Round 2")).await?;
 
-    delay_for(Duration::from_secs(4)).await;
+    sleep(Duration::from_secs(4)).await;
 
     api.send(message2.edit_text("Round 3")).await?;
     Ok(())
