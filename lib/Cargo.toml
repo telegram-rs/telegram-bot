@@ -1,6 +1,6 @@
 [package]
 name = "telegram-bot"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Fedor Gogolev <knsd@knsd.net>", "Gustavo Aguiar <gustavo.h.o.aguiar@gmail.com>"]
 edition = "2018"
 
@@ -26,7 +26,7 @@ tracing = "0.1.9"
 tracing-futures = "0.2"
 multipart = { version = "0.16", default-features = false, features = ["client"] }
 
-telegram-bot-raw = { version = "0.7.0", path = "../raw" }
+telegram-bot-raw = { version = "0.8.0", path = "../raw" }
 
 hyper = "0.13"
 hyper-tls = { version = "0.4", optional = true  }
