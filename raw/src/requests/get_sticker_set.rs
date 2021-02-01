@@ -10,7 +10,7 @@ pub struct GetStickerSet {
 
 impl Request for GetStickerSet {
     type Type = JsonRequestType<Self>;
-    type Response = JsonIdResponse<File>;
+    type Response = JsonIdResponse<StickerSet>;
 
     fn serialize(&self) -> Result<HttpRequest, Error> {
         Self::Type::serialize(RequestUrl::method("getStickerSet"), self)
