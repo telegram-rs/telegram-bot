@@ -5,6 +5,7 @@
 pub use telegram_bot_raw::CanAnswerCallbackQuery;
 pub use telegram_bot_raw::CanAnswerInlineQuery;
 pub use telegram_bot_raw::CanExportChatInviteLink;
+pub use telegram_bot_raw::CanGetStickerSet;
 pub use telegram_bot_raw::CanLeaveChat;
 pub use telegram_bot_raw::CanSendChatAction;
 pub use telegram_bot_raw::{CanDeleteMessage, CanForwardMessage};

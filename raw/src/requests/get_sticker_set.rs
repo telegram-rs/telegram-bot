@@ -5,7 +5,7 @@ use crate::types::*;
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
 pub struct GetStickerSet {
-    name: FileRef,
+    name: StickerSetRef,
 }
 
 impl Request for GetStickerSet {
@@ -20,24 +20,24 @@ impl Request for GetStickerSet {
 impl GetStickerSet {
     pub fn new<S>(set: S) -> Self
     where
-        S: ToFileRef,
+        S: ToStickerSetRef,
     {
         Self {
-            name: set.to_file_ref(),
+            name: set.to_sticker_set_ref(),
         }
     }
 }
 
 /// Get basic info about a sticker set and prepare it for downloading.
 pub trait CanGetStickerSet {
-    fn get_set(&self) -> GetStickerSet;
+    fn get_sticker_set(&self) -> GetStickerSet;
 }
 
 impl<S> CanGetStickerSet for S
 where
-    S: ToFileRef,
+    S: ToStickerSetRef,
 {
-    fn get_set(&self) -> GetStickerSet {
+    fn get_sticker_set(&self) -> GetStickerSet {
         GetStickerSet::new(self)
     }
 }
