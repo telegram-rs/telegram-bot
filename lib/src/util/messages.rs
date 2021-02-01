@@ -40,7 +40,6 @@ impl MessageText for MessageKind {
             }
             MessageKind::Photo { caption, .. } => caption.to_owned(),
             MessageKind::Sticker { .. } => None,
-            MessageKind::StickerSet { data } => Some(data.name.to_owned()),
             MessageKind::Video { caption, .. } => caption.to_owned(),
             MessageKind::Voice { .. } => None,
             MessageKind::VideoNote { .. } => None,
@@ -111,7 +110,6 @@ impl MessageGetFiles for MessageKind {
                 Some(data.into_iter().map(|f| f.get_file()).collect())
             }
             MessageKind::Sticker { data } => Some(vec![data.get_file()]),
-            MessageKind::StickerSet { .. } => None,
             MessageKind::Video { data, .. } => {
                 let mut files = vec![data.get_file()];
                 if let Some(thumb) = &data.thumb {

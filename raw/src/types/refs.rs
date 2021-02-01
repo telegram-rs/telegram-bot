@@ -269,6 +269,9 @@ specific_chat_id_impls!(ChannelId, Channel);
 pub struct ChatId(Integer);
 chat_id_impls!(ChatId);
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Name(String);
+
 /// Get `MessageId` from the type reference.
 pub trait ToMessageId {
     fn to_message_id(&self) -> MessageId;

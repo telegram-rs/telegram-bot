@@ -5,7 +5,7 @@ use crate::types::*;
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
 pub struct GetStickerSet {
-    name: String,
+    name: FileRef,
 }
 
 impl Request for GetStickerSet {
@@ -20,10 +20,10 @@ impl Request for GetStickerSet {
 impl GetStickerSet {
     pub fn new<S>(set: S) -> Self
     where
-        S: ToString,
+        S: ToFileRef,
     {
         Self {
-            name: set.to_string(),
+            name: set.to_file_ref(),
         }
     }
 }
@@ -35,7 +35,7 @@ pub trait CanGetStickerSet {
 
 impl<S> CanGetStickerSet for S
 where
-    S: ToString + std::fmt::Display,
+    S: ToFileRef,
 {
     fn get_set(&self) -> GetStickerSet {
         GetStickerSet::new(self)
