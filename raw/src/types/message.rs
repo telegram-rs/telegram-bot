@@ -117,6 +117,10 @@ pub enum MessageKind {
         /// Information about the sticker.
         data: Sticker,
     },
+    /// Message is a sticker set.
+    StickerSet {
+        data: StickerSet,
+    },
     /// Message is a video.
     Video {
         /// Information about the video.
@@ -324,6 +328,7 @@ impl Message {
         maybe_field_with_caption!(document, Document);
         maybe_field_with_caption_and_group!(photo, Photo);
         maybe_field!(sticker, Sticker);
+        maybe_field!(sticker_set, StickerSet);
         maybe_field_with_caption_and_group!(video, Video);
         maybe_field!(voice, Voice);
         maybe_field!(video_note, VideoNote);
@@ -463,6 +468,7 @@ impl ChannelPost {
         maybe_field_with_caption!(document, Document);
         maybe_field_with_caption_and_group!(photo, Photo);
         maybe_field!(sticker, Sticker);
+        maybe_field!(sticker_set, StickerSet);
         maybe_field_with_caption_and_group!(video, Video);
         maybe_field!(voice, Voice);
         maybe_field!(video_note, VideoNote);
@@ -561,6 +567,8 @@ pub struct RawMessage {
     pub photo: Option<Vec<PhotoSize>>,
     /// Message is a sticker, information about the sticker.
     pub sticker: Option<Sticker>,
+    /// Message is a sticker set, information about the sticker set.
+    pub sticker_set: Option<StickerSet>,
     /// Message is a video, information about the video.
     pub video: Option<Video>,
     /// Message is a voice message, information about the file.
@@ -770,6 +778,23 @@ pub struct Sticker {
     pub set_name: Option<String>,
     /// File size.
     pub file_size: Option<Integer>,
+}
+
+/// This object represents a sticker set.
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct StickerSet {
+    /// Sticker set name.
+    pub name: String,
+    /// Sticket set title.
+    pub title: String,
+    /// True, if the sticker set contains animated stickers.
+    pub is_animated: bool,
+    /// True, if the sticker set contains masks.
+    pub contains_masks: bool,
+    /// List of all set stickers.
+    pub stickers: Vec<Sticker>,
+    /// Sticker set thumbnail in the .WEBP or .TGS format.
+    pub thumb: Option<PhotoSize>,
 }
 
 /// This object represents a video file.
