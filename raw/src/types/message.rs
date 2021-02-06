@@ -208,9 +208,7 @@ pub enum MessageKind {
         data: Box<MessageOrChannelPost>,
     },
     /// This object represents an animated emoji that displays a random value.
-    Dice {
-        data: Dice
-    },
+    Dice { data: Dice },
     #[doc(hidden)]
     Unknown { raw: RawMessage },
 }
