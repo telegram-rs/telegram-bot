@@ -207,6 +207,10 @@ pub enum MessageKind {
         // contain further reply_to_message fields even if it is itself a reply.
         data: Box<MessageOrChannelPost>,
     },
+    /// This object represents an animated emoji that displays a random value.
+    Dice {
+        data: Dice
+    },
     #[doc(hidden)]
     Unknown { raw: RawMessage },
 }
@@ -330,6 +334,7 @@ impl Message {
         maybe_field!(contact, Contact);
         maybe_field!(location, Location);
         maybe_field!(poll, Poll);
+        maybe_field!(dice, Dice);
         maybe_field!(venue, Venue);
         maybe_field!(new_chat_members, NewChatMembers);
         maybe_field!(left_chat_member, LeftChatMember);
@@ -469,6 +474,7 @@ impl ChannelPost {
         maybe_field!(contact, Contact);
         maybe_field!(location, Location);
         maybe_field!(poll, Poll);
+        maybe_field!(dice, Dice);
         maybe_field!(venue, Venue);
         maybe_field!(new_chat_members, NewChatMembers);
         maybe_field!(left_chat_member, LeftChatMember);
@@ -565,6 +571,8 @@ pub struct RawMessage {
     pub video: Option<Video>,
     /// Message is a voice message, information about the file.
     pub voice: Option<Voice>,
+    /// Message is a Dice emoji representing a random value
+    pub dice: Option<Dice>,
     /// Message is a video note message, information about the file.
     pub video_note: Option<VideoNote>,
     /// Caption for the document, photo or video, 0-200 characters.
@@ -904,6 +912,15 @@ pub struct PollOption {
     pub text: String,
     /// Number of users that voted for this option.
     pub voter_count: Integer,
+}
+
+/// This object contains information about one answer option in a poll.
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct Dice {
+    /// Option text.
+    pub emoji: String,
+    /// Number of users that voted for this option.
+    pub value: Integer,
 }
 
 /// Type of a poll.
