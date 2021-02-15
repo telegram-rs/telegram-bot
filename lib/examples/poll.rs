@@ -2,7 +2,7 @@ use std::env;
 use std::time::Duration;
 
 use futures::StreamExt;
-use tokio::time::delay_for;
+use tokio::time::sleep;
 
 use telegram_bot::prelude::*;
 use telegram_bot::{
@@ -19,7 +19,7 @@ fn make_test_poll<'p>(message: Message) -> SendPoll<'p, 'p, 'p> {
 async fn send_and_stop_poll<'p>(api: Api, poll: SendPoll<'p, 'p, 'p>) -> Result<(), Error> {
     let poll_message = api.send(poll).await?;
 
-    delay_for(Duration::from_secs(10)).await;
+    sleep(Duration::from_secs(10)).await;
 
     api.send(poll_message.stop_poll()).await?;
     Ok(())

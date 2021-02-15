@@ -159,7 +159,7 @@ impl<C: Connect + std::fmt::Debug + 'static + Clone + Send + Sync> Connector for
 
 pub fn default_connector() -> Result<Box<dyn Connector>, Error> {
     #[cfg(feature = "rustls")]
-    let connector = HttpsConnector::new();
+    let connector = HttpsConnector::with_native_roots();
 
     #[cfg(feature = "openssl")]
     let connector = HttpsConnector::new();
