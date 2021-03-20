@@ -29,7 +29,8 @@ pub enum UpdateKind {
     EditedChannelPost(ChannelPost),
     #[serde(rename = "inline_query")]
     InlineQuery(InlineQuery),
-    //    ChosenInlineResult(ChosenInlineResult),
+    #[serde(rename = "chosen_inline_result")]
+    ChosenInlineResult(ChosenInlineResult),
     #[serde(rename = "callback_query")]
     CallbackQuery(CallbackQuery),
     /// New poll state. Bots receive only updates about stopped polls and polls, which are sent by the bot
