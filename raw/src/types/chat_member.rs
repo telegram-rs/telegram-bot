@@ -87,3 +87,38 @@ pub struct ChatMember {
     ///Optional. Restricted only. True, if user may add web page previews to his messages, implies can_send_media_messages
     pub can_add_web_page_previews: Option<bool>,
 }
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Deserialize)]
+pub struct ChatInviteLink {
+    /// The invite link. If the link was crated by another chat adminstrator, then the second part
+    /// of the link will be replaced with "..."
+    pub invite_link: String,
+    /// Creator of the link
+    pub creator: User,
+    /// True, if the link is primary
+    pub is_primary: bool,
+    /// True, if the link is revoked
+    pub is_revoked: bool,
+    /// Point in time (Unix timestamp) when the link will expire or has been expired
+    pub expire_date: Option<Integer>,
+    /// Maximum number of users that can be members of the chat simultaneously after joining the
+    /// chat via this invite link; 1-99999
+    pub member_limit: Option<Integer>,
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Deserialize)]
+pub struct ChatMemberUpdated {
+    /// Chat the user belongs to
+    pub chat: Chat,
+    /// Performer of the action, which resulted in the change
+    pub from: User,
+    /// Date the change was done in Unix time
+    pub date: Integer,
+    /// Previous information about the chat member
+    pub old_chat_member: ChatMember,
+    /// New information about the chat member
+    pub new_chat_member: ChatMember,
+    /// Chat invite link, which was used by the user to join the chat, for joining  by invite link
+    /// events only
+    pub invite_link: Option<ChatInviteLink>,
+}
