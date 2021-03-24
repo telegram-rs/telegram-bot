@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["messages","Utility traits that extends `telegram_bot_raw::types::message`"]]});

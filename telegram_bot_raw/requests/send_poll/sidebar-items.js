@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SendPoll","Use this method to send polls."]],"trait":[["CanReplySendPoll",""],["CanSendPoll","Send message with a poll."]]});

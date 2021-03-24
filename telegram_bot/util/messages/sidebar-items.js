@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["MessageGetFiles","A trait to obtain `GetFile` requests from a message."],["MessageText","A trait to obtain text from a message."]]});

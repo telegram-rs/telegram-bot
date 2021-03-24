@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EditMessageLiveLocation","Use this method to edit live location messages sent by the bot. A location can be edited until its live_period expires or editing is explicitly disabled by a call to stopMessageLiveLocation."]],"trait":[["CanEditMessageLiveLocation","Edit live location messages sent by the bot."]]});

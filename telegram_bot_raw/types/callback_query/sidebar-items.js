@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CallbackQuery","This object represents an incoming callback query from a callback button in an inline keyboard."]]});

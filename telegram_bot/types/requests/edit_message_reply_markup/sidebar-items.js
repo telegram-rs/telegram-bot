@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EditMessageReplyMarkup","Use this method to edit only the reply markup of messages sent by the bot."]],"trait":[["CanEditMessageReplyMarkup","Edit reply markup of messages sent by the bot."]]});

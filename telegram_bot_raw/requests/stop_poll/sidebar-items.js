@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["StopPoll","Use this method to stop a poll which was sent by the bot."]],"trait":[["CanStopPoll","Stop a poll which was sent by the bot."]]});

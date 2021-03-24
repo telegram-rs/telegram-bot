@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["GetFile","Use this method to get basic info about a file and prepare it for downloading. For the moment, bots can download files of up to 20MB in size."]],"trait":[["CanGetFile","Get basic info about a file and prepare it for downloading."]]});

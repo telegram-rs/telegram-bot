@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SendPhoto","Use this method to send photos"]],"trait":[["CanReplySendPhoto","Can reply with an photo"],["CanSendPhoto","Send an photo"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SendVideo","Use this method to send an video"]],"trait":[["CanReplySendVideo","Can reply with an video"],["CanSendVideo","Send an video"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["GetChatMember","Use this method to get information about a member of a chat."]],"trait":[["CanGetChatMemberForChat","Get information about a member of a chat."],["CanGetChatMemberForUser","Get information about a member of a chat."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["GetChatMembersCount","Use this method to get the number of members in a chat."]],"trait":[["CanGetChatMembersCount","Get the number of members in a chat."]]});

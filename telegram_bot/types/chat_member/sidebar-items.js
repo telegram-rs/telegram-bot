@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ChatMemberStatus","The member's status in the chat"]],"struct":[["ChatMember","This object contains information about one member of the chat."]]});

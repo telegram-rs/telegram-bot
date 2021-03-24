@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SendMessage","Use this method to send text messages."]],"trait":[["CanReplySendMessage","Reply with text message."],["CanSendMessage","Send text message."]]});

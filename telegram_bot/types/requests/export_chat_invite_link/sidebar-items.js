@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ExportChatInviteLink","Use this method to export chat invite links."]],"trait":[["CanExportChatInviteLink","Export chat invite link."]]});

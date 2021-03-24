@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SendVenue","Use this method to send information about a venue."]],"trait":[["CanReplySendVenue","Reply with information about a venue."],["CanSendVenue","Send information about a venue."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["callback_query",""],["chat",""],["chat_member",""],["inline_query",""],["inline_query_result",""],["input_file",""],["message",""],["primitive",""],["refs",""],["reply_markup",""],["response_parameters",""],["text",""],["update",""]]});

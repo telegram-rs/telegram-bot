@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DeleteMessage",""]],"trait":[["CanDeleteMessage","Delete messages.."]]});

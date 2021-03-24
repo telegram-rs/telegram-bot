@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `multipart` crate."><meta name="keywords" content="rust, rustlang, rust-lang, multipart"><title>multipart - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../multipart/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate multipart</p><div class="block version"><p>Version 0.17.1</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all multipart's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li></ul></div><p class="location"></p><script>window.sidebarCurrent = {name: "multipart", ty: "mod", relpath: "../"};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/multipart/lib.rs.html#7-130" title="goto source code">[src]</a></span><span class="in-band">Crate <a class="mod" href="">multipart</a></span></h1><div class="docblock"><p>Client- and server-side abstractions for HTTP <code>multipart/form-data</code> requests.</p>
+<h3 id="features" class="section-header"><a href="#features">Features:</a></h3>
+<p>This documentation is built with all features enabled.</p>
+<ul>
+<li>
+<p><code>client</code>: The client-side abstractions for generating multipart requests.</p>
+</li>
+<li>
+<p><code>server</code>: The server-side abstractions for parsing multipart requests.</p>
+</li>
+<li>
+<p><code>mock</code>: Provides mock implementations of core <code>client</code> and <code>server</code> traits for debugging
+or non-standard use.</p>
+</li>
+<li>
+<p><code>hyper</code>: Integration with the <a href="https://crates.io/crates/hyper">Hyper</a> HTTP library
+for client and/or server depending on which other feature flags are set.</p>
+</li>
+<li>
+<p><code>iron</code>: Integration with the <a href="http://crates.io/crates/iron">Iron</a> web application
+framework. See the <a href="server/iron/index.html"><code>server::iron</code></a> module for more information.</p>
+</li>
+<li>
+<p><code>nickel</code> (returning in 0.14!): Integration with the <a href="https://crates.io/crates/nickel">Nickel</a>
+web application framework. See the <a href="server/nickel/index.html"><code>server::nickel</code></a> module for more
+information.</p>
+</li>
+<li>
+<p><code>tiny_http</code>: Integration with the <a href="https://crates.io/crates/tiny_http"><code>tiny_http</code></a>
+crate. See the <a href="server/tiny_http/index.html"><code>server::tiny_http</code></a> module for more information.</p>
+</li>
+</ul>
+<h3 id="note-work-in-progress" class="section-header"><a href="#note-work-in-progress">Note: Work in Progress</a></h3>
+<p>I have left a number of Request-for-Comments (RFC) questions on various APIs and other places
+in the code as there are some cases where I'm not sure what the desirable behavior is.</p>
+<p>I have opened an issue as a place to collect responses and discussions for these questions
+<a href="https://github.com/abonander/multipart/issues/96">on Github</a>. Please quote the RFC-statement
+(and/or link to its source line) and provide your feedback there.</p>
+</div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="client/index.html" title="multipart::client mod">client</a></td><td class="docblock-short"><p>The client-side abstraction for multipart requests. Enabled with the <code>client</code> feature.</p>
+</td></tr></table><h2 id="macros" class="section-header"><a href="#macros">Macros</a></h2>
+<table><tr class="module-item"><td><a class="macro" href="macro.chain_result.html" title="multipart::chain_result macro">chain_result</a></td><td class="docblock-short"><p>Chain a series of results together, with or without previous results.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "multipart";</script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

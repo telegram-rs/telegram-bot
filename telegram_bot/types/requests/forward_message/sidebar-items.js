@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ForwardMessage","Use this method to forward messages of any kind."]],"trait":[["CanForwardMessage","Forward message."]]});

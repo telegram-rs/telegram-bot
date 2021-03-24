@@ -1,0 +1,12 @@
+(function() {var implementors = {};
+implementors["http"] = [{"text":"impl FromStr for HeaderName","synthetic":false,"types":[]},{"text":"impl FromStr for HeaderValue","synthetic":false,"types":[]},{"text":"impl FromStr for Method","synthetic":false,"types":[]},{"text":"impl FromStr for StatusCode","synthetic":false,"types":[]},{"text":"impl FromStr for Authority","synthetic":false,"types":[]},{"text":"impl FromStr for PathAndQuery","synthetic":false,"types":[]},{"text":"impl FromStr for Scheme","synthetic":false,"types":[]},{"text":"impl FromStr for Uri","synthetic":false,"types":[]}];
+implementors["httpdate"] = [{"text":"impl FromStr for HttpDate","synthetic":false,"types":[]}];
+implementors["hyper"] = [{"text":"impl FromStr for Name","synthetic":false,"types":[]}];
+implementors["log"] = [{"text":"impl FromStr for Level","synthetic":false,"types":[]},{"text":"impl FromStr for LevelFilter","synthetic":false,"types":[]}];
+implementors["mime"] = [{"text":"impl FromStr for Mime","synthetic":false,"types":[]}];
+implementors["ordered_float"] = [{"text":"impl&lt;T:&nbsp;FromStr&gt; FromStr for OrderedFloat&lt;T&gt;","synthetic":false,"types":[]},{"text":"impl&lt;T:&nbsp;Float + FromStr&gt; FromStr for NotNan&lt;T&gt;","synthetic":false,"types":[]}];
+implementors["proc_macro2"] = [{"text":"impl FromStr for TokenStream","synthetic":false,"types":[]}];
+implementors["serde_json"] = [{"text":"impl FromStr for Number","synthetic":false,"types":[]},{"text":"impl FromStr for Value","synthetic":false,"types":[]}];
+implementors["tracing_core"] = [{"text":"impl FromStr for Level","synthetic":false,"types":[]},{"text":"impl FromStr for LevelFilter","synthetic":false,"types":[]}];
+implementors["unicase"] = [{"text":"impl&lt;S:&nbsp;FromStr&gt; FromStr for Ascii&lt;S&gt;","synthetic":false,"types":[]},{"text":"impl&lt;S:&nbsp;FromStr + AsRef&lt;str&gt;&gt; FromStr for UniCase&lt;S&gt;","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["StopMessageLiveLocation","Use this method to stop updating a live location message sent by the bot before live_period expires."]],"trait":[["CanStopMessageLiveLocation","Stop updating a live location message sent by the bot."]]});
