@@ -32,6 +32,8 @@ pub struct Group {
     /// You can generate a new invite link by using the
     /// export_invite_link method.
     pub invite_link: Option<String>,
+    /// The group's description.
+    pub description: String,
 }
 
 /// This object represents a supergroup.
@@ -47,6 +49,8 @@ pub struct Supergroup {
     /// You can generate a new invite link by using the
     /// export_invite_link method.
     pub invite_link: Option<String>,
+    /// The group's description.
+    pub description: String,
 }
 
 /// This object represents a channel.
@@ -62,6 +66,8 @@ pub struct Channel {
     /// You can generate a new invite link by using the
     /// export_invite_link method.
     pub invite_link: Option<String>,
+    /// Channel description
+    pub description: String,
 }
 
 /// This object represents a private, group or supergroup.
@@ -138,18 +144,21 @@ impl<'de> Deserialize<'de> for Chat {
                 title: required_field!(title),
                 all_members_are_administrators: required_field!(all_members_are_administrators),
                 invite_link: raw.invite_link,
+                description: raw.description,
             }),
             "supergroup" => Chat::Supergroup(Supergroup {
                 id: raw.id.into(),
                 title: required_field!(title),
                 username: raw.username,
                 invite_link: raw.invite_link,
+                description: raw.description,
             }),
             "channel" => Chat::Channel(Channel {
                 id: raw.id.into(),
                 title: required_field!(title),
                 username: raw.username,
                 invite_link: raw.invite_link,
+                description: raw.description,
             }),
             _ => Chat::Unknown(raw),
         })
@@ -179,4 +188,6 @@ pub struct RawChat {
     pub language_code: Option<String>,
     /// True if a group has ‘All Members Are Admins’ enabled.
     pub all_members_are_administrators: Option<bool>,
+    /// The group's description
+    pub description: String,
 }
