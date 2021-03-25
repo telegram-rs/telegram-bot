@@ -32,3 +32,22 @@ impl<'s> SetChatDescription<'s> {
         }
     }
 }
+
+/// Set chat description.
+pub trait CanSetChatDescription {
+    fn text<'s, T>(&self, text: T) -> SetChatDescription<'s>
+    where
+        T: Into<Cow<'s, str>>;
+}
+
+impl<C> CanSetChatDescription for C
+where
+    C: ToChatRef,
+{
+    fn text<'s, D>(&self, description: D) -> SetChatDescription<'s>
+    where
+        D: Into<Cow<'s, str>>,
+    {
+        SetChatDescription::new(self, description)
+    }
+}
