@@ -44,10 +44,10 @@ impl<C> CanSetChatDescription for C
 where
     C: ToChatRef,
 {
-    fn text<'s, D>(&self, description: D) -> SetChatDescription<'s>
+    fn text<'s, D>(&self, text: D) -> SetChatDescription<'s>
     where
         D: Into<Cow<'s, str>>,
     {
-        SetChatDescription::new(self, description)
+        SetChatDescription::new(self, text)
     }
 }
