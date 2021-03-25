@@ -33,7 +33,7 @@ pub struct Group {
     /// export_invite_link method.
     pub invite_link: Option<String>,
     /// The group's description.
-    pub description: String,
+    pub description: Option<String>,
 }
 
 /// This object represents a supergroup.
@@ -50,7 +50,7 @@ pub struct Supergroup {
     /// export_invite_link method.
     pub invite_link: Option<String>,
     /// The group's description.
-    pub description: String,
+    pub description: Option<String>,
 }
 
 /// This object represents a channel.
@@ -67,7 +67,7 @@ pub struct Channel {
     /// export_invite_link method.
     pub invite_link: Option<String>,
     /// Channel description
-    pub description: String,
+    pub description: Option<String>,
 }
 
 /// This object represents a private, group or supergroup.
@@ -189,5 +189,5 @@ pub struct RawChat {
     /// True if a group has ‘All Members Are Admins’ enabled.
     pub all_members_are_administrators: Option<bool>,
     /// The group's description
-    pub description: String,
+    pub description: Option<String>,
 }
