@@ -1,5 +1,10 @@
+use std::borrow::Cow;
+
+use crate::requests::*;
+use crate::types::*;
+
 /// Use this method to set group descriptions.
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 #[must_use = "requests do nothing unless sent"]
 pub struct SetChatDescription<'s> {
     chat_id: ChatRef,
@@ -10,8 +15,8 @@ impl<'c, 's> Request for SetChatDescription<'s> {
     type Type = JsonRequestType<Self>;
     type Response = JsonIdResponse<bool>;
 
-    fn Serialize(&self) -> Result<HttpRequest, Error> {
-        Self::Type::Serialize(RequestUrl::method("setChatDescription"), self)
+    fn serialize(&self) -> Result<HttpRequest, Error> {
+        Self::Type::serialize(RequestUrl::method("setChatDescription"), self)
     }
 }
 
