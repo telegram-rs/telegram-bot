@@ -16,7 +16,7 @@ pub struct Update {
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub enum UpdateKind {
     #[serde(rename = "update_id")]
-    Id(Integer),
+    UpdateId(Integer),
     /// New incoming message of any kind — text, photo, sticker, etc.
     #[serde(rename = "message")]
     Message(Message),
@@ -37,8 +37,8 @@ pub enum UpdateKind {
     CallbackQuery(CallbackQuery),
     #[serde(rename = "shipping_query")]
     ShippingQuery(ShippingQuery),
-    // #[serde(rename = "pre_checkout_query")]
-    // PreCheckoutQuery(PreCheckoutQuery),
+    #[serde(rename = "pre_checkout_query")]
+    PreCheckoutQuery(PreCheckoutQuery),
     /// New poll state. Bots receive only updates about stopped polls and polls, which are sent by the bot
     #[serde(rename = "poll")]
     Poll(Poll),

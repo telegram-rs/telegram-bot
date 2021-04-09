@@ -15,11 +15,13 @@ pub mod shipping_query;
 pub mod chat_member_update;
 pub mod chat_invite_link;
 pub mod chosen_inline_result;
+pub mod pre_checkout_query;
 
 pub use self::callback_query::*;
 pub use self::shipping_query::*;
 pub use self::chosen_inline_result::*;
 pub use self::chat_invite_link::*;
+pub use self::pre_checkout_query::*;
 pub use self::chat_member_update::*;
 pub use self::chat::*;
 pub use self::chat_member::*;
