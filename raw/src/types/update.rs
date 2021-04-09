@@ -15,6 +15,8 @@ pub struct Update {
 /// Kind of the incoming update.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
 pub enum UpdateKind {
+    #[serde(rename = "update_id")]
+    Id(Integer),
     /// New incoming message of any kind — text, photo, sticker, etc.
     #[serde(rename = "message")]
     Message(Message),
@@ -29,15 +31,24 @@ pub enum UpdateKind {
     EditedChannelPost(ChannelPost),
     #[serde(rename = "inline_query")]
     InlineQuery(InlineQuery),
-    //    ChosenInlineResult(ChosenInlineResult),
+    #[serde(rename = "chosen_inline_result")]
+    ChosenInlineResult(ChosenInlineResult),
     #[serde(rename = "callback_query")]
     CallbackQuery(CallbackQuery),
+    #[serde(rename = "shipping_query")]
+    ShippingQuery(ShippingQuery),
+    // #[serde(rename = "pre_checkout_query")]
+    // PreCheckoutQuery(PreCheckoutQuery),
     /// New poll state. Bots receive only updates about stopped polls and polls, which are sent by the bot
     #[serde(rename = "poll")]
     Poll(Poll),
     /// A user changed their answer in a non-anonymous poll. Bots receive new votes only in polls that were sent by the bot itself
     #[serde(rename = "poll_answer")]
     PollAnswer(PollAnswer),
+    #[serde(rename = "my_chat_member")]
+    MyChatMember(ChatMemberUpdate),
+    #[serde(rename = "chat_member")]
+    ChatMember(ChatMemberUpdate),
     #[doc(hidden)]
     Error(String),
     #[doc(hidden)]
