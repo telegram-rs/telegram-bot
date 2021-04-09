@@ -6,5 +6,5 @@ pub struct ChosenInlineResult {
     pub from: User,
     pub location: Option<Location>,
     pub inline_message_id: Option<String>,
-    pub query: String
+    pub query: String,
 }

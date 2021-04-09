@@ -5,5 +5,5 @@ pub struct ShippingQuery {
     pub id: CallbackQueryId,
     pub from: User,
     pub invoice_payload: String,
-    pub shipping_address: ShippingAddress
+    pub shipping_address: ShippingAddress,
 }
