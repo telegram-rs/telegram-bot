@@ -79,6 +79,13 @@ pub enum ForwardFrom {
     ChannelHiddenUser {
         sender_name: String,
     },
+    /// For messages forwarded from a hidden admin
+    HiddenGroupAdmin {
+        /// Original group
+        chat_id: SupergroupId,
+        /// Group title
+        title: String,
+    },
 }
 
 /// Kind of the message.
@@ -257,6 +264,21 @@ impl Message {
                     sender_name: sender_name.clone(),
                 },
             }),
+            (
+                Some(date),
+                None,
+                Some(Chat::Supergroup(Supergroup {
+                    id: chat_id, title, ..
+                })),
+                None,
+                None,
+            ) => Some(Forward {
+                date,
+                from: ForwardFrom::HiddenGroupAdmin {
+                    chat_id: chat_id.clone(),
+                    title: title.clone(),
+                },
+            }),
             _ => return Err(format!("invalid forward fields combination")),
         };
 
@@ -395,6 +417,21 @@ impl ChannelPost {
                 date,
                 from: ForwardFrom::ChannelHiddenUser {
                     sender_name: sender_name.clone(),
+                },
+            }),
+            (
+                Some(date),
+                None,
+                Some(Chat::Supergroup(Supergroup {
+                    id: chat_id, title, ..
+                })),
+                None,
+                None,
+            ) => Some(Forward {
+                date,
+                from: ForwardFrom::HiddenGroupAdmin {
+                    chat_id: chat_id.clone(),
+                    title: title.clone(),
                 },
             }),
             _ => return Err(format!("invalid forward fields combination")),

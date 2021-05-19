@@ -144,12 +144,13 @@ impl ToChatRef for ChatMember {
 
 impl ToChatRef for ForwardFrom {
     fn to_chat_ref(&self) -> ChatRef {
-        match *self {
-            ForwardFrom::User { ref user, .. } => user.to_chat_ref(),
-            ForwardFrom::Channel { ref channel, .. } => channel.to_chat_ref(),
-            ForwardFrom::ChannelHiddenUser { ref sender_name } => {
+        match self {
+            ForwardFrom::User { user, .. } => user.to_chat_ref(),
+            ForwardFrom::Channel { channel, .. } => channel.to_chat_ref(),
+            ForwardFrom::ChannelHiddenUser { sender_name } => {
                 ChatRef::ChannelUsername(sender_name.clone())
             }
+            ForwardFrom::HiddenGroupAdmin { chat_id, .. } => chat_id.to_chat_ref(),
         }
     }
 }
