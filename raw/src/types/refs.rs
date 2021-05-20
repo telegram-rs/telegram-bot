@@ -270,6 +270,9 @@ specific_chat_id_impls!(ChannelId, Channel);
 pub struct ChatId(Integer);
 chat_id_impls!(ChatId);
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Name(String);
+
 /// Get `MessageId` from the type reference.
 pub trait ToMessageId {
     fn to_message_id(&self) -> MessageId;
@@ -371,6 +374,59 @@ impl<'a> From<String> for FileRef {
 }
 
 impl Serialize for FileRef {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.inner)
+    }
+}
+
+/// Get `StickerSetRef` from the type reference.
+pub trait ToStickerSetRef {
+    fn to_sticker_set_ref(&self) -> StickerSetRef;
+}
+
+impl<S> ToStickerSetRef for S
+where
+    S: Deref,
+    S::Target: ToStickerSetRef,
+{
+    fn to_sticker_set_ref(&self) -> StickerSetRef {
+        self.deref().to_sticker_set_ref()
+    }
+}
+
+impl ToStickerSetRef for Sticker {
+    fn to_sticker_set_ref(&self) -> StickerSetRef {
+        match &self.set_name {
+            Some(s) => s.to_owned().into(),
+            None => panic!("Failed to convert sticker set_name to StickerSetRef"),
+        }
+    }
+}
+
+/// Unique sticker set name identifier reference.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct StickerSetRef {
+    pub(crate) inner: String,
+}
+
+impl<'a> From<&'a str> for StickerSetRef {
+    fn from(s: &'a str) -> Self {
+        StickerSetRef {
+            inner: s.to_string(),
+        }
+    }
+}
+
+impl<'a> From<String> for StickerSetRef {
+    fn from(s: String) -> Self {
+        StickerSetRef { inner: s.clone() }
+    }
+}
+
+impl Serialize for StickerSetRef {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

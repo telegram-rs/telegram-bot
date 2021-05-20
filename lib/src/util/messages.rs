@@ -3,8 +3,10 @@
 //! [`telegram_bot_raw::types::message`]: ../../telegram_bot_raw/types/message/index.html
 
 use crate::prelude::CanGetFile;
+use crate::prelude::CanGetStickerSet;
 use crate::types::{
-    requests::get_file::GetFile, ChannelPost, Message, MessageKind, MessageOrChannelPost,
+    requests::get_file::GetFile, requests::get_sticker_set::GetStickerSet, ChannelPost, Message,
+    MessageKind, MessageOrChannelPost,
 };
 
 /// A trait to obtain text from a message.
@@ -150,5 +152,53 @@ impl MessageGetFiles for MessageKind {
 impl MessageGetFiles for ChannelPost {
     fn get_files<'a>(&'a self) -> Option<Vec<GetFile>> {
         self.kind.get_files()
+    }
+}
+
+/// A trait to obtain `GetStickerSet` requests from a message.
+///
+/// Only available on a sticker message.
+pub trait MessageGetStickerSet {
+    /// Obtain a sticker set from a message if available.
+    fn get_sticker_set(&self) -> Option<GetStickerSet>;
+}
+
+impl MessageGetStickerSet for Message {
+    fn get_sticker_set<'a>(&'a self) -> Option<GetStickerSet> {
+        self.kind.get_sticker_set()
+    }
+}
+
+impl MessageGetStickerSet for MessageKind {
+    fn get_sticker_set<'a>(&'a self) -> Option<GetStickerSet> {
+        match self {
+            MessageKind::Text { .. } => None,
+            MessageKind::Audio { .. } => None,
+            MessageKind::Document { .. } => None,
+            MessageKind::Photo { .. } => None,
+            MessageKind::Sticker { data } => match data.set_name {
+                Some(_) => Some(data.get_sticker_set()),
+                None => None,
+            },
+            MessageKind::Video { .. } => None,
+            MessageKind::Voice { .. } => None,
+            MessageKind::VideoNote { .. } => None,
+            MessageKind::Contact { .. } => None,
+            MessageKind::Location { .. } => None,
+            MessageKind::Poll { .. } => None,
+            MessageKind::Venue { .. } => None,
+            MessageKind::NewChatMembers { .. } => None,
+            MessageKind::LeftChatMember { .. } => None,
+            MessageKind::NewChatTitle { .. } => None,
+            MessageKind::NewChatPhoto { .. } => None,
+            MessageKind::DeleteChatPhoto => None,
+            MessageKind::GroupChatCreated => None,
+            MessageKind::SupergroupChatCreated => None,
+            MessageKind::ChannelChatCreated => None,
+            MessageKind::MigrateToChatId { .. } => None,
+            MessageKind::MigrateFromChatId { .. } => None,
+            MessageKind::PinnedMessage { .. } => None,
+            MessageKind::Unknown { .. } => None,
+        }
     }
 }
