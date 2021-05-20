@@ -114,7 +114,7 @@ where
     where
         T: Into<Cow<'s, str>>,
     {
-        let mut rq = self.to_source_chat().text(text);
+        let mut rq = send_message::CanSendMessage::text(&self.to_source_chat(), text);
         rq.reply_to(self.to_message_id());
         rq
     }
