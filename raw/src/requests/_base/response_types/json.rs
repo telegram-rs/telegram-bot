@@ -1,5 +1,4 @@
 use serde::de::DeserializeOwned;
-use serde_json;
 
 use crate::requests::*;
 use crate::types::*;
