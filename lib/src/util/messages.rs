@@ -33,6 +33,7 @@ impl MessageText for Message {
 impl MessageText for MessageKind {
     fn text<'a>(&'a self) -> Option<String> {
         match self {
+            MessageKind::Dice { .. } => None,
             MessageKind::Text { data, .. } => Some(data.to_owned()),
             MessageKind::Audio { data } => data.title.to_owned(),
             MessageKind::Document { data, caption } => {
@@ -97,6 +98,7 @@ impl MessageGetFiles for Message {
 impl MessageGetFiles for MessageKind {
     fn get_files<'a>(&'a self) -> Option<Vec<GetFile>> {
         match self {
+            MessageKind::Dice { .. } => None,
             MessageKind::Text { .. } => None,
             MessageKind::Audio { data } => Some(vec![data.get_file()]),
             MessageKind::Document { data, .. } => {
