@@ -249,6 +249,14 @@ impl InlineKeyboardButton {
         }
     }
 
+    /// A login url
+    pub fn login_url<T: AsRef<str>>(text: T, login_url: LoginUrl) -> Self {
+        Self {
+            text: text.as_ref().to_string(),
+            kind: InlineKeyboardButtonKind::LoginUrl(login_url),
+        }
+    }
+
     /// Pressing the button will prompt the user to select one of their chats, open that chat and
     /// insert the bot‘s username and the specified inline query in the input field. Can be empty,
     /// in which case just the bot’s username will be inserted.
@@ -289,8 +297,46 @@ pub enum InlineKeyboardButtonKind {
     //  CallbackGame(CallbackGame),
     // #[serde(rename = "pay")]
     //  Pay,
-    // #[serde(rename = "login_url")]
-    //  LoginUrl(LoginUrl),
+    #[serde(rename = "login_url")]
+    LoginUrl(LoginUrl),
+}
+
+/// Allows a user to be directly authorized by clicking the inline button
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
+pub struct LoginUrl {
+    url: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    forward_text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    bot_username: Option<String>,
+    #[serde(skip_serializing_if = "Not::not")]
+    request_write_access: bool,
+}
+
+impl LoginUrl {
+    pub fn new(url: impl AsRef<str>) -> LoginUrl {
+        LoginUrl {
+            url: url.as_ref().to_string(),
+            forward_text: None,
+            bot_username: None,
+            request_write_access: false,
+        }
+    }
+
+    pub fn forward_text(&mut self, forward_text: impl AsRef<str>) -> &mut LoginUrl {
+        self.forward_text = Some(forward_text.as_ref().to_string());
+        self
+    }
+
+    pub fn bot_username(&mut self, bot_username: impl AsRef<str>) -> &mut LoginUrl {
+        self.bot_username = Some(bot_username.as_ref().to_string());
+        self
+    }
+
+    pub fn request_write_access(&mut self, request_write_access: bool) -> &mut LoginUrl {
+        self.request_write_access = request_write_access;
+        self
+    }
 }
 
 /// Upon receiving a message with this object, Telegram clients will
