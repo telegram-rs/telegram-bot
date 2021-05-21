@@ -116,6 +116,8 @@ pub enum MessageKind {
         data: Vec<PhotoSize>,
         /// Caption for the photo, 0-200 characters.
         caption: Option<String>,
+
+        caption_entities: Option<Vec<MessageEntity>>,
         /// The unique identifier of a media message group this message belongs to.
         media_group_id: Option<String>,
     },
@@ -326,6 +328,19 @@ impl Message {
             }};
         }
 
+        macro_rules! maybe_field_with_caption_and_group_and_caption_entities {
+            ($name:ident, $variant:ident) => {{
+                if let Some(val) = raw.$name {
+                    return make_message(MessageKind::$variant {
+                        data: val,
+                        caption: raw.caption,
+                        caption_entities: raw.entities,
+                        media_group_id: raw.media_group_id,
+                    });
+                }
+            }};
+        }
+
         macro_rules! maybe_true_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(True) = raw.$name {
@@ -344,7 +359,7 @@ impl Message {
 
         maybe_field!(audio, Audio);
         maybe_field_with_caption!(document, Document);
-        maybe_field_with_caption_and_group!(photo, Photo);
+        maybe_field_with_caption_and_group_and_caption_entities!(photo, Photo);
         maybe_field!(sticker, Sticker);
         maybe_field_with_caption_and_group!(video, Video);
         maybe_field!(voice, Voice);
@@ -480,6 +495,18 @@ impl ChannelPost {
             }};
         }
 
+        macro_rules! maybe_field_with_caption_and_group_and_caption_entities {
+            ($name:ident, $variant:ident) => {{
+                if let Some(val) = raw.$name {
+                    return make_message(MessageKind::$variant {
+                        data: val,
+                        caption: raw.caption,
+                        caption_entities: raw.entities,
+                        media_group_id: raw.media_group_id,
+                    });
+                }
+            }};
+        }
         macro_rules! maybe_true_field {
             ($name:ident, $variant:ident) => {{
                 if let Some(True) = raw.$name {
@@ -498,7 +525,7 @@ impl ChannelPost {
 
         maybe_field!(audio, Audio);
         maybe_field_with_caption!(document, Document);
-        maybe_field_with_caption_and_group!(photo, Photo);
+        maybe_field_with_caption_and_group_and_caption_entities!(photo, Photo);
         maybe_field!(sticker, Sticker);
         maybe_field_with_caption_and_group!(video, Video);
         maybe_field!(voice, Voice);
