@@ -4,10 +4,10 @@ use std::fmt;
 use crate::types::*;
 
 #[derive(Debug)]
-pub struct Error(ErrorKind);
+pub struct Error(pub ErrorKind);
 
 #[derive(Debug)]
-pub(crate) enum ErrorKind {
+pub enum ErrorKind {
     EmptyBody,
     TelegramError {
         description: String,

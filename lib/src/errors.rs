@@ -2,10 +2,10 @@ use std::error;
 use std::fmt;
 
 #[derive(Debug)]
-pub struct Error(ErrorKind);
+pub struct Error(pub ErrorKind);
 
 #[derive(Debug)]
-pub(crate) enum ErrorKind {
+pub enum ErrorKind {
     Raw(telegram_bot_raw::Error),
     Hyper(hyper::Error),
     Http(hyper::http::Error),

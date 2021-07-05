@@ -2,8 +2,7 @@ mod _base;
 pub use self::_base::*;
 
 mod errors;
-pub use self::errors::Error;
-pub(crate) use self::errors::ErrorKind;
+pub use self::errors::{Error, ErrorKind};
 
 mod http;
 pub use self::http::{Body, Multipart, MultipartValue, RequestUrl};
