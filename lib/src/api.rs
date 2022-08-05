@@ -5,7 +5,10 @@ use std::sync::{
 use std::time::Duration;
 
 use futures::{Future, FutureExt};
-use tokio::time::timeout;
+#[cfg(feature = "sidevm-runtime")]
+use sidevm::{spawn, time::timeout};
+#[cfg(feature = "tokio-runtime")]
+use tokio::{spawn, time::timeout};
 use tracing_futures::Instrument;
 
 use telegram_bot_raw::{HttpRequest, Request, ResponseType};
@@ -94,7 +97,7 @@ impl Api {
     pub fn spawn<Req: Request>(&self, request: Req) {
         let api = self.clone();
         if let Ok(request) = request.serialize() {
-            tokio::spawn(async move {
+            spawn(async move {
                 let _ = api.send_http_request::<Req::Response>(request).await;
             });
         }

@@ -1,4 +1,5 @@
 use std::io::{Cursor, Read};
+#[cfg(feature = "tokio-runtime")]
 use std::path::Path;
 use std::pin::Pin;
 use std::str::FromStr;
@@ -76,6 +77,11 @@ impl<C: Connect + std::fmt::Debug + 'static + Clone + Send + Sync> Connector for
                             MultipartValue::Text(text) => {
                                 fields.push((key, MultipartTemporaryValue::Text(text)))
                             }
+                            #[cfg(feature = "sidevm-runtime")]
+                            MultipartValue::Path { .. } => {
+                                return Err(ErrorKind::InvalidMultipartFilename.into());
+                            }
+                            #[cfg(feature = "tokio-runtime")]
                             MultipartValue::Path { file_name, path } => {
                                 let file_name = file_name
                                     .or_else(|| {
@@ -157,6 +163,7 @@ impl<C: Connect + std::fmt::Debug + 'static + Clone + Send + Sync> Connector for
     }
 }
 
+#[cfg(feature = "tokio-runtime")]
 pub fn default_connector() -> Result<Box<dyn Connector>, Error> {
     #[cfg(feature = "rustls")]
     let connector = HttpsConnector::with_native_roots();
@@ -166,5 +173,14 @@ pub fn default_connector() -> Result<Box<dyn Connector>, Error> {
 
     Ok(Box::new(HyperConnector::new(
         Client::builder().build(connector),
+    )))
+}
+
+#[cfg(feature = "sidevm-runtime")]
+pub fn default_connector() -> Result<Box<dyn Connector>, Error> {
+    Ok(Box::new(HyperConnector::new(
+        Client::builder()
+            .executor(sidevm::exec::HyperExecutor)
+            .build(sidevm::net::HttpConnector),
     )))
 }
