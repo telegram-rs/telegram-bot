@@ -33,5 +33,5 @@ hyper-tls = { version = "0.5", optional = true  }
 futures = "0.3"
 hyper-rustls = { version = "0.22", optional = true }
 [dev-dependencies]
-tracing-subscriber = "0.2.15"
+tracing-subscriber = "0.3.16"
 tokio = { version = "1.2", features = ["macros", "time", "fs", "rt-multi-thread"] }
