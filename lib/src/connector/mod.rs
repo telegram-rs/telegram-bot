@@ -1,5 +1,6 @@
 //! Connector with hyper backend.
 
+#[cfg(feature = "connector-hyper")]
 pub mod hyper;
 
 use std::fmt::Debug;
@@ -18,6 +19,7 @@ pub trait Connector: Debug + Send + Sync {
     ) -> Pin<Box<dyn Future<Output = Result<HttpResponse, Error>> + Send>>;
 }
 
+#[cfg(feature = "hyper")]
 pub fn default_connector() -> Box<dyn Connector> {
     hyper::default_connector().unwrap()
 }

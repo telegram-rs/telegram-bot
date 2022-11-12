@@ -101,7 +101,18 @@ impl Stream for UpdatesStream {
                     .allowed_updates(&ref_mut.allowed_updates);
                 tracing::trace!(request = ?get_updates, timeout=?timeout, "preparing new request");
 
+                #[cfg(feature = "runtime-tokio")]
                 let request = ref_mut.api.send_timeout(get_updates, timeout);
+
+                #[cfg(not(feature = "runtime-tokio"))]
+                let request = {
+                    let api = ref_mut.api.clone();
+                    async move {
+                        let req = api.clone().send(get_updates).await;
+                        Some(req).transpose()
+                    }
+                };
+
                 ref_mut.current_request = Some(Box::pin(request));
                 return Poll::Ready(Some(Err(err)));
             }
@@ -115,7 +126,17 @@ impl Stream for UpdatesStream {
                     .allowed_updates(&ref_mut.allowed_updates);
                 tracing::trace!(request = ?get_updates, timeout=?timeout, "preparing new request");
 
+                #[cfg(feature = "runtime-tokio")]
                 let request = ref_mut.api.send_timeout(get_updates, timeout);
+
+                #[cfg(not(feature = "runtime-tokio"))]
+                let request = {
+                    let api = ref_mut.api.clone();
+                    async move {
+                        let req = api.send(get_updates).await;
+                        Some(req).transpose()
+                    }
+                };
                 ref_mut.current_request = Some(Box::pin(request));
 
                 tracing::trace!("executing recursive call");

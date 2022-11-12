@@ -2,17 +2,23 @@ use std::sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,
 };
-use std::time::Duration;
 
 use futures::{Future, FutureExt};
-use tokio::time::timeout;
+
 use tracing_futures::Instrument;
 
 use telegram_bot_raw::{HttpRequest, Request, ResponseType};
 
-use crate::connector::{default_connector, Connector};
+use crate::connector::Connector;
 use crate::errors::{Error, ErrorKind};
 use crate::stream::UpdatesStream;
+
+#[cfg(feature = "runtime-tokio")]
+use tokio::time::timeout;
+#[cfg(feature = "runtime-tokio")]
+use std::time::Duration;
+#[cfg(feature = "connector-hyper")]
+use crate::connector::default_connector;
 
 /// Main type for sending requests to the Telegram bot API.
 #[derive(Clone)]
@@ -39,6 +45,7 @@ impl Api {
     /// let api = Api::new(telegram_token);
     /// # }
     /// ```
+    #[cfg(feature = "connector-hyper")]
     pub fn new<T: AsRef<str>>(token: T) -> Self {
         Self::with_connector(token, default_connector())
     }
@@ -91,6 +98,7 @@ impl Api {
     /// # }
     /// # }
     /// ```
+    #[cfg(feature = "runtime-tokio")]
     pub fn spawn<Req: Request>(&self, request: Req) {
         let api = self.clone();
         if let Ok(request) = request.serialize() {
@@ -119,6 +127,7 @@ impl Api {
     /// # }
     /// # }
     /// ```
+    #[cfg(feature = "runtime-tokio")]
     pub fn send_timeout<Req: Request>(
         &self,
         request: Req,
